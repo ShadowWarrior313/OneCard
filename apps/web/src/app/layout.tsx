@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "OneCard — One card. Maximum rewards.",
   description:
     "A single phantom payment card that routes every purchase to your best underlying credit card.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

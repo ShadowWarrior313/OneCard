@@ -1,0 +1,131 @@
+/* Reusable UI: buttons, badges, cards, forms, stats */
+
+.oc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--oc-radius-full);
+  border: 1px solid var(--oc-accent-border);
+  background: var(--oc-accent-soft);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #065f46;
+}
+
+.oc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--oc-radius-full);
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.oc-btn-primary {
+  background: var(--oc-bg-dark);
+  color: white;
+  box-shadow: var(--oc-shadow);
+}
+
+.oc-btn-primary:hover {
+  background: #1e293b;
+}
+
+.oc-btn-secondary {
+  border: 1px solid var(--oc-border);
+  background: white;
+  color: var(--oc-text);
+}
+
+.oc-btn-secondary:hover {
+  border-color: #94a3b8;
+}
+
+.oc-btn-accent {
+  width: 100%;
+  background: var(--oc-accent);
+  color: var(--oc-bg-dark);
+  border: none;
+  cursor: pointer;
+}
+
+.oc-btn-accent:hover {
+  background: #34d399;
+}
+
+.oc-btn-nav {
+  border-radius: var(--oc-radius-full);
+  background: var(--oc-bg-dark);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  text-decoration: none;
+}
+
+.oc-stat-card {
+  border-radius: var(--oc-radius-2xl);
+  background: white;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: var(--oc-shadow-sm);
+  border: 1px solid var(--oc-border-soft);
+}
+
+.oc-stat-value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--oc-accent);
+}
+
+.oc-stat-label {
+  margin-top: 0.5rem;
+  font-weight: 500;
+  color: var(--oc-text);
+}
+
+.oc-stat-sub {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--oc-text-muted);
+}
+
+.oc-input,
+.oc-select {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-radius: var(--oc-radius-xl);
+  border: 1px solid var(--oc-border);
+  background: white;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--oc-text);
+}
+
+.oc-input:focus,
+.oc-select:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.25);
+}
+
+.oc-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.oc-field-hint {
+  font-size: 0.75rem;
+  color: var(--oc-text-muted);
+}
+
+.oc-form-error {
+  font-size: 0.875rem;
+  color: #f87171;
+}

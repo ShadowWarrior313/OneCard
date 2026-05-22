@@ -30,18 +30,18 @@ export function Waitlist() {
   }
 
   return (
-    <section id="waitlist" className="scroll-mt-24 py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl">
-          <div className="grid lg:grid-cols-2">
-            <div className="p-8 sm:p-12">
+    <section id="waitlist" className="oc-section oc-waitlist">
+      <div className="oc-container">
+        <div className="oc-waitlist-card">
+          <div className="oc-waitlist-grid">
+            <div className="oc-waitlist-copy">
               <p className="text-sm font-medium text-emerald-400">
                 Early access — Canada first
               </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              <h2 className="oc-section-title mt-3 text-white">
                 Get your OneCard
               </h2>
-              <p className="mt-4 text-slate-300 leading-relaxed">
+              <p className="mt-4 leading-relaxed text-slate-300">
                 One card for every purchase. We&apos;re building with the same
                 simplicity you expect from Wise or Wealthsimple — join the
                 waitlist for launch updates.
@@ -61,12 +61,12 @@ export function Waitlist() {
               </ul>
             </div>
 
-            <div className="bg-slate-800/50 p-8 sm:p-12">
+            <div className="oc-waitlist-form-panel">
               {submitted ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex h-full flex-col items-center justify-center text-center"
+                  className="flex h-full min-h-[280px] flex-col items-center justify-center text-center"
                 >
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20">
                     <CheckCircle2 className="h-8 w-8 text-emerald-400" />
@@ -88,7 +88,7 @@ export function Waitlist() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Alex Chen"
-                      className="mt-1 w-full rounded-xl border border-slate-600 bg-slate-900/80 px-4 py-3 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                      className="oc-waitlist-input"
                     />
                   </div>
                   <div>
@@ -104,18 +104,16 @@ export function Waitlist() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@email.com"
-                        className="w-full rounded-xl border border-slate-600 bg-slate-900/80 py-3 pl-11 pr-4 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                        className="oc-waitlist-input oc-waitlist-input-with-icon"
                       />
                     </div>
                   </div>
-                  {error && (
-                    <p className="text-sm text-red-400">{error}</p>
-                  )}
+                  {error && <p className="oc-form-error">{error}</p>}
                   <motion.button
                     type="submit"
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3.5 font-semibold text-slate-900 transition hover:bg-emerald-400"
+                    className="oc-btn oc-btn-accent flex items-center justify-center gap-2 py-3.5"
                   >
                     Join the waitlist
                     <ArrowRight className="h-5 w-5" />

@@ -1,0 +1,214 @@
+/**
+ * Standalone CSS for public/preview.html
+ * Mirrors src/styles/* — keep in sync when changing design tokens.
+ */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+
+:root {
+  --oc-bg: #fafaf9;
+  --oc-text: #0f172a;
+  --oc-text-muted: #64748b;
+  --oc-accent-dark: #059669;
+  --oc-bg-dark: #0f172a;
+  --oc-border: #e2e8f0;
+  --oc-border-soft: rgba(226, 232, 240, 0.8);
+  --oc-accent-soft: #d1fae5;
+  --oc-accent-border: #a7f3d0;
+  --oc-container: 72rem;
+  --oc-header-h: 4rem;
+  --oc-radius: 0.75rem;
+  --oc-radius-full: 9999px;
+  --oc-radius-2xl: 1.5rem;
+  --oc-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  background: var(--oc-bg);
+  color: var(--oc-text);
+}
+
+.oc-container {
+  max-width: var(--oc-container);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.oc-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--oc-header-h);
+  border-bottom: 1px solid var(--oc-border-soft);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.oc-header-inner {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.oc-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--oc-text);
+  text-decoration: none;
+}
+
+.oc-brand-mark {
+  height: 1.625rem;
+  width: auto;
+}
+
+.oc-brand-wordmark {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.oc-nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.oc-nav a {
+  font-size: 0.875rem;
+  color: var(--oc-text-muted);
+  text-decoration: none;
+}
+
+.oc-btn-nav {
+  background: var(--oc-bg-dark);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: var(--oc-radius-full);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.oc-hero {
+  position: relative;
+  padding: 8rem 0 4rem;
+  text-align: center;
+}
+
+.oc-hero-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% -20%,
+    rgba(16, 185, 129, 0.12),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.oc-hero-inner {
+  position: relative;
+}
+
+.oc-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--oc-radius-full);
+  border: 1px solid var(--oc-accent-border);
+  background: var(--oc-accent-soft);
+  color: #065f46;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.oc-hero-title {
+  margin-top: 1.5rem;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.oc-hero-accent {
+  color: var(--oc-accent-dark);
+}
+
+.oc-hero-lead {
+  max-width: 36rem;
+  margin: 1.5rem auto 0;
+  color: var(--oc-text-muted);
+  font-size: 1.125rem;
+}
+
+.oc-hero-cta {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.oc-btn {
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--oc-radius-full);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.oc-btn-primary {
+  background: var(--oc-bg-dark);
+  color: white;
+}
+
+.oc-btn-secondary {
+  border: 1px solid var(--oc-border);
+  background: white;
+  color: var(--oc-text);
+}
+
+.oc-flow-section {
+  background: white;
+  padding: 4rem 0;
+}
+
+.oc-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.oc-section-lead {
+  color: var(--oc-text-muted);
+  text-align: center;
+}
+
+.oc-waitlist {
+  padding: 4rem 0;
+}
+
+.oc-waitlist-card {
+  background: var(--oc-bg-dark);
+  border-radius: var(--oc-radius-2xl);
+  padding: 2rem;
+  color: white;
+}
+
+.oc-footer {
+  border-top: 1px solid var(--oc-border);
+  padding: 2rem 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--oc-text-muted);
+}
+
+code {
+  background: #f1f5f9;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.8em;
+}

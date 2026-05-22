@@ -68,30 +68,25 @@ export function ScenarioSimulator() {
   }
 
   return (
-    <section id="simulator" className="scroll-mt-24 py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="text-center">
-          <p className="text-sm font-medium text-emerald-600">Try it yourself</p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Test a real purchase
-          </h2>
+    <section id="simulator" className="oc-section oc-simulator">
+      <div className="oc-container">
+        <header className="oc-simulator-header">
+          <p className="oc-simulator-eyebrow">Try it yourself</p>
+          <h2 className="oc-section-title mt-2">Test a real purchase</h2>
           <p className="mx-auto mt-3 max-w-xl text-slate-600">
             Select the Amex and Big Six cards in your wallet, pick a merchant, and
             see which card OneCard would route to.
           </p>
-        </div>
+        </header>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-5">
-          {/* Controls */}
-          <div className="space-y-6 lg:col-span-2">
+        <div className="oc-simulator-grid">
+          <div className="oc-simulator-controls">
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Your cards
-              </label>
-              <p className="text-xs text-slate-500">
+              <label className="oc-label">Your cards</label>
+              <p className="oc-field-hint">
                 Amex + Canadian Big Six only (demo)
               </p>
-              <div className="mt-3 max-h-72 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2">
+              <div className="oc-card-picker space-y-2">
                 {ISSUER_GROUPS.map((issuer) => {
                   const open = expandedIssuer === issuer;
                   const cards = cardsByIssuer(issuer);
@@ -151,13 +146,11 @@ export function ScenarioSimulator() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Merchant
-              </label>
+              <label className="oc-label">Merchant</label>
               <select
                 value={merchantId}
                 onChange={(e) => setMerchantId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                className="oc-select"
               >
                 {MERCHANT_GROUPS.map((group) => (
                   <optgroup key={group} label={group}>
@@ -174,9 +167,7 @@ export function ScenarioSimulator() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Amount (CAD)
-              </label>
+              <label className="oc-label">Amount (CAD)</label>
               <input
                 type="range"
                 min={5}
@@ -196,13 +187,11 @@ export function ScenarioSimulator() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Your “lazy” default card
-              </label>
+              <label className="oc-label">Your “lazy” default card</label>
               <select
                 value={defaultCardId}
                 onChange={(e) => setDefaultCardId(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+                className="oc-select"
               >
                 {selectedIds.map((id) => {
                   const c = getCardById(id);
@@ -216,19 +205,15 @@ export function ScenarioSimulator() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">
-                Routing mode
-              </label>
+              <label className="oc-label">Routing mode</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {ROUTING_MODES.map((m) => (
                   <button
                     key={m.id}
                     type="button"
                     onClick={() => setMode(m.id)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                      mode === m.id
-                        ? "bg-slate-900 text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    className={`oc-chip ${
+                      mode === m.id ? "oc-chip-active" : "oc-chip-inactive"
                     }`}
                   >
                     {m.label}
@@ -238,15 +223,14 @@ export function ScenarioSimulator() {
             </div>
           </div>
 
-          {/* Result */}
-          <div className="lg:col-span-3">
+          <div>
             <AnimatePresence mode="wait">
               {decision ? (
                 <motion.div
                   key={`${decision.selectedCardId}-${merchantId}-${amount}`}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl border border-emerald-200/60 bg-gradient-to-b from-white to-emerald-50/30 p-6 shadow-lg"
+                  className="oc-result-panel"
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 text-2xl text-white shadow-md shadow-emerald-500/30">
@@ -256,7 +240,7 @@ export function ScenarioSimulator() {
                       <p className="text-sm text-slate-500">
                         OneCard routes to
                       </p>
-                      <h3 className="text-2xl font-bold text-slate-900">
+                      <h3 className="oc-result-winner">
                         {decision.selectedCardDisplayName}
                       </h3>
                       <p className="mt-1 text-sm text-slate-600">
@@ -266,9 +250,7 @@ export function ScenarioSimulator() {
                     </div>
                   </div>
 
-                  <p className="mt-6 rounded-xl bg-white/80 px-4 py-3 text-sm leading-relaxed text-slate-700 ring-1 ring-slate-200/80">
-                    {decision.reason}
-                  </p>
+                  <p className="oc-result-reason">{decision.reason}</p>
 
                   <div className="mt-6 grid grid-cols-3 gap-3">
                     <Stat
@@ -295,9 +277,7 @@ export function ScenarioSimulator() {
                         <li
                           key={alt.cardId}
                           className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${
-                            i === 0
-                              ? "bg-slate-900 text-white"
-                              : "bg-white ring-1 ring-slate-200/80 text-slate-700"
+                            i === 0 ? "oc-rank-winner" : "oc-rank-row"
                           }`}
                         >
                           <span>

@@ -1,0 +1,133 @@
+/* Page layout — containers, sections, header, footer */
+
+.oc-container {
+  width: 100%;
+  max-width: var(--oc-container);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .oc-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.oc-section {
+  scroll-margin-top: 6rem;
+}
+
+.oc-section-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--oc-text);
+}
+
+@media (min-width: 640px) {
+  .oc-section-title {
+    font-size: 2.25rem;
+  }
+}
+
+.oc-section-lead {
+  margin-top: 0.75rem;
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--oc-text-muted);
+  text-align: center;
+}
+
+.oc-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--oc-header-h);
+  border-bottom: 1px solid var(--oc-border-soft);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.oc-header-inner {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.oc-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--oc-text);
+  text-decoration: none;
+}
+
+.oc-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.oc-brand-mark {
+  height: 1.75rem;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.oc-brand-wordmark {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--oc-text);
+}
+
+.oc-nav {
+  display: none;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .oc-nav {
+    display: flex;
+  }
+}
+
+.oc-nav a {
+  font-size: 0.875rem;
+  color: var(--oc-text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.oc-nav a:hover {
+  color: var(--oc-text);
+}
+
+.oc-footer {
+  border-top: 1px solid var(--oc-border);
+  background: var(--oc-bg-white);
+  padding: 3rem 0;
+}
+
+.oc-footer-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--oc-text-muted);
+}
+
+@media (min-width: 640px) {
+  .oc-footer-inner {
+    flex-direction: row;
+  }
+}

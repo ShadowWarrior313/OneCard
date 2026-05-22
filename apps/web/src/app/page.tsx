@@ -1,6 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { PosTapAnimation } from "@/components/PosTapAnimation";
 import { TransactionFlow } from "@/components/TransactionFlow";
 import { Waitlist } from "@/components/Waitlist";
 import { ArrowRight, TrendingUp } from "lucide-react";
@@ -11,61 +12,55 @@ export default function Home() {
     <>
       <Header />
       <main>
-        {/* Hero */}
-        <section className="relative overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-24">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(16,185,129,0.12),transparent)]" />
-          <div className="relative mx-auto max-w-6xl px-4 text-center sm:px-6">
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800">
-              <TrendingUp className="h-4 w-4" />
+        <section className="oc-hero">
+          <div className="oc-hero-glow" aria-hidden />
+          <div className="oc-container oc-hero-inner">
+            <p className="oc-badge">
+              <TrendingUp className="h-4 w-4" aria-hidden />
               Optimize every tap — Amex & Big Six Canada
             </p>
-            <h1 className="text-balance mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+            <h1 className="oc-hero-title">
               One card.
               <br />
-              <span className="text-emerald-600">Every reward maximized.</span>
+              <span className="oc-hero-accent">Every reward maximized.</span>
             </h1>
-            <p className="text-balance mx-auto mt-6 max-w-2xl text-lg text-slate-600">
+            <p className="oc-hero-lead">
               Carry a single OneCard. We route each purchase to whichever card
               in your wallet earns the most — Cobalt at restaurants, Momentum at
               groceries, Avion on flights — automatically.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                href="#simulator"
-                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:bg-slate-800"
-              >
+            <div className="oc-hero-animation">
+              <PosTapAnimation />
+            </div>
+            <div className="oc-hero-cta">
+              <Link href="#simulator" className="oc-btn oc-btn-primary">
                 Try the simulator
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-              <Link
-                href="#waitlist"
-                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-slate-400"
-              >
+              <Link href="#waitlist" className="oc-btn oc-btn-secondary">
                 Join waitlist
               </Link>
             </div>
           </div>
         </section>
 
-        {/* How it works — animated flow */}
-        <section id="how-it-works" className="scroll-mt-24 bg-white py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="mb-10 text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <section id="how-it-works" className="oc-section oc-flow-section">
+          <div className="oc-container">
+            <header className="mb-10 text-center">
+              <h2 className="oc-section-title">
                 How OneCard routes a purchase
               </h2>
-              <p className="mx-auto mt-3 max-w-lg text-slate-600">
+              <p className="oc-section-lead">
                 You don&apos;t choose the card at checkout — the engine does, in
                 real time, using merchant category and your portfolio.
               </p>
-            </div>
+            </header>
             <TransactionFlow />
           </div>
         </section>
 
-        {/* Value props */}
-        <section className="border-y border-slate-200/80 bg-stone-50 py-16">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-3 sm:px-6">
+        <section className="oc-stats-section" aria-label="Key benefits">
+          <div className="oc-container oc-stats-grid">
             {[
               {
                 stat: "+$847",
@@ -83,14 +78,11 @@ export default function Home() {
                 sub: "Amex + Big Six Canadian issuers",
               },
             ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200/60"
-              >
-                <p className="text-3xl font-bold text-emerald-600">{item.stat}</p>
-                <p className="mt-2 font-medium text-slate-900">{item.label}</p>
-                <p className="mt-1 text-sm text-slate-500">{item.sub}</p>
-              </div>
+              <article key={item.label} className="oc-stat-card">
+                <p className="oc-stat-value">{item.stat}</p>
+                <p className="oc-stat-label">{item.label}</p>
+                <p className="oc-stat-sub">{item.sub}</p>
+              </article>
             ))}
           </div>
         </section>

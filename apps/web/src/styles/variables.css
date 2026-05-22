@@ -1,0 +1,38 @@
+/**
+ * OneCard design tokens — edit colors/spacing here.
+ */
+:root {
+  --oc-bg: #fafaf9;
+  --oc-bg-white: #ffffff;
+  --oc-bg-muted: #fafaf9;
+  --oc-bg-stone: #f5f5f4;
+  --oc-bg-dark: #0f172a;
+  --oc-bg-dark-panel: rgba(30, 41, 59, 0.5);
+
+  --oc-text: #0f172a;
+  --oc-text-muted: #64748b;
+  --oc-text-light: #94a3b8;
+  --oc-text-inverse: #f8fafc;
+
+  --oc-accent: #10b981;
+  --oc-accent-dark: #059669;
+  --oc-accent-soft: #d1fae5;
+  --oc-accent-border: #a7f3d0;
+
+  --oc-border: #e2e8f0;
+  --oc-border-soft: rgba(226, 232, 240, 0.8);
+
+  --oc-radius-sm: 0.5rem;
+  --oc-radius: 0.75rem;
+  --oc-radius-lg: 1rem;
+  --oc-radius-xl: 1.25rem;
+  --oc-radius-2xl: 1.5rem;
+  --oc-radius-full: 9999px;
+
+  --oc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --oc-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --oc-shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+
+  --oc-container: 72rem;
+  --oc-header-h: 4rem;
+}
