@@ -3,7 +3,7 @@ import { mapMccToCategory } from "./mapMccToCategory.js";
 import { routeTransaction } from "./routeTransaction.js";
 import { effectiveMultiplier } from "./estimateReward.js";
 import { AMEX_COBALT, CIBC_DIVIDEND } from "./fixtures/cards.js";
-import type { RoutingContext } from "@onecard/shared-types";
+import type { CardProduct, RoutingContext } from "@onecard/shared-types";
 
 function ctx(overrides: Partial<RoutingContext> = {}): RoutingContext {
   return {
@@ -26,6 +26,11 @@ function ctx(overrides: Partial<RoutingContext> = {}): RoutingContext {
 describe("mapMccToCategory", () => {
   it("maps restaurant MCC to dining", () => {
     expect(mapMccToCategory("5812")).toBe("dining");
+  });
+
+  it("maps telecom bill MCCs to recurring bills", () => {
+    expect(mapMccToCategory("4814")).toBe("recurring_bills");
+    expect(mapMccToCategory("4900")).toBe("recurring_bills");
   });
 });
 
@@ -56,6 +61,24 @@ describe("effectiveMultiplier", () => {
 });
 
 describe("routeTransaction", () => {
+  const BILL_PAY_CARD: CardProduct = {
+    cardId: "bill_pay_card",
+    issuer: "Test Bank",
+    displayName: "Bill Pay Card",
+    currency: "cashback %",
+    rewards: [
+      { category: "recurring_bills", multiplier: 4 },
+      { category: "other", multiplier: 1 },
+    ],
+  };
+  const FLAT_TWO_CARD: CardProduct = {
+    cardId: "flat_two_card",
+    issuer: "Test Bank",
+    displayName: "Flat Two Card",
+    currency: "cashback %",
+    rewards: [{ category: "other", multiplier: 2 }],
+  };
+
   it("picks AMEX Cobalt for dining (5x MR beats 1x cashback)", () => {
     const decision = routeTransaction(ctx());
     expect(decision.selectedCardId).toBe("amex_cobalt");
@@ -101,6 +124,23 @@ describe("routeTransaction", () => {
       }),
     );
     expect(decision.selectedCardId).toBe("cibc_dividend");
+  });
+
+  it("routes telecom bill MCCs through recurring bill rewards", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: { amount: 100, merchantName: "Rogers", mcc: "4814" },
+        portfolio: {
+          cards: [BILL_PAY_CARD, FLAT_TWO_CARD],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+
+    expect(decision.category).toBe("recurring_bills");
+    expect(decision.selectedCardId).toBe("bill_pay_card");
+    expect(decision.estimatedRewardValueCents).toBe(400);
   });
 
   it("throws when no eligible cards", () => {

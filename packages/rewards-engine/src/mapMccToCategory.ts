@@ -19,6 +19,8 @@ export function mapMccToCategory(mcc: string): RewardCategory {
     return "travel";
   // Streaming / digital goods (4899, 5815, 5816, 5817, 5818)
   if ([4899, 5815, 5816, 5817, 5818].includes(code)) return "streaming";
+  // Recurring bills / telecom and utilities (4814, 4900)
+  if (code === 4814 || code === 4900) return "recurring_bills";
 
   return "other";
 }
