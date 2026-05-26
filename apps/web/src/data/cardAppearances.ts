@@ -1,0 +1,618 @@
+/**
+ * Visual design per card — inspired by issuer branding (not official card art).
+ * Sources listed on each card in cards.ts.
+ */
+
+export type CardNetwork = "visa" | "mastercard" | "amex";
+export type CardTier =
+  | "standard"
+  | "gold"
+  | "platinum"
+  | "infinite"
+  | "world-elite"
+  | "privilege"
+  | "no-fee";
+
+export interface CardAppearance {
+  colorFrom: string;
+  colorTo: string;
+  accent: string;
+  textLight: boolean;
+  network: CardNetwork;
+  tier: CardTier;
+  faceLabel?: string;
+}
+
+const ISSUER_DEFAULT: Record<string, Omit<CardAppearance, "faceLabel">> = {
+  "American Express": {
+    colorFrom: "#006fcf",
+  colorTo: "#004f9e",
+  accent: "#006fcf",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+  },
+  CIBC: {
+    colorFrom: "#8B1538",
+  colorTo: "#5c0d24",
+  accent: "#8B1538",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  RBC: {
+    colorFrom: "#0051A5",
+  colorTo: "#003366",
+  accent: "#0051A5",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  TD: {
+    colorFrom: "#34A853",
+  colorTo: "#1e6b34",
+  accent: "#34A853",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  Scotiabank: {
+    colorFrom: "#EC111A",
+  colorTo: "#b80d14",
+  accent: "#EC111A",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  BMO: {
+    colorFrom: "#0075BE",
+  colorTo: "#004a7a",
+  accent: "#0075BE",
+  textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  "National Bank": {
+    colorFrom: "#E31937",
+  colorTo: "#9b1225",
+  accent: "#E31937",
+  textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  "Simplii Financial": {
+    colorFrom: "#652D90",
+    colorTo: "#4A1F6B",
+    accent: "#652D90",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  Wealthsimple: {
+    colorFrom: "#0a0a0a",
+    colorTo: "#1f1f1f",
+    accent: "#f5c542",
+    textLight: true,
+    network: "visa",
+    tier: "infinite",
+  },
+  "PC Financial": {
+    colorFrom: "#E1251B",
+    colorTo: "#B91C1C",
+    accent: "#E1251B",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  "Neo Financial": {
+    colorFrom: "#111111",
+    colorTo: "#2d0a2d",
+    accent: "#E3008C",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  Tangerine: {
+    colorFrom: "#FF6600",
+    colorTo: "#E85D04",
+    accent: "#FF6600",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  KOHO: {
+    colorFrom: "#6B4FBB",
+    colorTo: "#4A3578",
+    accent: "#6B4FBB",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  Manulife: {
+    colorFrom: "#00A758",
+    colorTo: "#006B3F",
+    accent: "#00A758",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+};
+
+export const CARD_APPEARANCES: Record<string, CardAppearance> = {
+  // Amex
+  amex_cobalt: {
+    colorFrom: "#38bdf8",
+  colorTo: "#312e81",
+  accent: "#0ea5e9",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+    faceLabel: "Cobalt",
+  },
+  amex_gold: {
+    colorFrom: "#fcd34d",
+  colorTo: "#92400e",
+  accent: "#d97706",
+  textLight: true,
+    network: "amex",
+    tier: "gold",
+    faceLabel: "Gold",
+  },
+  amex_platinum: {
+    colorFrom: "#cbd5e1",
+  colorTo: "#334155",
+  accent: "#94a3b8",
+  textLight: false,
+    network: "amex",
+    tier: "platinum",
+    faceLabel: "Platinum",
+  },
+  amex_simplycash_preferred: {
+    colorFrom: "#059669",
+  colorTo: "#134e4a",
+  accent: "#059669",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+    faceLabel: "SimplyCash",
+  },
+  amex_marriott: {
+    colorFrom: "#7a2239",
+  colorTo: "#3d1528",
+  accent: "#7a2239",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+    faceLabel: "Bonvoy",
+  },
+  amex_green: {
+    colorFrom: "#15803d",
+  colorTo: "#052e16",
+  accent: "#15803d",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+    faceLabel: "Green",
+  },
+  amex_choice: {
+    colorFrom: "#1d4ed8",
+  colorTo: "#172554",
+  accent: "#1d4ed8",
+  textLight: true,
+    network: "amex",
+    tier: "standard",
+    faceLabel: "Choice",
+  },
+
+  // CIBC
+  cibc_dividend_platinum: {
+    colorFrom: "#8B1538",
+    colorTo: "#5c0d24",
+    accent: "#C41E3A",
+    textLight: true,
+    network: "visa",
+    tier: "platinum",
+    faceLabel: "Dividend",
+  },
+  cibc_dividend: {
+    colorFrom: "#9b1b3a",
+  colorTo: "#6b0f2a",
+  accent: "#8B1538",
+  textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "Dividend",
+  },
+  cibc_dividend_infinite: {
+    colorFrom: "#8B1538",
+  colorTo: "#4a0a1f",
+  accent: "#8B1538",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Dividend",
+  },
+  cibc_aeroplan_infinite: {
+    colorFrom: "#1a1a1a",
+  colorTo: "#8B1538",
+  accent: "#8B1538",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Aeroplan",
+  },
+  cibc_aventura_infinite: {
+    colorFrom: "#1e3a5f",
+  colorTo: "#1a365d",
+  accent: "#2b6cb0",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Aventura",
+  },
+  cibc_aventura_gold: {
+    colorFrom: "#64748b",
+  colorTo: "#64748b",
+  accent: "#d97706",
+  textLight: true,
+    network: "visa",
+    tier: "gold",
+    faceLabel: "Aventura",
+  },
+  cibc_select: {
+    colorFrom: "#475569",
+  colorTo: "#0f172a",
+  accent: "#64748b",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+    faceLabel: "Select",
+  },
+  cibc_adapta: {
+    colorFrom: "#0d9488",
+  colorTo: "#164e63",
+  accent: "#0d9488",
+  textLight: true,
+    network: "mastercard",
+    tier: "no-fee",
+    faceLabel: "Adapta",
+  },
+  cibc_costco: {
+    colorFrom: "#b91c1c",
+  colorTo: "#450a0a",
+  accent: "#dc2626",
+  textLight: true,
+    network: "mastercard",
+    tier: "standard",
+    faceLabel: "Costco",
+  },
+
+  // RBC
+  rbc_avion_infinite: {
+    colorFrom: "#0051A5",
+  colorTo: "#002855",
+  accent: "#0051A5",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Avion",
+  },
+  rbc_avion_infinite_privilege: {
+    colorFrom: "#1e293b",
+  colorTo: "#000000",
+  accent: "#0051A5",
+  textLight: true,
+    network: "visa",
+    tier: "privilege",
+    faceLabel: "Avion",
+  },
+  rbc_ion: {
+    colorFrom: "#3b82f6",
+    colorTo: "#0051A5",
+    accent: "#0051A5",
+    textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "ION",
+  },
+  rbc_ion_plus: {
+    colorFrom: "#6366f1",
+  colorTo: "#0051A5",
+  accent: "#6366f1",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+    faceLabel: "ION+",
+  },
+  rbc_westjet: {
+    colorFrom: "#14b8a6",
+  colorTo: "#134e4a",
+  accent: "#14b8a6",
+  textLight: true,
+    network: "mastercard",
+    tier: "world-elite",
+    faceLabel: "WestJet",
+  },
+  rbc_cashback_preferred: {
+    colorFrom: "#0051A5",
+  colorTo: "#1e3a8a",
+  accent: "#0051A5",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+    faceLabel: "Cash Back",
+  },
+  rbc_low_rate: {
+    colorFrom: "#64748b",
+  colorTo: "#1e293b",
+  accent: "#64748b",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+    faceLabel: "Low Rate",
+  },
+
+  // TD
+  td_aeroplan_infinite: {
+    colorFrom: "#34A853",
+  colorTo: "#052e16",
+  accent: "#34A853",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Aeroplan",
+  },
+  td_aeroplan_platinum: {
+    colorFrom: "#10b981",
+  colorTo: "#14532d",
+  accent: "#22c55e",
+  textLight: true,
+    network: "visa",
+    tier: "platinum",
+    faceLabel: "Aeroplan",
+  },
+  td_cashback_infinite: {
+    colorFrom: "#16a34a",
+  colorTo: "#052e16",
+  accent: "#16a34a",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Cash Back",
+  },
+  td_cashback: {
+    colorFrom: "#65a30d",
+  colorTo: "#166534",
+  accent: "#65a30d",
+  textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "Cash Back",
+  },
+  td_first_class: {
+    colorFrom: "#1e6b34",
+    colorTo: "#0f3d1f",
+    accent: "#34A853",
+    textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "First Class",
+  },
+  td_rewards_visa: {
+    colorFrom: "#15803d",
+  colorTo: "#64748b",
+  accent: "#059669",
+  textLight: true,
+    network: "visa",
+    tier: "standard",
+    faceLabel: "Rewards",
+  },
+  td_emerald_flex: {
+    colorFrom: "#065f46",
+  colorTo: "#64748b",
+  accent: "#047857",
+  textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "Emerald",
+  },
+
+  // Scotiabank
+  scotia_momentum: {
+    colorFrom: "#EC111A",
+  colorTo: "#8b0a10",
+  accent: "#EC111A",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Momentum",
+  },
+  scotia_momentum_no_fee: {
+    colorFrom: "#ef4444",
+  colorTo: "#EC111A",
+  accent: "#EF4444",
+  textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "Momentum",
+  },
+  scotia_scene: {
+    colorFrom: "#7C3AED",
+    colorTo: "#4C1D95",
+    accent: "#7C3AED",
+    textLight: true,
+    network: "visa",
+    tier: "no-fee",
+    faceLabel: "Scene+",
+  },
+  scotia_passport: {
+    colorFrom: "#EC111A",
+  colorTo: "#0f172a",
+  accent: "#EC111A",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "Passport",
+  },
+  scotia_gold_amex: {
+    colorFrom: "#f59e0b",
+  colorTo: "#92400e",
+  accent: "#f59e0b",
+  textLight: true,
+    network: "amex",
+    tier: "gold",
+    faceLabel: "Gold Amex",
+  },
+
+  // BMO
+  bmo_eclipse: {
+    colorFrom: "#334155",
+  colorTo: "#000000",
+  accent: "#334155",
+  textLight: true,
+    network: "visa",
+    tier: "privilege",
+    faceLabel: "eclipse",
+  },
+  bmo_eclipse_rise: {
+    colorFrom: "#6d28d9",
+  colorTo: "#020617",
+  accent: "#7c3aed",
+  textLight: true,
+    network: "visa",
+    tier: "infinite",
+    faceLabel: "eclipse rise",
+  },
+  bmo_cashback_we: {
+    colorFrom: "#0075BE",
+  colorTo: "#172554",
+  accent: "#0075BE",
+  textLight: true,
+    network: "mastercard",
+    tier: "world-elite",
+    faceLabel: "CashBack",
+  },
+  bmo_cashback: {
+    colorFrom: "#0ea5e9",
+  colorTo: "#0075BE",
+  accent: "#0ea5e9",
+  textLight: true,
+    network: "mastercard",
+    tier: "no-fee",
+    faceLabel: "CashBack",
+  },
+  bmo_airmiles: {
+    colorFrom: "#2563eb",
+  colorTo: "#312e81",
+  accent: "#2563eb",
+  textLight: true,
+    network: "mastercard",
+    tier: "world-elite",
+    faceLabel: "AIR MILES",
+  },
+  bmo_ascend: {
+    colorFrom: "#0075BE",
+  colorTo: "#000000",
+  accent: "#0075BE",
+  textLight: true,
+    network: "mastercard",
+    tier: "world-elite",
+    faceLabel: "Ascend",
+  },
+  bmo_rewards_mc: {
+    colorFrom: "#3b82f6",
+  colorTo: "#1e3a8a",
+  accent: "#3b82f6",
+  textLight: true,
+    network: "mastercard",
+    tier: "standard",
+    faceLabel: "Rewards",
+  },
+
+  // National Bank
+  nbc_platinum: {
+    colorFrom: "#E31937",
+  colorTo: "#7f0f1f",
+  accent: "#E31937",
+  textLight: true,
+    network: "mastercard",
+    tier: "platinum",
+    faceLabel: "Platinum",
+  },
+  nbc_world_elite: {
+    colorFrom: "#dc2626",
+  colorTo: "#0f172a",
+  accent: "#E31937",
+  textLight: true,
+    network: "mastercard",
+    tier: "world-elite",
+    faceLabel: "World Elite",
+  },
+  nbc_my_credit: {
+    colorFrom: "#e11d48",
+  colorTo: "#7f1d1d",
+  accent: "#e11d48",
+  textLight: true,
+    network: "mastercard",
+    tier: "no-fee",
+    faceLabel: "mycredit",
+  },
+  nbc_allure: {
+    colorFrom: "#db2777",
+  colorTo: "#881337",
+  accent: "#db2777",
+  textLight: true,
+    network: "mastercard",
+    tier: "standard",
+    faceLabel: "Allure",
+  },
+
+  simplii_cashback_visa: { colorFrom: "#652D90", colorTo: "#4A1F6B", accent: "#652D90", textLight: true, network: "visa", tier: "no-fee", faceLabel: "Cash Back" },
+  ws_credit_infinite: { colorFrom: "#0a0a0a", colorTo: "#2a2a2a", accent: "#f5c542", textLight: true, network: "visa", tier: "infinite", faceLabel: "2% Cash" },
+  ws_credit_privilege: { colorFrom: "#1a1a1a", colorTo: "#3d3d3d", accent: "#c0c0c0", textLight: true, network: "visa", tier: "privilege", faceLabel: "Metal" },
+  pc_mastercard: { colorFrom: "#E1251B", colorTo: "#9B1212", accent: "#E1251B", textLight: true, network: "mastercard", tier: "no-fee", faceLabel: "PC" },
+  pc_world_mc: { colorFrom: "#C0C0C0", colorTo: "#8A8A8A", accent: "#E1251B", textLight: false, network: "mastercard", tier: "world-elite", faceLabel: "PC World" },
+  pc_world_elite_mc: { colorFrom: "#1a1a1a", colorTo: "#3d0818", accent: "#E1251B", textLight: true, network: "mastercard", tier: "world-elite", faceLabel: "PC WE" },
+  pc_insiders_we_mc: { colorFrom: "#E1251B", colorTo: "#5c0d24", accent: "#FFD700", textLight: true, network: "mastercard", tier: "world-elite", faceLabel: "Insiders" },
+  neo_mastercard: { colorFrom: "#111111", colorTo: "#E3008C", accent: "#E3008C", textLight: true, network: "mastercard", tier: "no-fee", faceLabel: "Neo" },
+  neo_world_mc: { colorFrom: "#1a1020", colorTo: "#4a1f5c", accent: "#E3008C", textLight: true, network: "mastercard", tier: "world-elite", faceLabel: "Neo World" },
+  neo_world_elite_mc: { colorFrom: "#0d0d0d", colorTo: "#1f1f1f", accent: "#E3008C", textLight: true, network: "mastercard", tier: "world-elite", faceLabel: "Neo WE" },
+  tangerine_money_back: { colorFrom: "#FF6600", colorTo: "#E85D04", accent: "#FF6600", textLight: true, network: "mastercard", tier: "no-fee", faceLabel: "Money-Back" },
+  tangerine_world_elite: { colorFrom: "#FF6600", colorTo: "#B45309", accent: "#FF6600", textLight: true, network: "mastercard", tier: "world-elite", faceLabel: "World Elite" },
+  koho_essential: { colorFrom: "#6B4FBB", colorTo: "#4A3578", accent: "#6B4FBB", textLight: true, network: "mastercard", tier: "no-fee", faceLabel: "Essential" },
+  koho_premium: { colorFrom: "#4A3578", colorTo: "#2d1f4d", accent: "#9F8FEF", textLight: true, network: "mastercard", tier: "standard", faceLabel: "Premium" },
+  manulife_benefits: { colorFrom: "#00A758", colorTo: "#006B3F", accent: "#00A758", textLight: true, network: "visa", tier: "no-fee", faceLabel: "Benefits" },
+
+};
+
+const FALLBACK: CardAppearance = {
+  colorFrom: "#64748b",
+  colorTo: "#334155",
+  accent: "#64748b",
+  textLight: true,
+  network: "visa",
+  tier: "standard",
+};
+
+export function getCardAppearance(
+  cardId: string,
+  issuer?: string,
+): CardAppearance {
+  const custom = CARD_APPEARANCES[cardId];
+  if (custom) return custom;
+  if (issuer && ISSUER_DEFAULT[issuer]) return ISSUER_DEFAULT[issuer];
+  return FALLBACK;
+}
+
+export function tierLabel(tier: CardTier): string {
+  const map: Record<CardTier, string> = {
+    standard: "",
+    gold: "Gold",
+    platinum: "Platinum",
+    infinite: "Infinite",
+    "world-elite": "World Elite",
+    privilege: "Privilege",
+    "no-fee": "No fee",
+  };
+  return map[tier];
+}

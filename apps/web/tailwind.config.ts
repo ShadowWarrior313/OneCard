@@ -12,11 +12,22 @@ const config: Config = {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
       },
       colors: {
-        onecard: {
-          ink: "#0f172a",
-          accent: "#10b981",
-          mint: "#34d399",
+        brand: {
+          ink: "#163300",
+          body: "#37514a",
+          muted: "#5c6c66",
+          purple: "#4f46e5",
+          "purple-dark": "#3730a3",
+          "purple-soft": "#eef2ff",
+          ocean: "#0891b2",
+          "ocean-soft": "#e0f2fe",
+          mint: "#10b981",
+          "mint-soft": "#d1fae5",
         },
+      },
+      boxShadow: {
+        card: "0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(15,23,42,0.06)",
+        lift: "0 16px 48px rgba(79,70,229,0.12)",
       },
     },
   },

@@ -2,17 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* OneCard site styles — edit files in src/styles/ */
-@import "../styles/index.css";
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-html {
-  scroll-behavior: smooth;
+  body {
+    @apply bg-white font-sans text-brand-body antialiased;
+  }
 }
 
-body {
-  color: var(--oc-text);
-  background: var(--oc-bg);
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
+@layer components {
+  .oc-container {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .oc-section {
+    @apply scroll-mt-20 py-10 sm:py-12;
+  }
+
+  .oc-eyebrow {
+    @apply text-sm font-semibold text-brand-ocean;
+  }
+
+  .oc-heading {
+    @apply text-balance text-3xl font-extrabold tracking-tight text-brand-ink sm:text-4xl;
+  }
+
+  .oc-lead {
+    @apply mt-3 text-lg leading-relaxed text-brand-muted;
+  }
+
+  .oc-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-purple to-brand-ocean px-6 py-3 text-sm font-semibold text-white shadow-md shadow-brand-purple/25 transition hover:opacity-95 hover:shadow-lg;
+  }
+
+  .oc-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-brand-ink transition hover:border-brand-purple/30 hover:bg-brand-purple-soft;
+  }
+
+  .oc-btn-ghost {
+    @apply inline-flex items-center justify-center rounded-full border-2 border-brand-ink bg-white px-6 py-2.5 text-sm font-semibold text-brand-ink transition hover:bg-slate-50;
+  }
+
+  .oc-panel {
+    @apply rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card;
+  }
+
+  .oc-link {
+    @apply font-semibold text-brand-purple hover:underline;
+  }
+
+  .oc-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-brand-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple-soft;
+  }
+
+  .oc-merchant-tile {
+    @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white p-2.5 transition hover:border-slate-300 hover:shadow-sm;
+  }
+
+  .oc-merchant-tile--active {
+    @apply border-brand-ink bg-brand-purple-soft/40 ring-2 ring-brand-ink/15;
+  }
+
+  .oc-sector-pill {
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-3 py-2.5 text-left transition hover:border-slate-400 hover:bg-white;
+  }
+
+  .oc-sector-pill--active {
+    @apply border-brand-ink border-solid bg-white ring-2 ring-brand-ink/10;
+  }
 }
 
 @layer utilities {
