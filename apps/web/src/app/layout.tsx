@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import { WalletProvider } from "@/context/WalletContext";
+import { getSiteUrl } from "@/lib/siteUrl";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -8,9 +9,7 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
