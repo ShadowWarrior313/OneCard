@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Mail, Shield, User } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { useUserProfile } from "@/context/UserProfileContext";
@@ -36,17 +35,11 @@ export function Waitlist() {
   }
 
   return (
-    <section id="waitlist" className="oc-section bg-brand-surface">
+    <section id="waitlist" className="oc-section bg-white">
       <div className="oc-container-wide">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="overflow-hidden rounded-[2rem] border border-zinc-200/80 bg-white shadow-lift"
-        >
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="grid lg:grid-cols-2">
-            <div className="border-b border-zinc-100 p-8 sm:p-10 lg:border-b-0 lg:border-r">
+            <div className="border-b border-zinc-100 p-6 sm:p-8 lg:border-b-0 lg:border-r">
               <p className="oc-eyebrow">Waitlist open · Canada first</p>
               <h2 className="oc-heading mt-4 text-3xl sm:text-4xl">
                 Get your OneCard
@@ -68,13 +61,9 @@ export function Waitlist() {
               </ul>
             </div>
 
-            <div className="p-8 sm:p-10">
+            <div className="p-6 sm:p-8">
               {submitted ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex min-h-[280px] flex-col items-center justify-center text-center"
-                >
+                <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
                   <CheckCircle2 className="h-12 w-12 text-brand-mint" />
                   <h3 className="mt-4 text-xl font-semibold text-brand-ink">
                     You&apos;re on the list, {displayName.split(" ")[0]}
@@ -83,7 +72,7 @@ export function Waitlist() {
                     Your OneCard now shows <strong>{displayName}</strong> across
                     the demo.
                   </p>
-                </motion.div>
+                </div>
               ) : (
                 <form onSubmit={onSubmit} className="space-y-5">
                   <div>
@@ -123,16 +112,14 @@ export function Waitlist() {
                     </div>
                   </div>
                   {error && <p className="text-sm text-red-600">{error}</p>}
-                  <motion.button
+                  <button
                     type="submit"
                     disabled={submitting}
-                    whileHover={{ scale: submitting ? 1 : 1.01 }}
-                    whileTap={{ scale: submitting ? 1 : 0.99 }}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-ink py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-ink py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal disabled:opacity-60"
                   >
                     {submitting ? "Joining…" : "Join waitlist"}
                     <ArrowRight className="h-5 w-5" />
-                  </motion.button>
+                  </button>
                   <p className="flex items-center justify-center gap-2 text-xs text-brand-muted">
                     <Shield className="h-3.5 w-3.5" />
                     Saved on this device · used for your card name
@@ -141,7 +128,7 @@ export function Waitlist() {
               )}
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,6 +1,70 @@
 export const PROFILE_STORAGE_KEY = "onecard_profile_v1";
 export const WAITLIST_STORAGE_KEY = "onecard_waitlist";
 export const SESSION_STORAGE_KEY = "onecard_session_v1";
+export const PERSONAL_DETAILS_STORAGE_KEY = "onecard_personal_details_v1";
+
+export type Occupation =
+  | "student"
+  | "employee"
+  | "entrepreneur"
+  | "self_employed"
+  | "retired"
+  | "other";
+
+export interface Address {
+  line1: string;
+  line2: string;
+  city: string;
+  province: string;
+  postalCode: string;
+}
+
+export interface PersonalDetails {
+  occupation: Occupation | "";
+  homeAddress: Address;
+  billingAddress: Address;
+  billingSameAsHome: boolean;
+}
+
+export const EMPTY_ADDRESS: Address = {
+  line1: "",
+  line2: "",
+  city: "",
+  province: "",
+  postalCode: "",
+};
+
+export const DEFAULT_PERSONAL_DETAILS: PersonalDetails = {
+  occupation: "",
+  homeAddress: { ...EMPTY_ADDRESS },
+  billingAddress: { ...EMPTY_ADDRESS },
+  billingSameAsHome: true,
+};
+
+export const OCCUPATION_LABELS: Record<Occupation, string> = {
+  student: "Student",
+  employee: "Employee",
+  entrepreneur: "Entrepreneur",
+  self_employed: "Self-employed",
+  retired: "Retired",
+  other: "Other",
+};
+
+export const CA_PROVINCES = [
+  "AB",
+  "BC",
+  "MB",
+  "NB",
+  "NL",
+  "NS",
+  "NT",
+  "NU",
+  "ON",
+  "PE",
+  "QC",
+  "SK",
+  "YT",
+] as const;
 
 export interface UserProfile {
   name: string;
@@ -114,4 +178,39 @@ export function readWaitlistEntries(): WaitlistEntry[] {
   } catch {
     return [];
   }
+}
+
+function normalizeAddress(raw: Partial<Address> | undefined): Address {
+  return {
+    line1: raw?.line1?.trim() ?? "",
+    line2: raw?.line2?.trim() ?? "",
+    city: raw?.city?.trim() ?? "",
+    province: raw?.province?.trim() ?? "",
+    postalCode: raw?.postalCode?.trim() ?? "",
+  };
+}
+
+export function readStoredPersonalDetails(): PersonalDetails {
+  if (typeof window === "undefined") return { ...DEFAULT_PERSONAL_DETAILS };
+  try {
+    const raw = localStorage.getItem(PERSONAL_DETAILS_STORAGE_KEY);
+    if (!raw) return { ...DEFAULT_PERSONAL_DETAILS };
+    const parsed = JSON.parse(raw) as Partial<PersonalDetails>;
+    const homeAddress = normalizeAddress(parsed.homeAddress);
+    const billingSameAsHome = parsed.billingSameAsHome ?? true;
+    return {
+      occupation: parsed.occupation ?? "",
+      homeAddress,
+      billingAddress: billingSameAsHome
+        ? { ...homeAddress }
+        : normalizeAddress(parsed.billingAddress),
+      billingSameAsHome,
+    };
+  } catch {
+    return { ...DEFAULT_PERSONAL_DETAILS };
+  }
+}
+
+export function writeStoredPersonalDetails(details: PersonalDetails): void {
+  localStorage.setItem(PERSONAL_DETAILS_STORAGE_KEY, JSON.stringify(details));
 }

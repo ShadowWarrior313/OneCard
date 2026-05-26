@@ -40,7 +40,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="oc-panel mx-auto w-full max-w-md !rounded-[1.75rem] !p-8 sm:!p-10">
+    <div className="oc-panel mx-auto w-full max-w-md">
       <div className="mb-8 text-center">
         <OneCardLogo showWordmark />
         <h1 className="mt-6 text-2xl font-semibold tracking-tight text-brand-ink">
@@ -110,7 +110,7 @@ export function LoginForm() {
 
       <p className="mt-6 text-center text-sm text-brand-muted">
         Don&apos;t have an account?{" "}
-        <Link href="/#waitlist" className="font-semibold text-brand-purple hover:underline">
+        <Link href="/get-started" className="font-semibold text-brand-ink hover:underline">
           Get started
         </Link>
       </p>

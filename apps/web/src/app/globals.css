@@ -8,11 +8,11 @@
   }
 
   body {
-    @apply bg-brand-cream font-sans text-brand-body antialiased;
+    @apply overflow-x-hidden bg-white font-sans text-brand-body antialiased;
   }
 
   ::selection {
-    @apply bg-brand-purple/20 text-brand-ink;
+    @apply bg-zinc-200 text-brand-ink;
   }
 }
 
@@ -26,131 +26,144 @@
   }
 
   .oc-section {
-    @apply scroll-mt-24 py-16 sm:py-24;
+    @apply scroll-mt-20 py-12 sm:scroll-mt-24 sm:py-16;
   }
 
   .oc-eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.2em] text-brand-ocean;
-  }
-
-  .oc-eyebrow-dark {
-    @apply text-xs font-semibold uppercase tracking-[0.2em] text-brand-ocean;
+    @apply text-xs font-semibold uppercase tracking-wider text-brand-muted;
   }
 
   .oc-display {
-    @apply text-balance text-4xl font-semibold tracking-tight text-brand-ink sm:text-5xl lg:text-6xl lg:leading-[1.05];
-  }
-
-  .oc-display-dark {
-    @apply text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.05];
+    @apply text-balance text-4xl font-semibold tracking-tight text-brand-ink sm:text-5xl lg:leading-[1.1];
   }
 
   .oc-heading {
-    @apply text-balance text-3xl font-semibold tracking-tight text-brand-ink sm:text-4xl;
+    @apply text-balance text-2xl font-semibold tracking-tight text-brand-ink sm:text-3xl;
   }
 
   .oc-lead {
-    @apply mt-4 text-lg leading-relaxed text-brand-muted;
-  }
-
-  .oc-lead-dark {
-    @apply mt-4 text-lg leading-relaxed text-zinc-400;
+    @apply mt-4 text-base leading-relaxed text-brand-muted sm:text-lg;
   }
 
   .oc-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink shadow-lg shadow-black/10 transition hover:bg-zinc-100 hover:shadow-xl;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-charcoal;
   }
 
   .oc-btn-primary-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink shadow-glow transition hover:scale-[1.02] hover:bg-zinc-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-charcoal;
   }
 
   .oc-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 bg-transparent px-6 py-3.5 text-sm font-semibold text-white transition hover:border-zinc-500 hover:bg-white/5;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-brand-ink transition hover:bg-zinc-50;
   }
 
   .oc-btn-secondary-light {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink transition hover:border-zinc-300 hover:shadow-card;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-6 py-3 text-sm font-semibold text-brand-ink transition hover:border-zinc-300;
   }
 
   .oc-btn-ghost {
-    @apply inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 text-sm font-semibold text-brand-ink transition hover:border-zinc-300 hover:shadow-sm;
+    @apply inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-semibold text-brand-ink transition hover:bg-zinc-50;
   }
 
   .oc-panel {
-    @apply rounded-3xl border border-brand-purple/10 bg-white/90 p-6 shadow-card backdrop-blur-sm sm:p-8;
+    @apply rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6;
   }
 
   .oc-panel-inset {
-    @apply rounded-2xl border border-brand-purple/10 bg-gradient-to-br from-brand-purple-soft/25 to-brand-ocean-soft/20 p-4;
+    @apply rounded-lg border border-zinc-100 bg-zinc-50 p-4;
   }
 
   .oc-simulator-shell {
-    @apply overflow-hidden rounded-[1.75rem] border border-brand-purple/15 bg-white/60 p-5 shadow-lift backdrop-blur-md sm:p-6 lg:p-8;
+    @apply rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6;
   }
 
   .oc-simulator-sidebar {
-    @apply space-y-4 lg:sticky lg:top-24 lg:self-start;
+    @apply space-y-4 lg:sticky lg:top-20 lg:self-start;
   }
 
   .oc-simulator-highlight {
-    @apply flex items-start gap-3 rounded-2xl border border-brand-purple/10 bg-gradient-to-r from-brand-purple-soft/40 to-white px-4 py-3 shadow-sm sm:px-5;
+    @apply flex items-start gap-3 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3;
   }
 
   .oc-simulator-tab {
-    @apply shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition;
+    @apply shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition;
   }
 
   .oc-simulator-tab--active {
-    @apply bg-brand-charcoal text-white shadow-sm;
+    @apply bg-brand-ink text-white;
   }
 
   .oc-simulator-tab--idle {
-    @apply bg-white/80 text-brand-muted ring-1 ring-brand-purple/10 hover:bg-brand-purple-soft/40 hover:text-brand-ink;
-  }
-
-  .oc-glass {
-    @apply rounded-3xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl;
-  }
-
-  .oc-glass-light {
-    @apply rounded-3xl border border-white/60 bg-white/70 shadow-card backdrop-blur-xl;
-  }
-
-  .oc-bento {
-    @apply relative overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-card transition duration-300 hover:shadow-lift sm:p-8;
-  }
-
-  .oc-bento-dark {
-    @apply relative overflow-hidden rounded-3xl border border-white/10 bg-brand-charcoal p-6 shadow-glass transition duration-300 hover:border-white/15 sm:p-8;
+    @apply border border-zinc-200 bg-white text-brand-muted hover:border-zinc-300 hover:text-brand-ink;
   }
 
   .oc-link {
-    @apply font-semibold text-brand-purple hover:underline;
+    @apply font-semibold text-brand-ink underline decoration-zinc-300 underline-offset-2 hover:decoration-brand-ink;
   }
 
   .oc-input {
-    @apply w-full rounded-xl border border-brand-purple/15 bg-white/90 px-4 py-3 text-sm text-brand-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20;
+    @apply w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-brand-ink transition focus:border-brand-ink focus:outline-none focus:ring-2 focus:ring-zinc-200;
   }
 
   .oc-merchant-tile {
-    @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-brand-purple/10 bg-gradient-to-br from-white to-brand-purple-soft/30 p-2 transition hover:border-brand-purple/25 hover:shadow-sm;
+    @apply flex min-h-[4.75rem] flex-col items-center justify-center gap-1 rounded-lg border border-zinc-200 bg-white p-2 transition hover:border-zinc-300;
   }
 
   .oc-merchant-tile--active {
-    @apply border-brand-purple bg-brand-purple-soft/50 ring-2 ring-brand-purple/20;
+    @apply border-brand-ink ring-2 ring-zinc-200;
   }
 
   .oc-sector-pill {
-    @apply flex items-center gap-3 rounded-xl border border-dashed border-brand-purple/20 bg-brand-purple-soft/20 px-3 py-2.5 text-left transition hover:border-brand-purple/35 hover:bg-brand-purple-soft/35;
+    @apply flex items-center gap-3 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-3 py-2.5 text-left transition hover:border-zinc-400;
   }
 
   .oc-sector-pill--active {
-    @apply border-brand-purple border-solid bg-white ring-2 ring-brand-purple/15;
+    @apply border-brand-ink border-solid bg-white ring-2 ring-zinc-200;
   }
 
-  .oc-gradient-text {
-    @apply bg-gradient-to-r from-brand-purple via-brand-ocean to-brand-mint bg-clip-text text-transparent;
+  .phone-leather-wallet {
+    position: relative;
+    background-color: #2f1f16;
+    background-image:
+      radial-gradient(ellipse 120% 80% at 20% 0%, rgba(255, 220, 170, 0.12) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 60% at 85% 100%, rgba(0, 0, 0, 0.35) 0%, transparent 50%),
+      repeating-linear-gradient(
+        92deg,
+        rgba(255, 255, 255, 0.015) 0px,
+        rgba(255, 255, 255, 0.015) 1px,
+        transparent 1px,
+        transparent 4px
+      ),
+      repeating-linear-gradient(
+        178deg,
+        rgba(0, 0, 0, 0.04) 0px,
+        rgba(0, 0, 0, 0.04) 2px,
+        transparent 2px,
+        transparent 7px
+      ),
+      linear-gradient(165deg, #5c3d2e 0%, #3d2819 38%, #2a1810 72%, #1f120c 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 170, 0.12),
+      0 0 0 1px rgba(0, 0, 0, 0.5),
+      0 0 0 2px rgba(210, 180, 140, 0.22);
+  }
+
+  .phone-leather-wallet::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 5px;
+    border-radius: 0.85rem;
+    border: 1px dashed rgba(210, 180, 140, 0.28);
+    z-index: 0;
+  }
+
+  .phone-leather-lip {
+    background: linear-gradient(180deg, #4a3224 0%, #352218 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 220, 170, 0.15),
+      inset 0 -3px 8px rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.35);
   }
 }
 

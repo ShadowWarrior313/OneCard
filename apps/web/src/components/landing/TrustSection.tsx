@@ -1,7 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Lock, ShieldCheck, Wallet } from "lucide-react";
+import { ShieldCheck, Lock, Wallet } from "lucide-react";
 
 const items = [
   {
@@ -23,41 +20,31 @@ const items = [
 
 export function TrustSection() {
   return (
-    <section className="relative overflow-hidden bg-brand-obsidian py-20 sm:py-28">
-      <div className="absolute inset-0 bg-mesh-dark opacity-80" />
-      <div className="oc-container-wide relative">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto max-w-2xl text-center"
-        >
-          <p className="oc-eyebrow-dark">Trust</p>
-          <h2 className="oc-display-dark mt-4 text-3xl sm:text-4xl lg:text-5xl">
-            Built like a real fintech.
-          </h2>
-          <p className="oc-lead-dark mx-auto mt-4 max-w-lg">
-            Calm, secure, and designed for the long term — not a weekend hackathon.
+    <section className="border-t border-zinc-200 bg-brand-surface py-16 sm:py-20">
+      <div className="oc-container-wide">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
+            Trust
           </p>
-        </motion.div>
+          <h2 className="oc-heading mt-3">Built for the long term</h2>
+          <p className="oc-lead mx-auto max-w-lg">
+            Secure, straightforward, and designed like a product you&apos;d trust with
+            your wallet.
+          </p>
+        </div>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-3">
-          {items.map(({ icon: Icon, title, body }, i) => (
-            <motion.article
+        <div className="mt-12 grid gap-5 sm:grid-cols-3">
+          {items.map(({ icon: Icon, title, body }) => (
+            <article
               key={title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="oc-glass p-6 text-center sm:p-8"
+              className="rounded-xl border border-zinc-200 bg-white p-6 text-center"
             >
-              <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-brand-ocean">
-                <Icon className="h-5 w-5" />
+              <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 text-brand-ink">
+                <Icon className="h-5 w-5" strokeWidth={1.75} />
               </span>
-              <h3 className="mt-5 text-lg font-semibold text-white">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-400">{body}</p>
-            </motion.article>
+              <h3 className="mt-4 text-base font-semibold text-brand-ink">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-brand-muted">{body}</p>
+            </article>
           ))}
         </div>
       </div>

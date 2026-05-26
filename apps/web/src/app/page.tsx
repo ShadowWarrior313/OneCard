@@ -1,11 +1,8 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { ScenarioSimulator } from "@/components/ScenarioSimulator";
-import { Waitlist } from "@/components/Waitlist";
-import { BentoGrid } from "@/components/landing/BentoGrid";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { TrustSection } from "@/components/landing/TrustSection";
-import { ProductVideoSection } from "@/components/ProductVideoSection";
+import { InteractiveDemo } from "@/components/landing/InteractiveDemo";
 
 export default function Home() {
   return (
@@ -13,11 +10,8 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
-        <BentoGrid />
-        <ScenarioSimulator />
-        <ProductVideoSection />
-        <TrustSection />
-        <Waitlist />
+        <InteractiveDemo />
+        <FeaturesSection />
       </main>
       <Footer />
     </>

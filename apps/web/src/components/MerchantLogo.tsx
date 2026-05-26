@@ -65,7 +65,7 @@ function RemoteLogo({
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain p-1.5"
         referrerPolicy="no-referrer"
         onError={onError}
       />
@@ -84,8 +84,11 @@ export function MerchantLogo({
 }) {
   const domains = brandDomains(merchant);
   const candidates = useMemo(
-    () => resolveBrandLogoCandidates(domains, "light", Math.max(size * 2, 128)),
-    [domains.join("|"), size],
+    () =>
+      resolveBrandLogoCandidates(domains, "light", Math.max(size * 2, 128), {
+        merchantId: merchant.id,
+      }),
+    [domains.join("|"), merchant.id, size],
   );
   const [candidateIndex, setCandidateIndex] = useState(0);
   const remoteSrc = candidates[candidateIndex] ?? null;

@@ -6,7 +6,7 @@ import { useState, type ReactNode } from "react";
 type LogoSurface = "dark" | "light" | "warm";
 
 export const MERCHANT_LOGO_FRAME =
-  "rounded-xl border border-brand-purple/15 bg-gradient-to-br from-white to-brand-purple-soft/40";
+  "rounded-lg border border-zinc-200 bg-white";
 
 export function BrandLogo({
   src,

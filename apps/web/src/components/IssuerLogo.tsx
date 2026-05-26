@@ -52,7 +52,7 @@ function RemoteIssuerLogo({
       <img
         src={src}
         alt={alt}
-        className="h-full w-full object-contain"
+        className="h-full w-full object-contain p-1.5"
         referrerPolicy="no-referrer"
         onError={onError}
       />
@@ -73,8 +73,11 @@ export function IssuerLogo({
 }) {
   const domains = issuerBrandDomains(issuer);
   const candidates = useMemo(
-    () => resolveBrandLogoCandidates(domains, "light", Math.max(size * 2, 128)),
-    [domains.join("|"), size],
+    () =>
+      resolveBrandLogoCandidates(domains, "light", Math.max(size * 2, 128), {
+        issuer,
+      }),
+    [domains.join("|"), issuer, size],
   );
   const [candidateIndex, setCandidateIndex] = useState(0);
   const remoteSrc = candidates[candidateIndex] ?? null;

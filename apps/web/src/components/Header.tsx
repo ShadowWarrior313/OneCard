@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import { OneCardLogo } from "./OneCardLogo";
 
 const links = [
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/simulator", label: "Simulator" },
   { href: "/wallet", label: "Wallet" },
-  { href: "/#simulator", label: "Simulator" },
 ];
 
 export function Header() {
@@ -16,32 +17,42 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const onHome = path === "/";
+  const transparent = onHome && !scrolled && !open;
 
   useEffect(() => {
     function onScroll() {
-      setScrolled(window.scrollY > 24);
+      setScrolled(window.scrollY > 20);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const transparent = onHome && !scrolled;
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         transparent
           ? "border-transparent bg-transparent"
-          : "border-b border-zinc-200/80 bg-brand-cream/85 backdrop-blur-xl"
+          : "border-b border-zinc-200 bg-white/95 backdrop-blur-sm"
       }`}
     >
-      <div className="oc-container-wide flex h-16 items-center justify-between gap-4">
-        <Link href="/" onClick={() => setOpen(false)}>
+      <div className="oc-container-wide flex h-14 items-center justify-between gap-3 sm:h-16">
+        <Link href="/" onClick={() => setOpen(false)} className="shrink-0">
           <OneCardLogo showWordmark light={transparent} />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -49,7 +60,9 @@ export function Header() {
               className={`text-sm font-medium transition ${
                 transparent
                   ? "text-zinc-300 hover:text-white"
-                  : "text-brand-muted hover:text-brand-ink"
+                  : path === l.href
+                    ? "text-brand-ink"
+                    : "text-brand-muted hover:text-brand-ink"
               }`}
             >
               {l.label}
@@ -57,24 +70,24 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/login"
-            className={`hidden rounded-full px-4 py-2 text-sm font-semibold transition sm:inline-flex ${
+            className={`hidden rounded-lg px-3 py-2 text-sm font-medium sm:inline-flex ${
               transparent
-                ? "text-zinc-200 ring-1 ring-white/25 hover:bg-white/10 hover:text-white"
-                : "border border-zinc-200 bg-white text-brand-ink hover:border-zinc-300 hover:shadow-sm"
+                ? "text-zinc-200 hover:text-white"
+                : "text-brand-body hover:text-brand-ink"
             }`}
           >
             Log in
           </Link>
           <Link
-            href="/#waitlist"
-            className={
+            href="/get-started"
+            className={`hidden rounded-lg px-4 py-2 text-sm font-semibold sm:inline-flex ${
               transparent
-                ? "oc-btn-primary-dark !px-5 !py-2.5 text-sm"
-                : "inline-flex items-center justify-center rounded-full bg-brand-ink px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
-            }
+                ? "bg-white text-brand-ink hover:bg-zinc-100"
+                : "bg-brand-ink text-white hover:bg-brand-charcoal"
+            }`}
           >
             Get started
           </Link>
@@ -98,7 +111,7 @@ export function Header() {
       {open && (
         <nav
           id="mobile-nav"
-          className="border-t border-zinc-200/80 bg-brand-cream px-4 py-3 md:hidden"
+          className="border-t border-zinc-200 bg-white px-4 py-3 md:hidden"
           aria-label="Mobile"
         >
           <ul className="space-y-1">
@@ -107,7 +120,7 @@ export function Header() {
                 <Link
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-4 py-3 text-sm font-medium text-brand-body hover:bg-zinc-100"
+                  className="block rounded-lg px-3 py-3 text-sm font-medium text-brand-body hover:bg-zinc-50"
                 >
                   {l.label}
                 </Link>
@@ -117,9 +130,18 @@ export function Header() {
               <Link
                 href="/login"
                 onClick={() => setOpen(false)}
-                className="block rounded-xl px-4 py-3 text-sm font-semibold text-brand-ink hover:bg-zinc-100"
+                className="block rounded-lg px-3 py-3 text-sm font-medium text-brand-body hover:bg-zinc-50"
               >
                 Log in
+              </Link>
+            </li>
+            <li className="pt-2">
+              <Link
+                href="/get-started"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg bg-brand-ink px-3 py-3 text-center text-sm font-semibold text-white"
+              >
+                Get started
               </Link>
             </li>
           </ul>

@@ -17,18 +17,23 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-brand-ink">Product</h4>
             <ul className="mt-4 space-y-2.5 text-sm text-brand-muted">
               <li>
+                <Link href="/how-it-works" className="hover:text-brand-ink">
+                  How it works
+                </Link>
+              </li>
+              <li>
+                <Link href="/simulator" className="hover:text-brand-ink">
+                  Simulator
+                </Link>
+              </li>
+              <li>
                 <Link href="/wallet" className="hover:text-brand-ink">
                   Wallet
                 </Link>
               </li>
               <li>
-                <Link href="/#simulator" className="hover:text-brand-ink">
-                  Simulator
-                </Link>
-              </li>
-              <li>
-                <Link href="/#waitlist" className="hover:text-brand-ink">
-                  Early access
+                <Link href="/get-started" className="hover:text-brand-ink">
+                  Get started
                 </Link>
               </li>
             </ul>

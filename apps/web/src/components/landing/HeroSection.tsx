@@ -1,103 +1,52 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Wallet } from "lucide-react";
-import { CARD_COUNT } from "@/data/cards";
 import { HeroCardStack } from "./HeroCardStack";
-
-const fade = {
-  hidden: { opacity: 0, y: 24 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
-  }),
-};
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[92vh] overflow-hidden bg-brand-obsidian pt-28 pb-16 sm:pt-32">
-      <div className="absolute inset-0 bg-mesh-dark" />
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    <section className="relative overflow-hidden bg-[#0c0c0e] pt-28 pb-20 sm:pt-32 sm:pb-24">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_70%_20%,rgba(255,255,255,0.07),transparent_55%)]" />
 
-      <div className="oc-container-wide relative grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+      <div className="oc-container-wide relative grid items-center gap-12 lg:grid-cols-2 lg:gap-10">
         <div className="text-center lg:text-left">
-          <motion.p
-            custom={0}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="oc-eyebrow-dark text-brand-ocean"
-          >
+          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Canada · Every card you carry
-          </motion.p>
+          </p>
 
-          <motion.h1
-            custom={1}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="oc-display-dark mt-5"
-          >
+          <h1 className="mt-5 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
             Your entire wallet.{" "}
-            <span className="oc-gradient-text">One card.</span>
-          </motion.h1>
+            <span className="text-zinc-300">One card.</span>
+          </h1>
 
-          <motion.p
-            custom={2}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="oc-lead-dark mx-auto max-w-md lg:mx-0"
-          >
-            Tap once. We route every purchase to the card that earns the most —
-            automatically.
-          </motion.p>
+          <p className="mt-5 max-w-md text-lg leading-relaxed text-zinc-400 lg:mx-0 mx-auto">
+            Tap once at checkout. OneCard routes each purchase to the card that
+            earns the most — automatically.
+          </p>
 
-          <motion.div
-            custom={3}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start"
-          >
-            <Link href="/#waitlist" className="oc-btn-primary-dark">
+          <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
+            <Link
+              href="/get-started"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand-ink hover:bg-zinc-100"
+            >
               Get OneCard
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/wallet" className="oc-btn-secondary">
+            <Link
+              href="/wallet"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-6 py-3 text-sm font-semibold text-zinc-200 hover:border-zinc-500 hover:bg-white/5"
+            >
               <Wallet className="h-4 w-4" />
               Open wallet
             </Link>
-          </motion.div>
-
-          <motion.p
-            custom={4}
-            variants={fade}
-            initial="hidden"
-            animate="show"
-            className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-400 backdrop-blur-sm"
-          >
-            <span className="h-2 w-2 rounded-full bg-brand-mint shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span>
-              <strong className="font-semibold text-white">{CARD_COUNT}+</strong>{" "}
-              reward cards supported
-            </span>
-          </motion.p>
+          </div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative lg:pl-4"
-        >
+        <div className="relative lg:pl-2">
           <HeroCardStack />
-        </motion.div>
+        </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-brand-cream to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white to-transparent" />
     </section>
   );
 }

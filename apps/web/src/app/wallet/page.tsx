@@ -46,8 +46,8 @@ export default function WalletPage() {
                 </div>
               </div>
               <Link
-                href="/#simulator"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand-purple/20 bg-brand-ink px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-brand-charcoal"
+                href="/simulator"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-ink px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
               >
                 <Calculator className="h-4 w-4 shrink-0" aria-hidden />
                 Test a purchase with this wallet

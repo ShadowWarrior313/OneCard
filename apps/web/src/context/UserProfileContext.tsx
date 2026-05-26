@@ -15,15 +15,20 @@ import {
   displayName,
   normalizeProfileName,
   profileForEmail,
+  readStoredPersonalDetails,
   readStoredProfile,
   readStoredSession,
+  type PersonalDetails,
   type UserProfile,
+  DEFAULT_PERSONAL_DETAILS,
+  writeStoredPersonalDetails,
   writeStoredProfile,
   writeStoredSession,
 } from "@/lib/userProfile";
 
 interface UserProfileContextValue {
   profile: UserProfile | null;
+  personalDetails: PersonalDetails;
   hydrated: boolean;
   isLoggedIn: boolean;
   displayName: string;
@@ -32,17 +37,22 @@ interface UserProfileContextValue {
   joinWaitlist: (input: { name: string; email: string }) => Promise<void>;
   login: (input: { email: string; password: string }) => Promise<void>;
   logout: () => void;
+  updatePersonalDetails: (patch: Partial<PersonalDetails>) => void;
 }
 
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [personalDetails, setPersonalDetails] = useState<PersonalDetails>(
+    DEFAULT_PERSONAL_DETAILS,
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setProfile(readStoredProfile());
+    setPersonalDetails(readStoredPersonalDetails());
     setIsLoggedIn(Boolean(readStoredSession()));
     setHydrated(true);
   }, []);
@@ -104,9 +114,39 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     setIsLoggedIn(true);
   }, []);
 
+  const updatePersonalDetails = useCallback((patch: Partial<PersonalDetails>) => {
+    setPersonalDetails((prev) => {
+      const billingSameAsHome = patch.billingSameAsHome ?? prev.billingSameAsHome;
+      const homeAddress = patch.homeAddress
+        ? { ...prev.homeAddress, ...patch.homeAddress }
+        : prev.homeAddress;
+
+      let billingAddress = patch.billingAddress
+        ? { ...prev.billingAddress, ...patch.billingAddress }
+        : prev.billingAddress;
+
+      if (billingSameAsHome) {
+        billingAddress = { ...homeAddress };
+      } else if (patch.billingSameAsHome === false && prev.billingSameAsHome) {
+        billingAddress = { ...homeAddress };
+      }
+
+      const next: PersonalDetails = {
+        ...prev,
+        ...patch,
+        homeAddress,
+        billingAddress,
+        billingSameAsHome,
+      };
+      writeStoredPersonalDetails(next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       profile,
+      personalDetails,
       hydrated,
       isLoggedIn,
       displayName: displayName(profile?.name),
@@ -115,8 +155,9 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       joinWaitlist,
       login,
       logout,
+      updatePersonalDetails,
     }),
-    [profile, hydrated, isLoggedIn, joinWaitlist, login, logout],
+    [profile, personalDetails, hydrated, isLoggedIn, joinWaitlist, login, logout, updatePersonalDetails],
   );
 
   return (

@@ -22,12 +22,27 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "cdn.brandfetch.io",
+        hostname: "cdn.simpleicons.org",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "rewardsccapibs.blob.core.windows.net",
+        hostname: "cdn.jsdelivr.net",
+        pathname: "/npm/simple-icons/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.vectorlogo.zone",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/aaronfagan/svg-credit-card-payment-icons/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.brandfetch.io",
         pathname: "/**",
       },
     ],

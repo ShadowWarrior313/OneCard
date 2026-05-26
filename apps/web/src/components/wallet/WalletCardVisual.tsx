@@ -5,6 +5,7 @@ import type { CardProduct } from "@onecard/shared-types";
 import { getCardAppearance, tierLabel } from "@/data/cardAppearances";
 import { useCardImage } from "@/hooks/useCardImage";
 import { cardBackgroundStyle, cardTextClass } from "@/lib/cardBackground";
+import { PaymentNetworkLogo } from "@/components/PaymentNetworkLogo";
 
 function shortName(card: CardProduct): string {
   const parts = card.displayName.split(" ");
@@ -21,25 +22,13 @@ function EmvChip() {
 }
 
 function NetworkMark({ network }: { network: "visa" | "mastercard" | "amex" }) {
-  if (network === "visa") {
-    return (
-      <span className="text-[0.5rem] font-black italic tracking-tighter">
-        VISA
-      </span>
-    );
-  }
-  if (network === "mastercard") {
-    return (
-      <span className="flex gap-0.5" aria-hidden>
-        <span className="h-3 w-3 rounded-full bg-red-500" />
-        <span className="-ml-1.5 h-3 w-3 rounded-full bg-amber-400" />
-      </span>
-    );
-  }
   return (
-    <span className="text-[0.45rem] font-bold uppercase tracking-wide">
-      AMEX
-    </span>
+    <PaymentNetworkLogo
+      network={network}
+      size={network === "mastercard" ? 22 : 20}
+      style="logo-border"
+      className="drop-shadow-sm"
+    />
   );
 }
 

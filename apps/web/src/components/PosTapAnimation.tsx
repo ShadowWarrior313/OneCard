@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { OneCardLogo } from "./OneCardLogo";
+import { IssuerLogo } from "./IssuerLogo";
 import { useUserProfile } from "@/context/UserProfileContext";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 
@@ -15,16 +16,16 @@ function cardBg(from: string, to: string): CSSProperties {
 }
 
 const SCAN_CARDS = [
-  { id: "scotia", short: "Momentum", issuer: "Scotiabank", from: "#EC111A", to: "#b80d14" },
-  { id: "rbc", short: "ION", issuer: "RBC", from: "#3b82f6", to: "#0051A5" },
-  { id: "cibc", short: "Dividend", issuer: "CIBC", from: "#8B1538", to: "#5c0d24" },
-  { id: "td", short: "Cash Back", issuer: "TD", from: "#16a34a", to: "#14532d" },
+  { id: "scotia_momentum", short: "Momentum", issuer: "Scotiabank", from: "#EC111A", to: "#b80d14" },
+  { id: "rbc_ion", short: "ION", issuer: "RBC", from: "#3b82f6", to: "#0051A5" },
+  { id: "cibc_dividend_infinite", short: "Dividend", issuer: "CIBC", from: "#8B1538", to: "#5c0d24" },
+  { id: "td_cashback", short: "Cash Back", issuer: "TD", from: "#16a34a", to: "#14532d" },
 ];
 
 const WINNER = {
   id: "amex_cobalt",
   short: "Cobalt",
-  issuer: "Amex",
+  issuer: "American Express",
   from: "#38bdf8",
   to: "#312e81",
 };
@@ -111,11 +112,11 @@ export function PosTapAnimation() {
       <div className="relative mb-3 h-[54px] w-full overflow-hidden rounded-lg">
         {locked ? (
           <div
-            className="absolute inset-x-0 top-0 flex h-[54px] items-center justify-between rounded-lg px-3 text-white"
+            className="absolute inset-x-0 top-0 flex h-[54px] items-center gap-2 rounded-lg px-3 text-white"
             style={cardBg(WINNER.from, WINNER.to)}
           >
-            <span className="text-[0.5rem] font-bold uppercase opacity-90">{WINNER.issuer}</span>
-            <span className="text-xs font-bold">{WINNER.short}</span>
+            <IssuerLogo issuer={WINNER.issuer} cardId={WINNER.id} size={28} />
+            <span className="min-w-0 flex-1 truncate text-xs font-bold">{WINNER.short}</span>
             {(phase === "approved" || phase === "reward") && (
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand-mint">
                 <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
@@ -130,13 +131,13 @@ export function PosTapAnimation() {
             {STRIP.map((card) => (
               <div
                 key={card.id}
-                className={`flex h-[54px] items-center justify-between rounded-lg px-3 text-white ${
+                className={`flex h-[54px] items-center gap-2 rounded-lg px-3 text-white ${
                   card.id !== STRIP[scrollIndex]?.id ? "brightness-90" : ""
                 }`}
                 style={cardBg(card.from, card.to)}
               >
-                <span className="text-[0.5rem] font-bold uppercase">{card.issuer}</span>
-                <span className="text-xs font-bold">{card.short}</span>
+                <IssuerLogo issuer={card.issuer} cardId={card.id} size={28} />
+                <span className="min-w-0 flex-1 truncate text-xs font-bold">{card.short}</span>
               </div>
             ))}
           </motion.div>
@@ -170,8 +171,8 @@ export function PosTapAnimation() {
               key={label}
               className={`rounded-full px-3 py-1 text-[0.65rem] font-semibold ${
                 active
-                  ? "bg-brand-purple text-white"
-                  : "bg-slate-100 text-brand-muted"
+                  ? "bg-brand-ink text-white"
+                  : "bg-zinc-100 text-brand-muted"
               }`}
             >
               {label}

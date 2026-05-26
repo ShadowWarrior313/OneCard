@@ -45,8 +45,7 @@ export function ProductVideoSection() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-brand-purple/10 via-transparent to-brand-ocean/10 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-zinc-200/80 bg-brand-obsidian shadow-lift ring-1 ring-black/5">
+            <div className="relative overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
               <OneCardDemoFilm />
             </div>
           </motion.div>
@@ -74,8 +73,8 @@ export function ProductVideoSection() {
               ))}
             </ol>
             <Link
-              href="/#waitlist"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-ink px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
+              href="/get-started"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-ink px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
             >
               Get your OneCard
               <ArrowRight className="h-4 w-4" />

@@ -139,16 +139,12 @@ export function OneCardDemoFilm() {
 
   return (
     <div
-      className="relative flex min-h-[32rem] w-full flex-col overflow-hidden rounded-2xl sm:min-h-[34rem] sm:rounded-3xl"
+      className="relative flex min-h-[32rem] w-full flex-col overflow-hidden rounded-xl sm:min-h-[34rem]"
       style={{
         background:
           "linear-gradient(145deg, #e8dfd0 0%, #d4c4a8 35%, #c9b896 70%, #b8a078 100%)",
       }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.1)_100%)]"
-        aria-hidden
-      />
 
       {/* Header */}
       <header className="relative z-10 flex shrink-0 items-center justify-between px-4 py-3 sm:px-5">

@@ -1,7 +1,7 @@
 "use client";
 
 import { routeTransaction } from "@onecard/rewards-engine";
-import type { RoutingDecision, RoutingMode } from "@onecard/shared-types";
+import type { RoutingDecision } from "@onecard/shared-types";
 import type { CardProduct } from "@onecard/shared-types";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState, useEffect } from "react";
@@ -44,24 +44,12 @@ import {
   Globe,
   MapPin,
   Receipt,
-  Route,
-  Smartphone,
   Store,
   User,
   Wallet,
-  Lock,
-  Network,
 } from "lucide-react";
 
-const ROUTING_MODES: {
-  id: RoutingMode;
-  label: string;
-  icon: typeof Smartphone;
-}[] = [
-  { id: "virtual_provisioning", label: "Digital wallet", icon: Smartphone },
-  { id: "network_dependent", label: "Card network", icon: Network },
-  { id: "closed_loop", label: "Closed-loop", icon: Lock },
-];
+const ROUTING_MODE = "virtual_provisioning" as const;
 
 function parseAmount(raw: string): number {
   const n = parseFloat(raw.replace(/[^0-9.]/g, ""));
@@ -81,7 +69,6 @@ export function ScenarioSimulator() {
   const [amountStr, setAmountStr] = useState("75");
   const [country, setCountry] = useState<TaxCountry>("CA");
   const [region, setRegion] = useState("ON");
-  const [mode, setMode] = useState<RoutingMode>("virtual_provisioning");
   const [purchaseType, setPurchaseType] = useState<PurchaseType>("personal");
 
   const merchant = MERCHANT_PRESETS.find((m) => m.id === merchantId)!;
@@ -127,7 +114,7 @@ export function ScenarioSimulator() {
     );
     try {
       return routeTransaction({
-        mode,
+        mode: ROUTING_MODE,
         transaction: {
           amount: chargeAmount,
           merchantName: merchant.name,
@@ -162,7 +149,6 @@ export function ScenarioSimulator() {
     businessCardId,
     purchaseType,
     businessBlock,
-    mode,
     merchant,
   ]);
 
@@ -175,15 +161,14 @@ export function ScenarioSimulator() {
   const sym = currencySymbol(country);
 
   return (
-    <section id="simulator" className="oc-section relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-purple-soft/35 via-brand-cream to-brand-ocean-soft/25" />
-      <div className="oc-container-wide relative">
-        <header className="mb-10 max-w-2xl">
+    <section id="simulator" className="oc-section bg-brand-surface">
+      <div className="oc-container-wide">
+        <header className="mb-8 max-w-2xl">
           <p className="oc-eyebrow inline-flex items-center gap-1.5">
             <FlaskConical className="h-3.5 w-3.5" aria-hidden />
-            Rewards lab
+            Rewards simulator
           </p>
-          <h2 className="oc-heading mt-3">Test a real purchase</h2>
+          <h2 className="oc-heading mt-2">Test a real purchase</h2>
           <p className="oc-lead max-w-lg">
             Pick a merchant, set tax, and see which card in your{" "}
             <Link href="/wallet" className="oc-link">
@@ -208,8 +193,33 @@ export function ScenarioSimulator() {
             </Link>
           </div>
         ) : (
-          <div className="oc-simulator-shell space-y-6">
-            <div className="oc-panel !rounded-2xl !p-5 sm:!p-6">
+          <div className="oc-simulator-shell space-y-4 sm:space-y-6">
+            {/* Results first on mobile */}
+            <div className="lg:hidden">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${merchantId}-${chargeAmount}-${purchaseType}-mobile`}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <SimulatorResultsPanel
+                    merchant={merchant}
+                    sym={sym}
+                    taxTotal={tax?.total ?? null}
+                    chargeAmount={chargeAmount}
+                    cards={cards}
+                    decision={decision}
+                    businessBlock={businessBlock}
+                    purchaseType={purchaseType}
+                    defaultCardId={defaultCardId ?? null}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="oc-panel">
               <PurchaseControls
                 country={country}
                 region={region}
@@ -226,9 +236,9 @@ export function ScenarioSimulator() {
               />
             </div>
 
-            <div className="grid gap-6 xl:grid-cols-12 xl:gap-8">
-              <div className="space-y-4 xl:col-span-7">
-                <div className="oc-panel !rounded-2xl !p-5 sm:!p-6">
+            <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
+              <div className="space-y-4 lg:col-span-7">
+                <div className="oc-panel">
                   <MerchantPicker
                     merchantId={merchantId}
                     location={merchantLocation}
@@ -236,19 +246,18 @@ export function ScenarioSimulator() {
                   />
                 </div>
 
-                <div className="oc-panel !rounded-2xl !p-5 sm:!p-6">
-                  <RoutingControls
-                    purchaseType={purchaseType}
-                    cards={cards}
-                    defaultCardId={defaultCardId}
-                    mode={mode}
-                    onDefaultCard={setDefaultCardId}
-                    onMode={setMode}
-                  />
-                </div>
+                {purchaseType === "personal" && (
+                  <div className="oc-panel">
+                    <FallbackCardControl
+                      cards={cards}
+                      defaultCardId={defaultCardId}
+                      onDefaultCard={setDefaultCardId}
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="xl:col-span-5">
+              <div className="hidden lg:col-span-5 lg:block">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${merchantId}-${chargeAmount}-${purchaseType}`}
@@ -321,8 +330,8 @@ function PurchaseControls({
               onClick={() => onPurchaseType(t)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold transition ${
                 purchaseType === t
-                  ? "bg-brand-charcoal text-white shadow-sm"
-                  : "bg-brand-purple-soft/50 text-brand-body ring-1 ring-brand-purple/10 hover:bg-brand-purple-soft"
+                  ? "bg-brand-ink text-white"
+                  : "border border-zinc-200 bg-white text-brand-body hover:bg-zinc-50"
               }`}
             >
               {t === "personal" ? (
@@ -357,8 +366,8 @@ function PurchaseControls({
               onClick={() => onCountry(c)}
               className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold transition ${
                 country === c
-                  ? "bg-brand-charcoal text-white shadow-sm"
-                  : "bg-brand-purple-soft/50 text-brand-body ring-1 ring-brand-purple/10 hover:bg-brand-purple-soft"
+                  ? "bg-brand-ink text-white"
+                  : "border border-zinc-200 bg-white text-brand-body hover:bg-zinc-50"
               }`}
             >
               <Globe className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -436,68 +445,32 @@ function PurchaseControls({
   );
 }
 
-function RoutingControls({
-  purchaseType,
+function FallbackCardControl({
   cards,
   defaultCardId,
-  mode,
   onDefaultCard,
-  onMode,
 }: {
-  purchaseType: PurchaseType;
   cards: CardProduct[];
   defaultCardId: string | undefined;
-  mode: RoutingMode;
   onDefaultCard: (id: string) => void;
-  onMode: (m: RoutingMode) => void;
 }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2">
-      {purchaseType === "personal" && (
-        <div>
-          <label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-muted">
-            <CreditCard className="h-3.5 w-3.5" aria-hidden />
-            Fallback card
-          </label>
-          <select
-            value={defaultCardId ?? cards[0]?.cardId}
-            onChange={(e) => onDefaultCard(e.target.value)}
-            className="oc-input mt-2"
-          >
-            {cards.map((c) => (
-              <option key={c.cardId} value={c.cardId}>
-                {c.displayName}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-      <div className={purchaseType === "personal" ? "" : "sm:col-span-2"}>
-        <label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-muted">
-          <Route className="h-3.5 w-3.5" aria-hidden />
-          Routing
-        </label>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {ROUTING_MODES.map((m) => {
-            const Icon = m.icon;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => onMode(m.id)}
-                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                  mode === m.id
-                    ? "bg-brand-charcoal text-white shadow-sm"
-                    : "bg-brand-purple-soft/50 text-brand-body ring-1 ring-brand-purple/10 hover:bg-brand-purple-soft"
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                {m.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div>
+      <label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-muted">
+        <CreditCard className="h-3.5 w-3.5" aria-hidden />
+        Fallback card
+      </label>
+      <select
+        value={defaultCardId ?? cards[0]?.cardId}
+        onChange={(e) => onDefaultCard(e.target.value)}
+        className="oc-input mt-2"
+      >
+        {cards.map((c) => (
+          <option key={c.cardId} value={c.cardId}>
+            {c.displayName}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -616,7 +589,7 @@ function MerchantBrandGrid({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
+    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {brands.map((m) => (
         <button
           key={m.id}

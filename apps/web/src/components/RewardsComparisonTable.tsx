@@ -11,7 +11,6 @@ import { useMemo, useState, type ReactNode } from "react";
 
 const VISIBLE = 4;
 
-/** Label column + card columns — wide enough that the last column is never clipped. */
 function comparisonMinWidth(columnCount: number): string {
   return `${8.5 + columnCount * 7.25}rem`;
 }
@@ -40,18 +39,6 @@ function shortCardName(name: string): string {
   return name.replace(/American Express/g, "Amex").slice(0, 22) + "…";
 }
 
-function IssuerMark({
-  issuer,
-  cardId,
-  size = 40,
-}: {
-  issuer: string;
-  cardId: string;
-  size?: number;
-}) {
-  return <IssuerLogo issuer={issuer} cardId={cardId} size={size} />;
-}
-
 export function RewardsComparisonTable({
   decision,
   merchant,
@@ -78,29 +65,26 @@ export function RewardsComparisonTable({
     (a) => a.cardId === defaultCardId,
   );
   const defaultEarnCents = defaultAlt?.estimatedRewardValueCents ?? 0;
+  const winnerId = decision.selectedCardId;
 
   const columns = showAll
     ? decision.alternatives
     : decision.alternatives.slice(0, VISIBLE);
 
-  const winnerId = decision.selectedCardId;
-
   const rows: {
     label: string;
     hint?: string;
-    primary?: boolean;
     value: (alt: (typeof columns)[0], isWinner: boolean) => ReactNode;
   }[] = [
     {
       label: "You earn",
       hint: "Estimated reward on this purchase",
-      primary: true,
       value: (alt, isWinner) => {
         const v = formatDecimal(alt.estimatedRewardValueCents / 100, 1);
         return (
           <CellValue>
             <span
-              className={`max-w-full break-words text-base font-bold tabular-nums leading-tight sm:text-lg ${
+              className={`max-w-full break-words text-base font-bold tabular-nums leading-tight ${
                 isWinner ? "text-brand-ink" : "text-red-600"
               }`}
             >
@@ -127,8 +111,7 @@ export function RewardsComparisonTable({
     {
       label: "vs your default",
       value: (alt) => {
-        const delta =
-          (alt.estimatedRewardValueCents - defaultEarnCents) / 100;
+        const delta = (alt.estimatedRewardValueCents - defaultEarnCents) / 100;
         if (alt.cardId === defaultCardId) {
           return <span className="text-sm text-brand-muted">—</span>;
         }
@@ -165,9 +148,8 @@ export function RewardsComparisonTable({
   ];
 
   return (
-    <div className="rounded-2xl border border-brand-purple/15 bg-white/90 shadow-card backdrop-blur-sm">
-      {/* Summary bar — mirrors Wise amount / from / to */}
-      <div className="grid gap-4 border-b border-brand-purple/10 bg-gradient-to-r from-brand-purple-soft/30 to-brand-ocean-soft/20 px-4 py-4 sm:grid-cols-3 sm:px-5">
+    <div className="rounded-xl border border-zinc-200 bg-white">
+      <div className="grid gap-4 border-b border-zinc-100 px-4 py-4 sm:grid-cols-3 sm:px-5">
         <div>
           <p className="text-xs font-medium text-brand-muted">Merchant</p>
           <div className="mt-1.5 flex items-center gap-2">
@@ -190,18 +172,70 @@ export function RewardsComparisonTable({
         </div>
       </div>
 
-      {/* Comparison grid — scroll horizontally so every column stays fully visible */}
-      <div className="overflow-x-auto overscroll-x-contain rounded-b-2xl [scrollbar-gutter:stable]">
+      {/* Mobile: stacked cards */}
+      <div className="divide-y divide-zinc-100 md:hidden">
+        {columns.map((alt) => {
+          const card = cardsById.get(alt.cardId);
+          const isWinner = alt.cardId === winnerId;
+          const isDefault = alt.cardId === defaultCardId;
+          return (
+            <div
+              key={alt.cardId}
+              className={`px-4 py-4 ${isWinner ? "bg-emerald-50/60" : ""}`}
+            >
+              <div className="flex items-center gap-3">
+                {card && (
+                  <IssuerLogo issuer={card.issuer} cardId={alt.cardId} size={36} />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-brand-ink">
+                    {shortCardName(alt.displayName)}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {isWinner && (
+                      <span className="rounded bg-brand-ink px-1.5 py-0.5 text-[0.6rem] font-bold uppercase text-white">
+                        Best
+                      </span>
+                    )}
+                    {isDefault && !isWinner && (
+                      <span className="text-xs text-brand-muted">Your default</span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-lg font-bold tabular-nums text-brand-ink">
+                  {sym}
+                  {formatDecimal(alt.estimatedRewardValueCents / 100, 1)}
+                </p>
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <dt className="text-brand-muted">Earn rate</dt>
+                  <dd className="font-medium text-brand-body">
+                    {formatMultiplier(alt.multiplier)}{" "}
+                    {alt.category.replace(/_/g, " ")}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-brand-muted">Bonus cap</dt>
+                  <dd className="font-medium text-brand-body">
+                    {alt.cappedOut ? "Cap reached" : "Available"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop: comparison grid */}
+      <div className="hidden overflow-x-auto overscroll-x-contain md:block">
         <div
           className="w-max min-w-full pr-3"
           style={{ minWidth: comparisonMinWidth(columns.length) }}
         >
-          {/* Column headers */}
           <div
-            className="grid border-b border-brand-purple/10"
-            style={{
-              gridTemplateColumns: GRID_COLUMNS(columns.length),
-            }}
+            className="grid border-b border-zinc-100"
+            style={{ gridTemplateColumns: GRID_COLUMNS(columns.length) }}
           >
             <div className="px-4 py-4" />
             {columns.map((alt) => {
@@ -212,26 +246,22 @@ export function RewardsComparisonTable({
                 <div
                   key={alt.cardId}
                   className={`flex min-w-0 flex-col items-center px-2 py-4 text-center sm:px-3 ${
-                    isWinner ? "rounded-t-xl bg-[#B2FCE4]/70" : ""
+                    isWinner ? "rounded-t-lg bg-emerald-50/70" : ""
                   }`}
                 >
                   {card && (
-                    <IssuerMark
-                      issuer={card.issuer}
-                      cardId={alt.cardId}
-                      size={44}
-                    />
+                    <IssuerLogo issuer={card.issuer} cardId={alt.cardId} size={44} />
                   )}
                   <p className="mt-2 max-w-full break-words text-xs font-semibold leading-snug text-brand-ink">
                     {shortCardName(alt.displayName)}
                   </p>
                   {isWinner && (
-                    <span className="mt-1.5 rounded-full bg-brand-ink px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white">
+                    <span className="mt-1.5 rounded bg-brand-ink px-2 py-0.5 text-[0.6rem] font-bold uppercase text-white">
                       Best
                     </span>
                   )}
                   {isDefault && !isWinner && (
-                    <span className="mt-1.5 text-[0.65rem] font-medium text-brand-muted underline decoration-brand-muted/40">
+                    <span className="mt-1.5 text-[0.65rem] font-medium text-brand-muted">
                       Your default
                     </span>
                   )}
@@ -240,16 +270,13 @@ export function RewardsComparisonTable({
             })}
           </div>
 
-          {/* Rows */}
           {rows.map((row, rowIdx) => (
             <div
               key={row.label}
-              className={`grid border-b border-brand-purple/5 last:border-0 ${
-                rowIdx % 2 === 1 ? "bg-brand-purple-soft/15" : ""
+              className={`grid border-b border-zinc-50 last:border-0 ${
+                rowIdx % 2 === 1 ? "bg-zinc-50/50" : ""
               }`}
-              style={{
-                gridTemplateColumns: GRID_COLUMNS(columns.length),
-              }}
+              style={{ gridTemplateColumns: GRID_COLUMNS(columns.length) }}
             >
               <div className="flex min-w-0 flex-col justify-center px-4 py-3.5">
                 <span className="text-sm font-medium text-brand-body">
@@ -267,7 +294,7 @@ export function RewardsComparisonTable({
                   <div
                     key={`${row.label}-${alt.cardId}`}
                     className={`flex min-w-0 items-center justify-center px-2 py-3.5 sm:px-3 ${
-                      isWinner ? "bg-[#B2FCE4]/50" : ""
+                      isWinner ? "bg-emerald-50/50" : ""
                     }`}
                   >
                     {row.value(alt, isWinner)}
@@ -280,11 +307,11 @@ export function RewardsComparisonTable({
       </div>
 
       {decision.alternatives.length > VISIBLE && (
-        <div className="border-t border-slate-100 py-3 text-center">
+        <div className="border-t border-zinc-100 py-3 text-center">
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
-            className="text-sm font-semibold text-brand-ink underline decoration-brand-ink/30 underline-offset-2 hover:decoration-brand-ink"
+            className="text-sm font-semibold text-brand-ink underline decoration-zinc-300 underline-offset-2 hover:decoration-brand-ink"
           >
             {showAll
               ? "Show fewer cards"
@@ -293,7 +320,7 @@ export function RewardsComparisonTable({
         </div>
       )}
 
-      <p className="border-t border-slate-100 px-4 py-3 text-center text-xs text-brand-muted sm:px-5">
+      <p className="border-t border-zinc-100 px-4 py-3 text-center text-xs text-brand-muted sm:px-5">
         {decision.reason}
       </p>
     </div>

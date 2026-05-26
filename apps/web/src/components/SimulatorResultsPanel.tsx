@@ -7,7 +7,7 @@ import type { MerchantPreset } from "@/data/merchants";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
 import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
-import { ArrowRight, Sparkles, TrendingUp, Wallet } from "lucide-react";
+import { ArrowRight, TrendingUp, Wallet } from "lucide-react";
 import Link from "next/link";
 import { RewardsComparisonTable } from "./RewardsComparisonTable";
 
@@ -44,17 +44,17 @@ export function SimulatorResultsPanel({
     return (
       <div className="oc-simulator-sidebar space-y-4">
         {purchaseType === "business" && (
-          <p className="rounded-xl bg-brand-charcoal px-4 py-2.5 text-sm font-medium text-white">
+          <p className="rounded-lg bg-brand-ink px-4 py-2.5 text-sm font-medium text-white">
             Business purchase — business card only
           </p>
         )}
         <div className="oc-simulator-highlight">
           <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.hero} />
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-ocean">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
               OneCard routes to
             </p>
-            <p className="truncate text-lg font-bold text-brand-ink">
+            <p className="truncate text-base font-bold text-brand-ink sm:text-lg">
               {decision.selectedCardDisplayName}
             </p>
             <p className="text-sm text-brand-muted">
@@ -96,7 +96,7 @@ function BusinessBlockMessage({
   merchant: MerchantPreset;
 }) {
   return (
-    <div className="rounded-2xl border border-amber-200/80 bg-amber-50/90 p-6 text-center">
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
       <p className="text-lg font-bold text-brand-ink">
         {block === "no-card" ? "Set a business card first" : "Not allowed on business card"}
       </p>
@@ -135,74 +135,68 @@ function SimulatorLivePreview({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-brand-purple/15 bg-gradient-to-br from-brand-purple-soft/60 via-white to-brand-ocean-soft/50 p-6 shadow-card"
+      className="rounded-xl border border-zinc-200 bg-white p-5"
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-brand-purple/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-brand-ocean/15 blur-2xl" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+        Preview
+      </p>
 
-      <div className="relative">
-        <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-purple">
-          <Sparkles className="h-3.5 w-3.5" />
-          Live preview
-        </p>
-
-        <div className="mt-5 flex items-center gap-3">
-          <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.hero} />
-          <div>
-            <p className="font-bold text-brand-ink">{merchant.name}</p>
-            <p className="text-xs text-brand-muted">
-              {merchant.group} · MCC {merchant.mcc}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6 rounded-xl bg-white/70 p-4 ring-1 ring-brand-purple/10 backdrop-blur-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-brand-muted">
-            Purchase total
-          </p>
-          <p className="mt-1 text-3xl font-semibold tabular-nums text-brand-ink">
-            {waitingForAmount ? (
-              <span className="text-brand-muted">—</span>
-            ) : (
-              <>
-                {sym}
-                {chargeAmount.toFixed(2)}
-              </>
-            )}
+      <div className="mt-4 flex items-center gap-3">
+        <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.hero} />
+        <div>
+          <p className="font-bold text-brand-ink">{merchant.name}</p>
+          <p className="text-xs text-brand-muted">
+            {merchant.group} · MCC {merchant.mcc}
           </p>
         </div>
-
-        <div className="mt-4 flex items-center gap-2 text-sm text-brand-body">
-          <Wallet className="h-4 w-4 shrink-0 text-brand-ocean" />
-          <span>
-            <strong>{cardCount}</strong> cards ready to route
-          </span>
-        </div>
-
-        <div className="mt-6 flex items-start gap-3 rounded-xl bg-brand-charcoal/95 p-4 text-white shadow-lift">
-          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-brand-mint" />
-          <div>
-            <p className="text-sm font-semibold">
-              {waitingForAmount
-                ? "Enter an amount to see rewards"
-                : "Calculating best card…"}
-            </p>
-            <p className="mt-1 text-xs text-zinc-400">
-              Pick a merchant and we&apos;ll compare earn rates across your wallet.
-            </p>
-          </div>
-        </div>
-
-        {cardCount === 0 && (
-          <Link
-            href="/wallet"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-purple px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-purple-dark"
-          >
-            Add cards to your wallet
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        )}
       </div>
+
+      <div className="mt-5 rounded-lg border border-zinc-100 bg-zinc-50 p-4">
+        <p className="text-xs font-medium uppercase tracking-wide text-brand-muted">
+          Purchase total
+        </p>
+        <p className="mt-1 text-3xl font-semibold tabular-nums text-brand-ink">
+          {waitingForAmount ? (
+            <span className="text-brand-muted">—</span>
+          ) : (
+            <>
+              {sym}
+              {chargeAmount.toFixed(2)}
+            </>
+          )}
+        </p>
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 text-sm text-brand-body">
+        <Wallet className="h-4 w-4 shrink-0 text-brand-muted" />
+        <span>
+          <strong>{cardCount}</strong> cards ready to route
+        </span>
+      </div>
+
+      <div className="mt-4 flex items-start gap-3 rounded-lg bg-zinc-50 p-4">
+        <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-brand-muted" />
+        <div>
+          <p className="text-sm font-semibold text-brand-ink">
+            {waitingForAmount
+              ? "Enter an amount to see rewards"
+              : "Calculating best card…"}
+          </p>
+          <p className="mt-1 text-xs text-brand-muted">
+            Pick a merchant and we&apos;ll compare earn rates across your wallet.
+          </p>
+        </div>
+      </div>
+
+      {cardCount === 0 && (
+        <Link
+          href="/wallet"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-ink px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
+        >
+          Add cards to your wallet
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      )}
     </motion.div>
   );
 }
