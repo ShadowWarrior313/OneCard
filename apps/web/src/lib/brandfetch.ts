@@ -74,16 +74,48 @@ export function pickLogoSrc(
   return null;
 }
 
+export type BrandfetchErrorCode =
+  | "not_configured"
+  | "quota_exceeded"
+  | "not_found"
+  | "upstream_error";
+
+export class BrandfetchError extends Error {
+  constructor(
+    message: string,
+    readonly code: BrandfetchErrorCode,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "BrandfetchError";
+  }
+}
+
 export async function fetchBrandFromApi(domain: string): Promise<BrandfetchBrand | null> {
   const key = process.env.BRANDFETCH_KEY;
-  if (!key) return null;
+  if (!key) {
+    throw new BrandfetchError("Brandfetch not configured", "not_configured", 503);
+  }
 
   const res = await fetch(`https://api.brandfetch.io/v2/brands/${encodeURIComponent(domain)}`, {
     headers: { Authorization: `Bearer ${key}` },
     next: { revalidate: 60 * 60 * 24 },
   });
 
-  if (!res.ok) return null;
+  if (res.status === 429) {
+    throw new BrandfetchError("Brandfetch API quota exceeded", "quota_exceeded", 429);
+  }
+
+  if (res.status === 404) return null;
+
+  if (!res.ok) {
+    throw new BrandfetchError(
+      `Brandfetch request failed (${res.status})`,
+      "upstream_error",
+      res.status,
+    );
+  }
+
   return (await res.json()) as BrandfetchBrand;
 }
 

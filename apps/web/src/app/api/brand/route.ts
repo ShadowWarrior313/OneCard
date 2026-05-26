@@ -1,4 +1,8 @@
-import { resolveBrandLogo, type LogoSurface } from "@/lib/brandfetch";
+import {
+  BrandfetchError,
+  resolveBrandLogo,
+  type LogoSurface,
+} from "@/lib/brandfetch";
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -16,14 +20,27 @@ export async function GET(request: Request) {
     return Response.json({ error: "Invalid domain", src: null }, { status: 400 });
   }
 
-  if (!process.env.BRANDFETCH_KEY) {
-    return Response.json({ error: "Brandfetch not configured", src: null }, { status: 503 });
-  }
+  try {
+    const result = await resolveBrandLogo(domains, surface);
+    if (!result) {
+      return Response.json(
+        { error: "No logo found for domain", src: null, domain: domains[0] },
+        { status: 404 },
+      );
+    }
 
-  const result = await resolveBrandLogo(domains, surface);
-  if (!result) {
-    return Response.json({ src: null, domain: domains[0] }, { status: 404 });
-  }
+    return Response.json(result);
+  } catch (err) {
+    if (err instanceof BrandfetchError) {
+      return Response.json(
+        { error: err.message, code: err.code, src: null, domain: domains[0] },
+        { status: err.status },
+      );
+    }
 
-  return Response.json(result);
+    return Response.json(
+      { error: "Brand lookup failed", src: null, domain: domains[0] },
+      { status: 500 },
+    );
+  }
 }
