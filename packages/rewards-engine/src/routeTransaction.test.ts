@@ -3,7 +3,57 @@ import { mapMccToCategory } from "./mapMccToCategory.js";
 import { routeTransaction } from "./routeTransaction.js";
 import { effectiveMultiplier } from "./estimateReward.js";
 import { AMEX_COBALT, CIBC_DIVIDEND } from "./fixtures/cards.js";
-import type { RoutingContext } from "@onecard/shared-types";
+import type { CardProduct, RoutingContext } from "@onecard/shared-types";
+
+const SCOTIA_SCENE: CardProduct = {
+  cardId: "scotia_scene",
+  issuer: "Scotiabank",
+  displayName: "Scotiabank Scene+ Visa Card",
+  currency: "Scene+ points",
+  pointValueCents: 1,
+  network: "visa",
+  rewards: [
+    { category: "other", multiplier: 1 },
+    {
+      category: "groceries",
+      multiplier: 2,
+      merchantIds: ["sobeys", "freshco"],
+    },
+    { category: "other", multiplier: 2, merchantIds: ["cineplex"] },
+  ],
+};
+
+const TD_AEROPLAN: CardProduct = {
+  cardId: "td_aeroplan_infinite",
+  issuer: "TD",
+  displayName: "TD Aeroplan Visa Infinite Card",
+  currency: "Aeroplan points",
+  pointValueCents: 2,
+  network: "visa",
+  rewards: [
+    { category: "other", multiplier: 1 },
+    { category: "gas", multiplier: 1.5 },
+    { category: "groceries", multiplier: 1.5 },
+    { category: "travel", multiplier: 1.5 },
+  ],
+};
+
+const PC_WORLD_ELITE: CardProduct = {
+  cardId: "pc_world_elite_mc",
+  issuer: "PC Financial",
+  displayName: "PC World Elite Mastercard",
+  currency: "PC Optimum points",
+  pointValueCents: 1,
+  network: "mastercard",
+  rewards: [
+    { category: "other", multiplier: 1 },
+    {
+      category: "groceries",
+      multiplier: 4.5,
+      merchantIds: ["loblaws", "no_frills"],
+    },
+  ],
+};
 
 function ctx(overrides: Partial<RoutingContext> = {}): RoutingContext {
   return {
@@ -26,6 +76,10 @@ function ctx(overrides: Partial<RoutingContext> = {}): RoutingContext {
 describe("mapMccToCategory", () => {
   it("maps restaurant MCC to dining", () => {
     expect(mapMccToCategory("5812")).toBe("dining");
+  });
+
+  it("maps utilities to recurring_bills", () => {
+    expect(mapMccToCategory("4900")).toBe("recurring_bills");
   });
 });
 
@@ -69,22 +123,86 @@ describe("routeTransaction", () => {
   it("picks CIBC for groceries when Cobalt cap is exhausted", () => {
     const decision = routeTransaction(
       ctx({
-        transaction: { amount: 100, merchantName: "Loblaws", mcc: "5411" },
+        transaction: {
+          amount: 100,
+          merchantName: "Sobeys",
+          mcc: "5411",
+          merchantId: "sobeys",
+          category: "groceries",
+        },
         portfolio: {
           cards: [AMEX_COBALT, CIBC_DIVIDEND],
           usage: [
-            { cardId: "amex_cobalt", category: "groceries", spendThisPeriod: 500 },
+            { cardId: "amex_cobalt", category: "groceries", spendThisPeriod: 2500 },
           ],
           preferences: { preferCashback: false },
         },
       }),
     );
-    // Cobalt capped → 1x MR ($2); CIBC 2% ($2) — tie broken by stable sort; CIBC wins alphabetically after equal score... 
-    // Actually both 100 cents - need to check
-    // Cobalt: 100 * 1 * 2 = 200 cents
-    // CIBC: 100 * 2 * 1 = 200 cents - tie, localeCompare: amex before cibc - amex wins
     expect(decision.selectedCardId).toBe("amex_cobalt");
     expect(decision.alternatives[0]?.cappedOut).toBe(true);
+  });
+
+  it("routes Cineplex to Scotiabank Scene+ partner bonus", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 50,
+          merchantName: "Cineplex",
+          mcc: "7832",
+          merchantId: "cineplex",
+          category: "other",
+        },
+        portfolio: {
+          cards: [SCOTIA_SCENE, CIBC_DIVIDEND],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.selectedCardId).toBe("scotia_scene");
+    expect(decision.multiplier).toBe(2);
+  });
+
+  it("excludes Amex at Loblaws and picks PC Financial", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 100,
+          merchantName: "Loblaws",
+          mcc: "5411",
+          merchantId: "loblaws",
+          category: "groceries",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, PC_WORLD_ELITE],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.selectedCardId).toBe("pc_world_elite_mc");
+  });
+
+  it("picks TD Aeroplan for gas over Amex Cobalt base rate", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 80,
+          merchantName: "Petro-Canada",
+          mcc: "5541",
+          merchantId: "petro_canada",
+          category: "gas",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, TD_AEROPLAN],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.selectedCardId).toBe("td_aeroplan_infinite");
+    expect(decision.multiplier).toBe(1.5);
   });
 
   it("respects excludedCardIds", () => {

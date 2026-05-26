@@ -44,6 +44,26 @@ pnpm test          # rewards-engine unit tests
 pnpm dev           # web :3000, api :3001 (when wired in turbo)
 ```
 
+## Deploying (Vercel monorepo)
+
+This repo uses **two Vercel projects** on the same GitHub repo:
+
+| Vercel project | Root directory | Domain |
+|----------------|----------------|--------|
+| `one-card-web` | `apps/web` | `use-onecard.com`, `www.use-onecard.com` |
+| `one-card-api` | `apps/api` | `one-card-api.vercel.app` only |
+
+**Critical:** In each Vercel project → **Settings → General → Root Directory**, set the path above. Without this, pushes may build the wrong app or fail silently.
+
+Each app has its own `vercel.json` with monorepo install/build commands. The web project also sets `NEXT_PUBLIC_SITE_URL` for sitemap/metadata.
+
+**Env vars (Vercel → one-card-web → Environment Variables):**
+
+- `BRANDFETCH_KEY` — merchant/issuer logos
+- `REWARDS_CC_RAPIDAPI_KEY` — wallet card art (optional)
+
+After changing Root Directory or env vars, redeploy **one-card-web** (Deployments → … → Redeploy, optionally clear cache).
+
 ## Regulatory & partnership reality (read before pitching)
 
 OneCard is **not** a weekend side project from a compliance perspective:

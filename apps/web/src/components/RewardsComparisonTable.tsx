@@ -6,9 +6,29 @@ import type { MerchantPreset } from "@/data/merchants";
 import { IssuerLogo } from "@/components/IssuerLogo";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
+import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
 import { useMemo, useState, type ReactNode } from "react";
 
 const VISIBLE = 4;
+
+const GRID_COLUMNS = (count: number) =>
+  `minmax(7.5rem, 1.1fr) repeat(${count}, minmax(5.5rem, 1fr))`;
+
+function CellValue({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex min-w-0 max-w-full flex-col items-center justify-center gap-0.5 text-center ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 function shortCardName(name: string): string {
   if (name.length <= 22) return name;
@@ -71,28 +91,32 @@ export function RewardsComparisonTable({
       hint: "Estimated reward on this purchase",
       primary: true,
       value: (alt, isWinner) => {
-        const v = (alt.estimatedRewardValueCents / 100).toFixed(2);
+        const v = formatDecimal(alt.estimatedRewardValueCents / 100, 1);
         return (
-          <span
-            className={`text-lg font-bold tabular-nums sm:text-xl ${
-              isWinner
-                ? "text-brand-ink"
-                : "text-red-600"
-            }`}
-          >
-            {sym}
-            {v}
-          </span>
+          <CellValue>
+            <span
+              className={`max-w-full break-words text-base font-bold tabular-nums leading-tight sm:text-lg ${
+                isWinner ? "text-brand-ink" : "text-red-600"
+              }`}
+            >
+              {sym}
+              {v}
+            </span>
+          </CellValue>
         );
       },
     },
     {
       label: "Earn rate",
       value: (alt) => (
-        <span className="text-sm font-medium text-brand-body tabular-nums">
-          {alt.multiplier}×{" "}
-          <span className="text-brand-muted">{alt.category.replace(/_/g, " ")}</span>
-        </span>
+        <CellValue>
+          <span className="max-w-full break-words text-sm font-medium tabular-nums text-brand-body">
+            {formatMultiplier(alt.multiplier)}
+          </span>
+          <span className="max-w-full break-words text-xs leading-snug text-brand-muted">
+            {alt.category.replace(/_/g, " ")}
+          </span>
+        </CellValue>
       ),
     },
     {
@@ -105,28 +129,32 @@ export function RewardsComparisonTable({
         }
         const sign = delta >= 0 ? "+" : "";
         return (
-          <span
-            className={`text-sm font-semibold tabular-nums ${
-              delta > 0 ? "text-brand-ink" : "text-red-600"
-            }`}
-          >
-            {sign}
-            {sym}
-            {delta.toFixed(2)}
-          </span>
+          <CellValue>
+            <span
+              className={`max-w-full break-words text-sm font-semibold tabular-nums leading-tight ${
+                delta > 0 ? "text-brand-ink" : "text-red-600"
+              }`}
+            >
+              {sign}
+              {sym}
+              {formatDecimal(delta, 1)}
+            </span>
+          </CellValue>
         );
       },
     },
     {
       label: "Bonus cap",
       value: (alt) => (
-        <span className="text-sm text-brand-body">
-          {alt.cappedOut ? (
-            <span className="text-amber-700">Cap reached</span>
-          ) : (
-            "Available"
-          )}
-        </span>
+        <CellValue>
+          <span className="max-w-full break-words text-sm text-brand-body">
+            {alt.cappedOut ? (
+              <span className="text-amber-700">Cap reached</span>
+            ) : (
+              "Available"
+            )}
+          </span>
+        </CellValue>
       ),
     },
   ];
@@ -164,7 +192,7 @@ export function RewardsComparisonTable({
           <div
             className="grid border-b border-slate-200/80"
             style={{
-              gridTemplateColumns: `minmax(7.5rem, 1.1fr) repeat(${columns.length}, minmax(5.5rem, 1fr))`,
+              gridTemplateColumns: GRID_COLUMNS(columns.length),
             }}
           >
             <div className="px-4 py-4" />
@@ -175,10 +203,8 @@ export function RewardsComparisonTable({
               return (
                 <div
                   key={alt.cardId}
-                  className={`flex flex-col items-center px-3 py-4 text-center ${
-                    isWinner
-                      ? "rounded-t-xl bg-[#B2FCE4]/70"
-                      : ""
+                  className={`flex min-w-0 flex-col items-center px-2 py-4 text-center sm:px-3 ${
+                    isWinner ? "rounded-t-xl bg-[#B2FCE4]/70" : ""
                   }`}
                 >
                   {card && (
@@ -188,7 +214,7 @@ export function RewardsComparisonTable({
                       size={44}
                     />
                   )}
-                  <p className="mt-2 text-xs font-semibold leading-tight text-brand-ink">
+                  <p className="mt-2 max-w-full break-words text-xs font-semibold leading-snug text-brand-ink">
                     {shortCardName(alt.displayName)}
                   </p>
                   {isWinner && (
@@ -214,10 +240,10 @@ export function RewardsComparisonTable({
                 rowIdx % 2 === 1 ? "bg-slate-50/40" : ""
               }`}
               style={{
-                gridTemplateColumns: `minmax(7.5rem, 1.1fr) repeat(${columns.length}, minmax(5.5rem, 1fr))`,
+                gridTemplateColumns: GRID_COLUMNS(columns.length),
               }}
             >
-              <div className="flex flex-col justify-center px-4 py-3.5">
+              <div className="flex min-w-0 flex-col justify-center px-4 py-3.5">
                 <span className="text-sm font-medium text-brand-body">
                   {row.label}
                 </span>
@@ -232,7 +258,7 @@ export function RewardsComparisonTable({
                 return (
                   <div
                     key={`${row.label}-${alt.cardId}`}
-                    className={`flex items-center justify-center px-3 py-3.5 text-center ${
+                    className={`flex min-w-0 items-center justify-center px-2 py-3.5 sm:px-3 ${
                       isWinner ? "bg-[#B2FCE4]/50" : ""
                     }`}
                   >

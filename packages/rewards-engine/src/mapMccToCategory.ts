@@ -19,6 +19,14 @@ export function mapMccToCategory(mcc: string): RewardCategory {
     return "travel";
   // Streaming / digital goods (4899, 5815, 5816, 5817, 5818)
   if ([4899, 5815, 5816, 5817, 5818].includes(code)) return "streaming";
+  // Telecom / utilities / recurring (4814, 4900)
+  if (code === 4814 || code === 4900) return "recurring_bills";
+  // Travel agencies & OTAs (4722)
+  if (code === 4722) return "travel";
+  // Rideshare / taxi (4121)
+  if (code === 4121) return "other";
+  // Wholesale clubs (5300) — Costco etc.; not grocery for bonus purposes
+  if (code === 5300) return "other";
 
   return "other";
 }

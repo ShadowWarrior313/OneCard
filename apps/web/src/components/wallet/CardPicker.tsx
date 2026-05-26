@@ -1,25 +1,42 @@
 "use client";
 
+import { useState } from "react";
 import { Check, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { ISSUER_GROUPS, ISSUER_CARD_PAGES, cardsByIssuer } from "@/data/cards";
 import { useWallet } from "@/context/WalletContext";
-import { useState } from "react";
 import { getCardAppearance } from "@/data/cardAppearances";
+import { useCardImage } from "@/hooks/useCardImage";
 import { cardBackgroundStyle } from "@/lib/cardBackground";
 
 function CardSwatch({ cardId, issuer }: { cardId: string; issuer: string }) {
-  const a = getCardAppearance(cardId, issuer);
+  const appearance = getCardAppearance(cardId, issuer);
+  const { imageUrl } = useCardImage(cardId);
+  const [imageFailed, setImageFailed] = useState(false);
+  const showArt = Boolean(imageUrl && !imageFailed);
+
   return (
     <span
-      className="h-7 w-11 shrink-0 rounded-md shadow-sm ring-1 ring-black/10"
-      style={cardBackgroundStyle(a)}
+      className="relative h-7 w-11 shrink-0 overflow-hidden rounded-md shadow-sm ring-1 ring-black/10"
+      style={showArt ? undefined : cardBackgroundStyle(appearance)}
       aria-hidden
-    />
+    >
+      {showArt && imageUrl && (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={imageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          loading="lazy"
+          decoding="async"
+          onError={() => setImageFailed(true)}
+        />
+      )}
+    </span>
   );
 }
 
 export function CardPicker() {
-  const { hasCard, toggleCard, businessCardId } = useWallet();
+  const { hasCard, toggleCard } = useWallet();
   const [open, setOpen] = useState<string | null>(ISSUER_GROUPS[0]);
 
   return (

@@ -3,12 +3,19 @@
 import { routeTransaction } from "@onecard/rewards-engine";
 import type { RoutingDecision, RoutingMode } from "@onecard/shared-types";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useWallet } from "@/context/WalletContext";
 import {
   MERCHANT_GROUPS,
   MERCHANT_PRESETS,
+  featuredBrandsInGroup,
+  merchantAvailableAt,
+  merchantById,
   merchantsInGroup,
+  searchMerchantsInGroup,
+  type MerchantGroup,
+  type MerchantLocation,
+  type MerchantPreset,
 } from "@/data/merchants";
 import {
   CA_PROVINCES,
@@ -18,7 +25,9 @@ import {
   defaultRegion,
   type TaxCountry,
 } from "@/lib/taxes";
+import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
 import { MerchantLogo } from "@/components/MerchantLogo";
+import { MerchantGroupSearch } from "@/components/MerchantGroupSearch";
 import { MERCHANT_LOGO, MERCHANT_GROUP_STYLE } from "@/data/merchantIcons";
 import { RewardsComparisonTable } from "@/components/RewardsComparisonTable";
 import {
@@ -78,6 +87,25 @@ export function ScenarioSimulator() {
   const [purchaseType, setPurchaseType] = useState<PurchaseType>("personal");
 
   const merchant = MERCHANT_PRESETS.find((m) => m.id === merchantId)!;
+  const merchantLocation: MerchantLocation = useMemo(
+    () => ({ country, region }),
+    [country, region],
+  );
+
+  useEffect(() => {
+    setMerchantId((prev) => {
+      const current = merchantById(prev);
+      if (current && merchantAvailableAt(current, merchantLocation)) {
+        return prev;
+      }
+
+      const group = current?.group ?? "Food & drink";
+      const replacement =
+        featuredBrandsInGroup(group, merchantLocation)[0] ??
+        merchantsInGroup(group).find((m) => m.kind === "sector");
+      return replacement?.id ?? prev;
+    });
+  }, [merchantLocation]);
   const subtotal = parseAmount(amountStr);
   const tax = useMemo(
     () => (subtotal > 0 ? computeTax(subtotal, country, region) : null),
@@ -106,6 +134,8 @@ export function ScenarioSimulator() {
           amount: chargeAmount,
           merchantName: merchant.name,
           mcc: merchant.mcc,
+          merchantId: merchant.id,
+          category: merchant.category,
         },
         portfolio: {
           cards,
@@ -201,6 +231,7 @@ export function ScenarioSimulator() {
               <div className="oc-panel">
                 <MerchantPicker
                   merchantId={merchantId}
+                  location={merchantLocation}
                   onSelect={setMerchantId}
                 />
               </div>
@@ -309,9 +340,9 @@ export function ScenarioSimulator() {
                           {decision.selectedCardDisplayName}
                         </p>
                         <p className="text-sm text-brand-muted">
-                          {decision.multiplier}× {decision.category.replace(/_/g, " ")} ·{" "}
-                          {sym}
-                          {tax.total.toFixed(2)} charged
+                          {formatMultiplier(decision.multiplier)}{" "}
+                          {decision.category.replace(/_/g, " ")} · {sym}
+                          {formatDecimal(tax.total, 1)} charged
                         </p>
                       </div>
                     </div>
@@ -504,22 +535,36 @@ function PurchaseControls({
 
 function MerchantPicker({
   merchantId,
+  location,
   onSelect,
 }: {
   merchantId: string;
+  location: MerchantLocation;
   onSelect: (id: string) => void;
 }) {
+  const [queries, setQueries] = useState<Partial<Record<MerchantGroup, string>>>(
+    {},
+  );
+
+  function setGroupQuery(group: MerchantGroup, query: string) {
+    setQueries((prev) => ({ ...prev, [group]: query }));
+  }
+
   return (
     <div>
       <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-muted">
         <Store className="h-3.5 w-3.5" aria-hidden />
         Merchant
       </p>
-      <div className="mt-3 space-y-5">
+      <div className="mt-3 max-h-[32rem] space-y-5 overflow-y-auto pr-1">
         {MERCHANT_GROUPS.map((group) => {
           const items = merchantsInGroup(group);
           const sector = items.find((m) => m.kind === "sector");
-          const brands = items.filter((m) => m.kind === "brand");
+          const query = queries[group] ?? "";
+          const trimmed = query.trim();
+          const brands = trimmed
+            ? searchMerchantsInGroup(group, query, location)
+            : featuredBrandsInGroup(group, location);
           const GroupIcon = MERCHANT_GROUP_STYLE[group].Icon;
 
           return (
@@ -528,47 +573,78 @@ function MerchantPicker({
                 <GroupIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 {group}
               </p>
-              {sector && (
-                <button
-                  type="button"
-                  onClick={() => onSelect(sector.id)}
-                  className={`oc-sector-pill mt-2 w-full ${
-                    merchantId === sector.id ? "oc-sector-pill--active" : ""
-                  }`}
-                >
-                  <MerchantLogo merchant={sector} size={MERCHANT_LOGO.sector} />
-                  <span>
-                    <span className="block font-semibold text-brand-ink">
-                      {sector.name}
-                    </span>
-                    <span className="text-xs text-brand-muted">
-                      Sector · MCC {sector.mcc}
-                    </span>
-                  </span>
-                </button>
-              )}
-              <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {brands.map((m) => (
+              <div className="mt-2 flex flex-col gap-2">
+                {sector && (
                   <button
-                    key={m.id}
                     type="button"
-                    onClick={() => onSelect(m.id)}
-                    className={`oc-merchant-tile ${
-                      merchantId === m.id ? "oc-merchant-tile--active" : ""
+                    onClick={() => onSelect(sector.id)}
+                    className={`oc-sector-pill w-full ${
+                      merchantId === sector.id ? "oc-sector-pill--active" : ""
                     }`}
-                    title={m.name}
                   >
-                    <MerchantLogo merchant={m} size={MERCHANT_LOGO.tile} />
-                    <span className="line-clamp-2 text-center text-[0.65rem] font-medium leading-tight text-brand-body">
-                      {m.shortName ?? m.name}
+                    <MerchantLogo merchant={sector} size={MERCHANT_LOGO.sector} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-brand-ink">
+                        {sector.name}
+                      </span>
+                      <span className="text-xs text-brand-muted">
+                        Sector · MCC {sector.mcc}
+                      </span>
                     </span>
                   </button>
-                ))}
+                )}
+                <MerchantGroupSearch
+                  group={group}
+                  query={query}
+                  onQueryChange={(next) => setGroupQuery(group, next)}
+                />
               </div>
+              {trimmed && brands.length === 0 ? (
+                <p className="mt-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-3 py-2.5 text-sm text-brand-muted">
+                  No merchants match &ldquo;{trimmed}&rdquo; in {group.toLowerCase()}.
+                </p>
+              ) : brands.length > 0 ? (
+                <MerchantBrandGrid
+                  brands={brands}
+                  merchantId={merchantId}
+                  onSelect={onSelect}
+                />
+              ) : null}
             </div>
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function MerchantBrandGrid({
+  brands,
+  merchantId,
+  onSelect,
+}: {
+  brands: MerchantPreset[];
+  merchantId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+      {brands.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          onClick={() => onSelect(m.id)}
+          className={`oc-merchant-tile ${
+            merchantId === m.id ? "oc-merchant-tile--active" : ""
+          }`}
+          title={m.name}
+        >
+          <MerchantLogo merchant={m} size={MERCHANT_LOGO.tile} />
+          <span className="line-clamp-2 text-center text-[0.65rem] font-medium leading-tight text-brand-body">
+            {m.shortName ?? m.name}
+          </span>
+        </button>
+      ))}
     </div>
   );
 }

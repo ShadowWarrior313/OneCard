@@ -26,7 +26,13 @@ export interface RewardRule {
   multiplier: number;
   /** Monthly cap in dollars of eligible spend in this category, if any. */
   capMonthly?: number;
+  /** When set, this rule only applies at these merchant IDs (from the merchant catalog). */
+  merchantIds?: string[];
+  /** Merchants excluded from this category bonus (e.g. Amex Cobalt at Costco). */
+  excludedMerchantIds?: string[];
 }
+
+export type CardNetwork = "visa" | "mastercard" | "amex";
 
 export interface CardProduct {
   cardId: string;
@@ -41,6 +47,8 @@ export interface CardProduct {
    * Curated dataset should populate this; defaults to 1 cent if unknown.
    */
   pointValueCents?: number;
+  /** Payment network — used for merchant acceptance checks. */
+  network?: CardNetwork;
 }
 
 /** Period spend already applied toward a card's category cap. */
@@ -64,6 +72,10 @@ export interface TransactionInput {
   merchantName: string;
   /** ISO 18245 MCC code (4 digits, string for leading zeros). */
   mcc: string;
+  /** Merchant catalog ID — enables partner-specific earn rates. */
+  merchantId?: string;
+  /** Curated category from merchant preset; overrides MCC when set. */
+  category?: RewardCategory;
   timestamp?: Date;
 }
 

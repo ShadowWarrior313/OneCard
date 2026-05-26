@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=@onecard/api"
+  "installCommand": "cd ../.. && corepack enable && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=@onecard/api",
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ../../packages ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ../../turbo.json"
 }

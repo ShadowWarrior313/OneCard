@@ -6,6 +6,7 @@ import type {
   RewardRule,
   TransactionInput,
 } from "@onecard/shared-types";
+import { getRewardRule } from "./getRewardRule.js";
 
 const DEFAULT_POINT_VALUE_CENTS = 1;
 
@@ -32,19 +33,9 @@ export function getCategorySpend(
   );
 }
 
-/** Best matching rule: exact category, else `other`, else synthetic 1x. */
-export function getRewardRule(
-  card: CardProduct,
-  category: RewardCategory,
-): RewardRule {
-  const exact = card.rewards.find((r) => r.category === category);
-  if (exact) return exact;
-
-  const fallback = card.rewards.find((r) => r.category === "other");
-  if (fallback) return fallback;
-
-  return { category: "other", multiplier: 1 };
-}
+export {
+  getRewardRule,
+} from "./getRewardRule.js";
 
 /**
  * Blends bonus vs base rate when monthly cap is partially exhausted.
@@ -70,7 +61,6 @@ export function effectiveMultiplier(
     return { multiplier: rule.multiplier, cappedOut: false };
   }
 
-  // Part of this txn earns bonus, remainder at base rate
   const bonusPortion = remainingCap;
   const basePortion = amount - remainingCap;
   const blended =
@@ -112,8 +102,9 @@ export function estimateRewardForCard(
   category: RewardCategory,
   portfolio: PortfolioContext,
 ): RewardEstimate {
-  const rule = getRewardRule(card, category);
-  const otherRule = getRewardRule(card, "other");
+  const merchantId = transaction.merchantId;
+  const rule = getRewardRule(card, category, merchantId);
+  const otherRule = getRewardRule(card, "other", merchantId);
   const spend = getCategorySpend(portfolio.usage, card.cardId, rule.category);
   const { multiplier, cappedOut } = effectiveMultiplier(
     rule,
@@ -130,9 +121,14 @@ export function estimateRewardForCard(
       ? ` (partial cap — blended ${multiplier.toFixed(2)}x this purchase)`
       : "";
 
+  const partnerNote =
+    rule.merchantIds?.length && merchantId
+      ? " (partner merchant)"
+      : "";
+
   const reason = cappedOut
     ? `${card.displayName}: ${otherRule.multiplier}x on ${category} (category cap reached)${capNote}`
-    : `${card.displayName}: ${multiplier}x ${card.currency} on ${category}${capNote}`;
+    : `${card.displayName}: ${multiplier}x ${card.currency} on ${category}${partnerNote}${capNote}`;
 
   return {
     cardId: card.cardId,

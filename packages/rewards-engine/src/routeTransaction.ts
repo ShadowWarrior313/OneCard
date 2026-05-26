@@ -9,7 +9,8 @@ import {
   estimateRewardForCard,
   rankEstimates,
 } from "./estimateReward.js";
-import { mapMccToCategory } from "./mapMccToCategory.js";
+import { isCardAcceptedAtMerchant } from "./cardAcceptance.js";
+import { resolveCategory } from "./resolveCategory.js";
 
 /**
  * Core routing brain: score every eligible card, pick the highest normalized
@@ -17,10 +18,14 @@ import { mapMccToCategory } from "./mapMccToCategory.js";
  */
 export function routeTransaction(context: RoutingContext): RoutingDecision {
   const { transaction, portfolio, mode } = context;
-  const category = mapMccToCategory(transaction.mcc);
+  const category = resolveCategory(transaction.mcc, transaction.category);
   const excluded = new Set(portfolio.preferences.excludedCardIds ?? []);
 
-  const eligible = portfolio.cards.filter((c) => !excluded.has(c.cardId));
+  const eligible = portfolio.cards.filter(
+    (c) =>
+      !excluded.has(c.cardId) &&
+      isCardAcceptedAtMerchant(c, transaction.merchantId),
+  );
   if (eligible.length === 0) {
     throw new Error("routeTransaction: no eligible cards in portfolio");
   }

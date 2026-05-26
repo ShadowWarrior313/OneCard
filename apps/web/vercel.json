@@ -1,6 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && corepack enable && pnpm install --frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=@onecard/web",
-  "framework": "nextjs"
+  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- . ../../packages ../../pnpm-lock.yaml ../../pnpm-workspace.yaml ../../turbo.json",
+  "env": {
+    "NEXT_PUBLIC_SITE_URL": "https://www.use-onecard.com"
+  }
 }

@@ -9,13 +9,20 @@ const nextConfig = {
    * Required for pnpm monorepos on Vercel: trace workspace packages
    * (@onecard/rewards-engine, @onecard/shared-types) into serverless bundles.
    */
-  outputFileTracingRoot: path.join(__dirname, "../../"),
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, "../../"),
+  },
   transpilePackages: ["@onecard/shared-types", "@onecard/rewards-engine"],
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "logo.clearbit.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "rewardsccapibs.blob.core.windows.net",
         pathname: "/**",
       },
     ],

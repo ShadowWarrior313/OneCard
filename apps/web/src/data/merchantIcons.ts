@@ -3,6 +3,8 @@ import {
   Coffee,
   Film,
   Fuel,
+  GraduationCap,
+  HeartPulse,
   Hotel,
   Music,
   Plane,
@@ -10,9 +12,12 @@ import {
   ShoppingCart,
   Smartphone,
   Store,
+  TrainFront,
   Tv,
   UtensilsCrossed,
   Warehouse,
+  Zap,
+  CircleDot,
 } from "lucide-react";
 import type { MerchantGroup } from "@/data/merchants";
 
@@ -35,6 +40,11 @@ export const MERCHANT_GROUP_STYLE: Record<
   Gas: { bg: "bg-amber-50", icon: "text-amber-800", Icon: Fuel },
   Shopping: { bg: "bg-slate-100", icon: "text-slate-700", Icon: ShoppingBag },
   Subscriptions: { bg: "bg-indigo-50", icon: "text-indigo-700", Icon: Tv },
+  "Health & pharmacy": { bg: "bg-rose-50", icon: "text-rose-700", Icon: HeartPulse },
+  Transportation: { bg: "bg-cyan-50", icon: "text-cyan-700", Icon: TrainFront },
+  Education: { bg: "bg-blue-50", icon: "text-blue-700", Icon: GraduationCap },
+  "Home & utilities": { bg: "bg-yellow-50", icon: "text-yellow-800", Icon: Zap },
+  Other: { bg: "bg-stone-100", icon: "text-stone-600", Icon: CircleDot },
 };
 
 /** Per-merchant lucide icon (used when no local PNG asset) */
@@ -56,6 +66,11 @@ export const MERCHANT_ICONS: Record<string, LucideIcon> = {
   petro_canada: Fuel,
   sector_shopping: ShoppingBag,
   sector_subscriptions: Tv,
+  sector_health: HeartPulse,
+  sector_transport: TrainFront,
+  sector_education: GraduationCap,
+  sector_utilities: Zap,
+  sector_other: CircleDot,
   spotify: Music,
   rogers: Smartphone,
 };

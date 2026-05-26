@@ -1,4 +1,5 @@
 import type { CardProduct, RewardCategory } from "@onecard/shared-types";
+import { getRewardRule } from "@onecard/rewards-engine";
 import { getCardById } from "@/data/cards";
 import { MERCHANT_PRESETS, type MerchantPreset } from "@/data/merchants";
 
@@ -31,9 +32,8 @@ export function topMerchantsForCard(
   if (!card) return [];
 
   const scored = MERCHANT_PRESETS.map((merchant) => {
-    const rule = card.rewards.find((r) => r.category === merchant.category);
-    const mult = rule?.multiplier ?? 1;
-    return { merchant, multiplier: mult };
+    const rule = getRewardRule(card, merchant.category, merchant.id);
+    return { merchant, multiplier: rule.multiplier };
   })
     .filter((x) => x.multiplier > 1)
     .sort((a, b) => b.multiplier - a.multiplier);

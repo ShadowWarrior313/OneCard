@@ -1,5 +1,6 @@
 import type { CardProduct } from "@onecard/shared-types";
 import { FINTECH_CARDS } from "./fintechCards";
+import { enhanceCardCatalog } from "./cardEnhancements";
 
 /**
  * Curated Canadian credit cards (Amex + Big Six + National Bank + fintech).
@@ -640,7 +641,10 @@ const BANK_CARDS: CardProduct[] = [
   },
 ];
 
-export const CARD_CATALOG: CardProduct[] = [...BANK_CARDS, ...FINTECH_CARDS];
+export const CARD_CATALOG: CardProduct[] = enhanceCardCatalog([
+  ...BANK_CARDS,
+  ...FINTECH_CARDS,
+]);
 
 export const ISSUER_GROUPS: CardIssuerGroup[] = [
   "American Express",

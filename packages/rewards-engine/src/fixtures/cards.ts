@@ -7,6 +7,7 @@ export const AMEX_COBALT: CardProduct = {
   displayName: "AMEX Cobalt",
   currency: "MR points",
   pointValueCents: 2,
+  network: "amex",
   rewards: [
     { category: "groceries", multiplier: 5, capMonthly: 500 },
     { category: "dining", multiplier: 5, capMonthly: 500 },
