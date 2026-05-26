@@ -6,7 +6,7 @@ export default function SimulatorPage() {
   return (
     <>
       <Header />
-      <main className="pt-16">
+      <main className="min-w-0 overflow-x-hidden pt-16">
         <ScenarioSimulator />
       </main>
       <Footer />

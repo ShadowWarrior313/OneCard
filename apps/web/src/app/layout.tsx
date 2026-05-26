@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { WalletProvider } from "@/context/WalletContext";
 import { UserProfileProvider } from "@/context/UserProfileContext";
@@ -11,6 +11,12 @@ const inter = Inter({
 });
 
 const siteUrl = getSiteUrl();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -41,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body>
+      <body className="min-w-0">
         <UserProfileProvider>
           <WalletProvider>{children}</WalletProvider>
         </UserProfileProvider>

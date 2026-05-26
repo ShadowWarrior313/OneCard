@@ -148,25 +148,27 @@ export function RewardsComparisonTable({
   ];
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white">
+    <div className="min-w-0 max-w-full overflow-x-hidden rounded-xl border border-zinc-200 bg-white">
       <div className="grid gap-4 border-b border-zinc-100 px-4 py-4 sm:grid-cols-3 sm:px-5">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium text-brand-muted">Merchant</p>
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5 flex min-w-0 items-center gap-2">
             <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.tile} />
-            <span className="font-semibold text-brand-ink">{merchant.name}</span>
+            <span className="min-w-0 break-words font-semibold text-brand-ink">
+              {merchant.name}
+            </span>
           </div>
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium text-brand-muted">Purchase</p>
           <p className="mt-1 text-lg font-bold tabular-nums text-brand-ink">
             {sym}
             {totalCharged.toFixed(2)}
           </p>
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-medium text-brand-muted">OneCard picks</p>
-          <p className="mt-1 text-sm font-bold text-brand-ink">
+          <p className="mt-1 line-clamp-2 break-words text-sm font-bold text-brand-ink">
             {decision.selectedCardDisplayName}
           </p>
         </div>
@@ -188,8 +190,8 @@ export function RewardsComparisonTable({
                   <IssuerLogo issuer={card.issuer} cardId={alt.cardId} size={36} />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-brand-ink">
-                    {shortCardName(alt.displayName)}
+                  <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-brand-ink">
+                    {alt.displayName}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-2">
                     {isWinner && (
@@ -202,7 +204,7 @@ export function RewardsComparisonTable({
                     )}
                   </div>
                 </div>
-                <p className="text-lg font-bold tabular-nums text-brand-ink">
+                <p className="shrink-0 text-lg font-bold tabular-nums text-brand-ink">
                   {sym}
                   {formatDecimal(alt.estimatedRewardValueCents / 100, 1)}
                 </p>
@@ -320,8 +322,8 @@ export function RewardsComparisonTable({
         </div>
       )}
 
-      <p className="border-t border-zinc-100 px-4 py-3 text-center text-xs text-brand-muted sm:px-5">
-        {decision.reason}
+      <p className="border-t border-zinc-100 px-4 py-3 text-center text-xs leading-relaxed text-brand-muted sm:px-5">
+        <span className="break-words">{decision.reason}</span>
       </p>
     </div>
   );

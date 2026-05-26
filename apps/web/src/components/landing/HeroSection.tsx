@@ -4,10 +4,10 @@ import { HeroCardStack } from "./HeroCardStack";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#0c0c0e] pt-28 pb-20 sm:pt-32 sm:pb-24">
+    <section className="relative bg-[#0c0c0e] pt-28 pb-24 sm:pt-32 sm:pb-28">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_70%_20%,rgba(255,255,255,0.07),transparent_55%)]" />
 
-      <div className="oc-container-wide relative grid items-center gap-12 lg:grid-cols-2 lg:gap-10">
+      <div className="oc-container-wide relative grid min-w-0 items-center gap-12 lg:grid-cols-2 lg:gap-10">
         <div className="text-center lg:text-left">
           <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Canada · Every card you carry
@@ -41,7 +41,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="relative lg:pl-2">
+        <div className="relative flex min-w-0 justify-center overflow-visible lg:pl-2">
           <HeroCardStack />
         </div>
       </div>

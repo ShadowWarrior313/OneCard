@@ -195,7 +195,7 @@ export function ScenarioSimulator() {
         ) : (
           <div className="oc-simulator-shell space-y-4 sm:space-y-6">
             {/* Results first on mobile */}
-            <div className="lg:hidden">
+            <div className="min-w-0 max-w-full lg:hidden">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${merchantId}-${chargeAmount}-${purchaseType}-mobile`}
@@ -236,8 +236,8 @@ export function ScenarioSimulator() {
               />
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
-              <div className="space-y-4 lg:col-span-7">
+            <div className="grid min-w-0 gap-4 lg:grid-cols-12 lg:gap-6">
+              <div className="min-w-0 space-y-4 lg:col-span-7">
                 <div className="oc-panel">
                   <MerchantPicker
                     merchantId={merchantId}
@@ -511,13 +511,13 @@ function MerchantPicker({
   const GroupIcon = MERCHANT_GROUP_STYLE[group].Icon;
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full">
       <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-muted">
         <Store className="h-3.5 w-3.5" aria-hidden />
         Merchant
       </p>
 
-      <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="mt-3 flex min-w-0 max-w-full gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {MERCHANT_GROUPS.map((g) => (
           <button
             key={g}
@@ -589,7 +589,7 @@ function MerchantBrandGrid({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+    <div className="mt-3 grid min-w-0 max-w-full grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {brands.map((m) => (
         <button
           key={m.id}

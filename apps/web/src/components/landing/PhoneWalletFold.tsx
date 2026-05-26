@@ -8,19 +8,15 @@ import { IssuerLogo } from "@/components/IssuerLogo";
 import { WalletCardVisual } from "@/components/wallet/WalletCardVisual";
 import { CARD_CATALOG } from "@/data/cards";
 
-/** Identical to `WalletFold` on /wallet */
-const PEEK = 44;
-const SLIDE_UP = 128;
-const SPRING = { type: "spring" as const, stiffness: 380, damping: 32 };
+import {
+  WALLET_PEEK,
+  WALLET_SLIDE_UP,
+  WALLET_SPRING,
+  walletSlideHeadroom,
+} from "@/lib/walletFoldMotion";
 
 function shortCardName(name: string): string {
   return name.replace(/American Express/g, "Amex").replace(/ Card$/, "");
-}
-
-/** Headroom so top-stack cards can slide up without clipping (index 0 needs the most). */
-function slideHeadroom(activeIndex: number): number {
-  if (activeIndex < 0) return 0;
-  return Math.max(0, SLIDE_UP - activeIndex * PEEK + 12);
 }
 
 export function PhoneWalletFold({
@@ -53,9 +49,10 @@ export function PhoneWalletFold({
 
   const active = cards.find((c) => c.cardId === activeId);
   const activeIndex = active ? cards.findIndex((c) => c.cardId === activeId) : -1;
-  const stackH = cards.length > 0 ? PEEK + (cards.length - 1) * PEEK : PEEK;
+  const stackH =
+    cards.length > 0 ? WALLET_PEEK + (cards.length - 1) * WALLET_PEEK : WALLET_PEEK;
   const addable = CARD_CATALOG.filter((c) => !hasCard(c.cardId)).slice(0, 10);
-  const headroom = slideHeadroom(activeIndex);
+  const headroom = walletSlideHeadroom(activeIndex);
 
   useEffect(() => {
     if (!activeId || activeIndex > 2) return;
@@ -75,14 +72,14 @@ export function PhoneWalletFold({
   }
 
   return (
-    <div ref={ref} className="pb-6">
+    <div ref={ref} className="mx-auto min-w-0 max-w-full pb-6">
       {/* Scroll headroom — top cards (e.g. CIBC) need space to slide up like TD */}
       <motion.div
         aria-hidden
         className="shrink-0"
         initial={false}
         animate={{ height: headroom }}
-        transition={SPRING}
+        transition={WALLET_SPRING}
       />
 
       <div className={`relative w-full ${active ? "pb-1" : ""}`}>
@@ -103,7 +100,7 @@ export function PhoneWalletFold({
           <div
             className="relative overflow-visible rounded-b-2xl px-2 pb-4"
             style={{
-              paddingTop: active ? SLIDE_UP + 16 : 12,
+              paddingTop: active ? WALLET_SLIDE_UP + 16 : 12,
               minHeight: stackH + (active ? 240 : 32),
             }}
           >
@@ -119,15 +116,15 @@ export function PhoneWalletFold({
                   type="button"
                   className="absolute left-2 right-2 block origin-top text-left"
                   style={{
-                    top: i * PEEK,
+                    top: i * WALLET_PEEK,
                     zIndex: isActive ? 40 : i + 1,
                   }}
                   onClick={() => setActiveId(isActive ? null : card.cardId)}
                   animate={{
-                    y: isActive ? -SLIDE_UP : isBehindActive ? -4 : 0,
-                    scale: isActive ? 1.02 : 1,
+                    y: isActive ? -WALLET_SLIDE_UP : isBehindActive ? -4 : 0,
+                    scale: 1,
                   }}
-                  transition={SPRING}
+                  transition={WALLET_SPRING}
                   aria-expanded={isActive}
                   aria-label={`${card.displayName}${isBusiness ? ", business card" : ""}`}
                 >

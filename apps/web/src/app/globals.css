@@ -5,10 +5,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    @apply overflow-x-hidden;
   }
 
   body {
-    @apply overflow-x-hidden bg-white font-sans text-brand-body antialiased;
+    @apply min-w-0 overflow-x-hidden bg-white font-sans text-brand-body antialiased;
   }
 
   ::selection {
@@ -18,11 +19,11 @@
 
 @layer components {
   .oc-container {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full min-w-0 max-w-6xl px-4 sm:px-6 lg:px-8;
   }
 
   .oc-container-wide {
-    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
   .oc-section {
@@ -66,7 +67,7 @@
   }
 
   .oc-panel {
-    @apply rounded-xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6;
+    @apply min-w-0 max-w-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6;
   }
 
   .oc-panel-inset {
@@ -74,11 +75,11 @@
   }
 
   .oc-simulator-shell {
-    @apply rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6;
+    @apply min-w-0 max-w-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6;
   }
 
   .oc-simulator-sidebar {
-    @apply space-y-4 lg:sticky lg:top-20 lg:self-start;
+    @apply min-w-0 max-w-full space-y-4 lg:sticky lg:top-20 lg:self-start;
   }
 
   .oc-simulator-highlight {
@@ -106,11 +107,11 @@
   }
 
   .oc-merchant-tile {
-    @apply flex min-h-[4.75rem] flex-col items-center justify-center gap-1 rounded-lg border border-zinc-200 bg-white p-2 transition hover:border-zinc-300;
+    @apply flex min-h-[4.75rem] min-w-0 max-w-full flex-col items-center justify-center gap-1 rounded-lg border border-zinc-200 bg-white p-2 transition hover:border-zinc-300;
   }
 
   .oc-merchant-tile--active {
-    @apply border-brand-ink ring-2 ring-zinc-200;
+    @apply border-brand-ink ring-2 ring-inset ring-zinc-200;
   }
 
   .oc-sector-pill {
@@ -118,7 +119,7 @@
   }
 
   .oc-sector-pill--active {
-    @apply border-brand-ink border-solid bg-white ring-2 ring-zinc-200;
+    @apply border-brand-ink border-solid bg-white ring-2 ring-inset ring-zinc-200;
   }
 
   .phone-leather-wallet {

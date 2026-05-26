@@ -1,13 +1,19 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useRef, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useUserProfile } from "@/context/UserProfileContext";
 
-const STACK = [
-  { label: "Dining", mult: "5×", from: "#1e293b", to: "#334155", rotate: -14, y: 48, x: -32, scale: 0.88 },
-  { label: "Travel", mult: "3×", from: "#0f172a", to: "#1e3a5f", rotate: 8, y: 32, x: 28, scale: 0.92 },
-  { label: "Groceries", mult: "4×", from: "#14532d", to: "#166534", rotate: -4, y: 16, x: -8, scale: 0.96 },
+const STACK_DESKTOP = [
+  { label: "Dining", mult: "5×", from: "#1e293b", to: "#334155", rotate: -10, y: 36, x: -18, scale: 0.88 },
+  { label: "Travel", mult: "3×", from: "#0f172a", to: "#1e3a5f", rotate: 6, y: 24, x: 16, scale: 0.92 },
+  { label: "Groceries", mult: "4×", from: "#14532d", to: "#166534", rotate: -3, y: 12, x: -4, scale: 0.96 },
+];
+
+const STACK_MOBILE = [
+  { label: "Dining", mult: "5×", from: "#1e293b", to: "#334155", rotate: -6, y: 28, x: -8, scale: 0.9 },
+  { label: "Travel", mult: "3×", from: "#0f172a", to: "#1e3a5f", rotate: 4, y: 18, x: 8, scale: 0.93 },
+  { label: "Groceries", mult: "4×", from: "#14532d", to: "#166534", rotate: -2, y: 8, x: -2, scale: 0.96 },
 ];
 
 function MiniCard({
@@ -20,6 +26,7 @@ function MiniCard({
   x,
   scale,
   delay,
+  compact,
 }: {
   label: string;
   mult: string;
@@ -30,10 +37,13 @@ function MiniCard({
   x: number;
   scale: number;
   delay: number;
+  compact: boolean;
 }) {
   return (
     <motion.div
-      className="absolute left-1/2 top-1/2 w-[220px] -translate-x-1/2 -translate-y-1/2"
+      className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
+        compact ? "w-[min(200px,calc(100vw-3.5rem))]" : "w-[220px]"
+      }`}
       style={{ rotate, y, x, scale }}
       initial={{ opacity: 0, y: y + 40 }}
       animate={{ opacity: 0.9, y }}
@@ -53,16 +63,33 @@ function MiniCard({
   );
 }
 
+function useCompactHero() {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setCompact(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return compact;
+}
+
 export function HeroCardStack() {
   const { cardholderName } = useUserProfile();
+  const compact = useCompactHero();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
   const spring = { stiffness: 120, damping: 20 };
-  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], [8, -8]), spring);
-  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), spring);
+  const rotateX = useSpring(useTransform(my, [-0.5, 0.5], compact ? [0, 0] : [8, -8]), spring);
+  const rotateY = useSpring(useTransform(mx, [-0.5, 0.5], compact ? [0, 0] : [-10, 10]), spring);
+  const stack = compact ? STACK_MOBILE : STACK_DESKTOP;
 
   function onMove(e: MouseEvent) {
+    if (compact) return;
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
@@ -78,19 +105,21 @@ export function HeroCardStack() {
   return (
     <div
       ref={ref}
-      className="relative mx-auto aspect-square w-full max-w-[420px]"
+      className="relative mx-auto aspect-square w-full max-w-[420px] overflow-visible px-5 sm:px-0"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       style={{ perspective: 1200 }}
     >
-      <div className="absolute inset-[15%] rounded-full bg-white/[0.04] blur-[70px]" />
+      <div className="pointer-events-none absolute inset-[15%] rounded-full bg-white/[0.04] blur-[70px]" />
 
-      {STACK.map((card, i) => (
-        <MiniCard key={card.label} {...card} delay={0.15 + i * 0.1} />
+      {stack.map((card, i) => (
+        <MiniCard key={card.label} {...card} delay={0.15 + i * 0.1} compact={compact} />
       ))}
 
       <motion.div
-        className="absolute left-1/2 top-1/2 z-20 w-[240px] -translate-x-1/2 -translate-y-1/2"
+        className={`absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 ${
+          compact ? "w-[min(216px,calc(100vw-3rem))]" : "w-[240px]"
+        }`}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}

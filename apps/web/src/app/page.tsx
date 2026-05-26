@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main>
+      <main className="min-w-0 overflow-x-hidden">
         <HeroSection />
         <InteractiveDemo />
         <FeaturesSection />

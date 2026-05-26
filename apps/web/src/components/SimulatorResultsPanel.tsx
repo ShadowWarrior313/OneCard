@@ -54,7 +54,7 @@ export function SimulatorResultsPanel({
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
               OneCard routes to
             </p>
-            <p className="truncate text-base font-bold text-brand-ink sm:text-lg">
+            <p className="line-clamp-2 break-words text-base font-bold text-brand-ink sm:text-lg">
               {decision.selectedCardDisplayName}
             </p>
             <p className="text-sm text-brand-muted">

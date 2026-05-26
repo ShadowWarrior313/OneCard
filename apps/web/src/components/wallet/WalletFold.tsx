@@ -3,13 +3,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "@/context/WalletContext";
+import {
+  WALLET_PEEK,
+  WALLET_SLIDE_UP,
+  WALLET_SPRING,
+  walletSlideHeadroom,
+} from "@/lib/walletFoldMotion";
 import { WalletCardVisual } from "./WalletCardVisual";
 import { WalletCardPopover } from "./WalletCardPopover";
 import { topMerchantsForCard } from "@/lib/recommendations";
-
-const PEEK = 44;
-const SLIDE_UP = 128;
-const SPRING = { type: "spring" as const, stiffness: 380, damping: 32 };
 
 export function WalletFold() {
   const { cards, businessCardId } = useWallet();
@@ -24,6 +26,15 @@ export function WalletFold() {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
+  const active = cards.find((c) => c.cardId === activeId);
+  const activeIndex = active ? cards.findIndex((c) => c.cardId === activeId) : -1;
+  const headroom = walletSlideHeadroom(activeIndex);
+
+  useEffect(() => {
+    if (!cards.length || !activeId || activeIndex > 2) return;
+    ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeId, activeIndex, cards.length]);
+
   if (!cards.length) {
     return (
       <div className="mx-auto flex max-w-[22rem] min-h-[14rem] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-[#eef0f3] px-6 py-12 text-center">
@@ -33,16 +44,22 @@ export function WalletFold() {
     );
   }
 
-  const stackH = cards.length > 0 ? PEEK + (cards.length - 1) * PEEK : PEEK;
-  const active = cards.find((c) => c.cardId === activeId);
+  const stackH = cards.length > 0 ? WALLET_PEEK + (cards.length - 1) * WALLET_PEEK : WALLET_PEEK;
   const recs = active ? topMerchantsForCard(active.cardId, cards, 3) : [];
-  const activeIndex = active ? cards.findIndex((c) => c.cardId === activeId) : -1;
 
   return (
     <div
       ref={ref}
       className={`relative mx-auto w-full max-w-[22rem] ${active ? "pb-4" : ""}`}
     >
+      <motion.div
+        aria-hidden
+        className="shrink-0"
+        initial={false}
+        animate={{ height: headroom }}
+        transition={WALLET_SPRING}
+      />
+
       <div className="overflow-visible rounded-3xl bg-[#eef0f3] shadow-card ring-1 ring-slate-200/80">
         {/* Pocket lip */}
         <div className="relative overflow-hidden rounded-t-3xl border-b border-slate-200/90 bg-[#e2e5e9] px-4 pb-3 pt-4">
@@ -64,7 +81,7 @@ export function WalletFold() {
         <div
           className="relative overflow-visible rounded-b-3xl px-3 pb-4"
           style={{
-            paddingTop: active ? SLIDE_UP + 16 : 12,
+            paddingTop: active ? WALLET_SLIDE_UP + 16 : 12,
             minHeight: stackH + (active ? 240 : 32),
           }}
         >
@@ -78,15 +95,15 @@ export function WalletFold() {
                 type="button"
                 className="absolute left-3 right-3 block origin-top text-left"
                 style={{
-                  top: i * PEEK,
+                  top: i * WALLET_PEEK,
                   zIndex: isActive ? 40 : i + 1,
                 }}
                 onClick={() => setActiveId(isActive ? null : card.cardId)}
                 animate={{
-                  y: isActive ? -SLIDE_UP : isBehindActive ? -4 : 0,
-                  scale: isActive ? 1.02 : 1,
+                  y: isActive ? -WALLET_SLIDE_UP : isBehindActive ? -4 : 0,
+                  scale: 1,
                 }}
-                transition={SPRING}
+                transition={WALLET_SPRING}
                 aria-expanded={isActive}
                 aria-label={`${card.displayName}${businessCardId === card.cardId ? ", business card" : ""}`}
               >

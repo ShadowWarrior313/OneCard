@@ -8,7 +8,7 @@ export function InteractiveDemo() {
   return (
     <section className="oc-section border-t border-zinc-200 bg-white">
       <div className="oc-container-wide">
-        <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="grid min-w-0 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="order-2 lg:order-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
               Live demo · Tap anything
