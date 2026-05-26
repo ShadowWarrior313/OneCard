@@ -1,35 +1,36 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { WalletProvider } from "@/context/WalletContext";
+import { UserProfileProvider } from "@/context/UserProfileContext";
 import { getSiteUrl } from "@/lib/siteUrl";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-inter",
 });
 
 const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "OneCard — One card. Maximum rewards.",
+  title: "OneCard — Your entire wallet. One card.",
   description:
-    "A single phantom payment card that routes every purchase to your best underlying credit card.",
+    "One physical card routes every purchase to the credit card that earns the most. Link your wallet once, tap once, earn more.",
   icons: { icon: "/icon.svg" },
   openGraph: {
-    title: "OneCard — One card. Maximum rewards.",
+    title: "OneCard — Your entire wallet. One card.",
     description:
-      "Link your Amex and Big Six cards. OneCard routes every tap to the card that earns the most.",
+      "One physical card routes every purchase to the credit card that earns the most.",
     type: "website",
     locale: "en_CA",
     siteName: "OneCard",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OneCard — One card. Maximum rewards.",
+    title: "OneCard — Your entire wallet. One card.",
     description:
-      "Link your Amex and Big Six cards. OneCard routes every tap to the card that earns the most.",
+      "One physical card routes every purchase to the credit card that earns the most.",
   },
 };
 
@@ -39,9 +40,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={dmSans.variable}>
+    <html lang="en" className={inter.variable}>
       <body>
-        <WalletProvider>{children}</WalletProvider>
+        <UserProfileProvider>
+          <WalletProvider>{children}</WalletProvider>
+        </UserProfileProvider>
       </body>
     </html>
   );

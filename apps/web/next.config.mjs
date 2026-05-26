@@ -22,6 +22,11 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "cdn.brandfetch.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "rewardsccapibs.blob.core.windows.net",
         pathname: "/**",
       },

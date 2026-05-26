@@ -4,10 +4,13 @@ export function OneCardLogo({
   showWordmark = false,
   cardholderName = "John Doe",
   variant = "mark",
+  light = false,
 }: {
   showWordmark?: boolean;
-  variant?: "mark" | "card";
   cardholderName?: string;
+  variant?: "mark" | "card";
+  /** White wordmark for dark backgrounds */
+  light?: boolean;
 }) {
   if (variant === "card") {
     return (
@@ -21,7 +24,7 @@ export function OneCardLogo({
             fill="#fafafa"
             fontSize="14"
             fontWeight="600"
-            fontFamily="var(--font-dm-sans), system-ui, sans-serif"
+            fontFamily="var(--font-inter), system-ui, sans-serif"
           >
             {cardholderName.toUpperCase()}
           </text>
@@ -31,7 +34,7 @@ export function OneCardLogo({
   }
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2.5">
       <Image
         src="/brand-mark.png"
         alt=""
@@ -41,7 +44,11 @@ export function OneCardLogo({
         priority
       />
       {showWordmark && (
-        <span className="text-lg font-bold tracking-tight text-brand-ink">
+        <span
+          className={`text-lg font-semibold tracking-tight ${
+            light ? "text-white" : "text-brand-ink"
+          }`}
+        >
           OneCard
         </span>
       )}

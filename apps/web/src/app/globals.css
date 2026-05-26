@@ -8,45 +8,121 @@
   }
 
   body {
-    @apply bg-white font-sans text-brand-body antialiased;
+    @apply bg-brand-cream font-sans text-brand-body antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-purple/20 text-brand-ink;
   }
 }
 
 @layer components {
   .oc-container {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .oc-container-wide {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
   .oc-section {
-    @apply scroll-mt-20 py-10 sm:py-12;
+    @apply scroll-mt-24 py-16 sm:py-24;
   }
 
   .oc-eyebrow {
-    @apply text-sm font-semibold text-brand-ocean;
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-brand-ocean;
+  }
+
+  .oc-eyebrow-dark {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-brand-ocean;
+  }
+
+  .oc-display {
+    @apply text-balance text-4xl font-semibold tracking-tight text-brand-ink sm:text-5xl lg:text-6xl lg:leading-[1.05];
+  }
+
+  .oc-display-dark {
+    @apply text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.05];
   }
 
   .oc-heading {
-    @apply text-balance text-3xl font-extrabold tracking-tight text-brand-ink sm:text-4xl;
+    @apply text-balance text-3xl font-semibold tracking-tight text-brand-ink sm:text-4xl;
   }
 
   .oc-lead {
-    @apply mt-3 text-lg leading-relaxed text-brand-muted;
+    @apply mt-4 text-lg leading-relaxed text-brand-muted;
+  }
+
+  .oc-lead-dark {
+    @apply mt-4 text-lg leading-relaxed text-zinc-400;
   }
 
   .oc-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-purple to-brand-ocean px-6 py-3 text-sm font-semibold text-white shadow-md shadow-brand-purple/25 transition hover:opacity-95 hover:shadow-lg;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink shadow-lg shadow-black/10 transition hover:bg-zinc-100 hover:shadow-xl;
+  }
+
+  .oc-btn-primary-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink shadow-glow transition hover:scale-[1.02] hover:bg-zinc-100;
   }
 
   .oc-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-brand-ink transition hover:border-brand-purple/30 hover:bg-brand-purple-soft;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-zinc-700 bg-transparent px-6 py-3.5 text-sm font-semibold text-white transition hover:border-zinc-500 hover:bg-white/5;
+  }
+
+  .oc-btn-secondary-light {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-white px-6 py-3.5 text-sm font-semibold text-brand-ink transition hover:border-zinc-300 hover:shadow-card;
   }
 
   .oc-btn-ghost {
-    @apply inline-flex items-center justify-center rounded-full border-2 border-brand-ink bg-white px-6 py-2.5 text-sm font-semibold text-brand-ink transition hover:bg-slate-50;
+    @apply inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-6 py-2.5 text-sm font-semibold text-brand-ink transition hover:border-zinc-300 hover:shadow-sm;
   }
 
   .oc-panel {
-    @apply rounded-2xl border border-slate-200/80 bg-white p-6 shadow-card;
+    @apply rounded-3xl border border-brand-purple/10 bg-white/90 p-6 shadow-card backdrop-blur-sm sm:p-8;
+  }
+
+  .oc-panel-inset {
+    @apply rounded-2xl border border-brand-purple/10 bg-gradient-to-br from-brand-purple-soft/25 to-brand-ocean-soft/20 p-4;
+  }
+
+  .oc-simulator-shell {
+    @apply overflow-hidden rounded-[1.75rem] border border-brand-purple/15 bg-white/60 p-5 shadow-lift backdrop-blur-md sm:p-6 lg:p-8;
+  }
+
+  .oc-simulator-sidebar {
+    @apply space-y-4 lg:sticky lg:top-24 lg:self-start;
+  }
+
+  .oc-simulator-highlight {
+    @apply flex items-start gap-3 rounded-2xl border border-brand-purple/10 bg-gradient-to-r from-brand-purple-soft/40 to-white px-4 py-3 shadow-sm sm:px-5;
+  }
+
+  .oc-simulator-tab {
+    @apply shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition;
+  }
+
+  .oc-simulator-tab--active {
+    @apply bg-brand-charcoal text-white shadow-sm;
+  }
+
+  .oc-simulator-tab--idle {
+    @apply bg-white/80 text-brand-muted ring-1 ring-brand-purple/10 hover:bg-brand-purple-soft/40 hover:text-brand-ink;
+  }
+
+  .oc-glass {
+    @apply rounded-3xl border border-white/10 bg-white/5 shadow-glass backdrop-blur-xl;
+  }
+
+  .oc-glass-light {
+    @apply rounded-3xl border border-white/60 bg-white/70 shadow-card backdrop-blur-xl;
+  }
+
+  .oc-bento {
+    @apply relative overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 shadow-card transition duration-300 hover:shadow-lift sm:p-8;
+  }
+
+  .oc-bento-dark {
+    @apply relative overflow-hidden rounded-3xl border border-white/10 bg-brand-charcoal p-6 shadow-glass transition duration-300 hover:border-white/15 sm:p-8;
   }
 
   .oc-link {
@@ -54,23 +130,27 @@
   }
 
   .oc-input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-brand-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple-soft;
+    @apply w-full rounded-xl border border-brand-purple/15 bg-white/90 px-4 py-3 text-sm text-brand-ink transition focus:border-brand-purple focus:outline-none focus:ring-2 focus:ring-brand-purple/20;
   }
 
   .oc-merchant-tile {
-    @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-200/90 bg-white p-2 transition hover:border-slate-300 hover:shadow-sm;
+    @apply flex min-h-[5.5rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-brand-purple/10 bg-gradient-to-br from-white to-brand-purple-soft/30 p-2 transition hover:border-brand-purple/25 hover:shadow-sm;
   }
 
   .oc-merchant-tile--active {
-    @apply border-brand-ink bg-brand-purple-soft/40 ring-2 ring-brand-ink/15;
+    @apply border-brand-purple bg-brand-purple-soft/50 ring-2 ring-brand-purple/20;
   }
 
   .oc-sector-pill {
-    @apply flex items-center gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 px-3 py-2.5 text-left transition hover:border-slate-400 hover:bg-white;
+    @apply flex items-center gap-3 rounded-xl border border-dashed border-brand-purple/20 bg-brand-purple-soft/20 px-3 py-2.5 text-left transition hover:border-brand-purple/35 hover:bg-brand-purple-soft/35;
   }
 
   .oc-sector-pill--active {
-    @apply border-brand-ink border-solid bg-white ring-2 ring-brand-ink/10;
+    @apply border-brand-purple border-solid bg-white ring-2 ring-brand-purple/15;
+  }
+
+  .oc-gradient-text {
+    @apply bg-gradient-to-r from-brand-purple via-brand-ocean to-brand-mint bg-clip-text text-transparent;
   }
 }
 

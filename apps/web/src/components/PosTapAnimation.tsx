@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { OneCardLogo } from "./OneCardLogo";
+import { useUserProfile } from "@/context/UserProfileContext";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 
 type Phase = "idle" | "tap" | "scan" | "match" | "process" | "approved" | "reward";
@@ -53,6 +54,7 @@ const STATUS: Record<Phase, string> = {
 };
 
 export function PosTapAnimation() {
+  const { displayName } = useUserProfile();
   const [phase, setPhase] = useState<Phase>("idle");
   const [scrollIndex, setScrollIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -153,7 +155,7 @@ export function PosTapAnimation() {
           </div>
         </div>
         <div className="relative -mt-6 z-10">
-          <OneCardLogo variant="card" cardholderName="John Doe" />
+          <OneCardLogo variant="card" cardholderName={displayName} />
         </div>
       </div>
 

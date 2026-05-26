@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import type { MerchantPreset } from "@/data/merchants";
 import { merchantLucideIcon } from "@/data/merchantIcons";
 import { MERCHANT_LOGO_FRAME } from "./BrandLogo";
 import {
-  brandLogoCacheKey,
-  fetchBrandLogo,
-  getCachedBrandLogo,
+  resolveBrandLogoCandidates,
 } from "@/lib/brandLogoClient";
 
 function brandDomains(merchant: MerchantPreset): string[] {
@@ -85,54 +83,30 @@ export function MerchantLogo({
   className?: string;
 }) {
   const domains = brandDomains(merchant);
-  const cacheKey = brandLogoCacheKey(domains);
-  const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
-    const cached = getCachedBrandLogo(domains);
-    return cached === undefined ? null : cached;
-  });
-  const [remoteFailed, setRemoteFailed] = useState(false);
-  const [loading, setLoading] = useState(
-    () => domains.length > 0 && getCachedBrandLogo(domains) === undefined,
+  const candidates = useMemo(
+    () => resolveBrandLogoCandidates(domains, "light", Math.max(size * 2, 128)),
+    [domains.join("|"), size],
   );
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const remoteSrc = candidates[candidateIndex] ?? null;
 
-  useEffect(() => {
-    if (!domains.length) return;
-
-    let active = true;
-    setRemoteFailed(false);
-
-    fetchBrandLogo(domains).then((src) => {
-      if (!active) return;
-      setRemoteSrc(src);
-      setLoading(false);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, [cacheKey]);
-
-  if (loading) {
-    return (
-      <span
-        className={`inline-block shrink-0 animate-pulse ${MERCHANT_LOGO_FRAME} ${className}`}
-        style={{ width: size, height: size }}
-        aria-hidden
-      />
-    );
+  if (!remoteSrc) {
+    return <LucideMerchantMark merchant={merchant} size={size} className={className} />;
   }
 
-  if (remoteSrc && !remoteFailed) {
-    return (
-      <RemoteLogo
-        src={remoteSrc}
-        alt={merchant.name}
-        size={size}
-        className={className}
-        onError={() => setRemoteFailed(true)}
-      />
-    );
-  }
-
-  return <LucideMerchantMark merchant={merchant} size={size} className={className} />;
+  return (
+    <RemoteLogo
+      src={remoteSrc}
+      alt={merchant.name}
+      size={size}
+      className={className}
+      onError={() => {
+        if (candidateIndex + 1 < candidates.length) {
+          setCandidateIndex((index) => index + 1);
+        } else {
+          setCandidateIndex(candidates.length);
+        }
+      }}
+    />
+  );
 }

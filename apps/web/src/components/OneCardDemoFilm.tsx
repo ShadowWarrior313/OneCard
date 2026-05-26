@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import { OneCardLogo } from "./OneCardLogo";
+import { useUserProfile } from "@/context/UserProfileContext";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 
 type Phase = "idle" | "tap" | "scan" | "match" | "process" | "approved" | "reward";
@@ -97,6 +98,7 @@ const PHASE_ORDER: Phase[] = [
 ];
 
 export function OneCardDemoFilm() {
+  const { displayName } = useUserProfile();
   const [phase, setPhase] = useState<Phase>("idle");
   const [scrollIndex, setScrollIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -266,7 +268,7 @@ export function OneCardDemoFilm() {
             </div>
           </div>
           <div className="relative z-10 -mt-8">
-            <OneCardLogo variant="card" cardholderName="Alex Chen" />
+            <OneCardLogo variant="card" cardholderName={displayName} />
           </div>
         </div>
 

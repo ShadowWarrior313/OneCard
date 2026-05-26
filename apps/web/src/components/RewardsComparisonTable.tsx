@@ -11,8 +11,13 @@ import { useMemo, useState, type ReactNode } from "react";
 
 const VISIBLE = 4;
 
+/** Label column + card columns — wide enough that the last column is never clipped. */
+function comparisonMinWidth(columnCount: number): string {
+  return `${8.5 + columnCount * 7.25}rem`;
+}
+
 const GRID_COLUMNS = (count: number) =>
-  `minmax(7.5rem, 1.1fr) repeat(${count}, minmax(5.5rem, 1fr))`;
+  `minmax(8rem, 1.15fr) repeat(${count}, minmax(7rem, 1fr))`;
 
 function CellValue({
   children,
@@ -160,9 +165,9 @@ export function RewardsComparisonTable({
   ];
 
   return (
-    <div className="overflow-hidden rounded-2xl border-2 border-brand-mint bg-white shadow-card">
+    <div className="rounded-2xl border border-brand-purple/15 bg-white/90 shadow-card backdrop-blur-sm">
       {/* Summary bar — mirrors Wise amount / from / to */}
-      <div className="grid gap-4 border-b border-slate-200/80 bg-slate-50/60 px-4 py-4 sm:grid-cols-3 sm:px-5">
+      <div className="grid gap-4 border-b border-brand-purple/10 bg-gradient-to-r from-brand-purple-soft/30 to-brand-ocean-soft/20 px-4 py-4 sm:grid-cols-3 sm:px-5">
         <div>
           <p className="text-xs font-medium text-brand-muted">Merchant</p>
           <div className="mt-1.5 flex items-center gap-2">
@@ -185,12 +190,15 @@ export function RewardsComparisonTable({
         </div>
       </div>
 
-      {/* Comparison grid */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[36rem]">
+      {/* Comparison grid — scroll horizontally so every column stays fully visible */}
+      <div className="overflow-x-auto overscroll-x-contain rounded-b-2xl [scrollbar-gutter:stable]">
+        <div
+          className="w-max min-w-full pr-3"
+          style={{ minWidth: comparisonMinWidth(columns.length) }}
+        >
           {/* Column headers */}
           <div
-            className="grid border-b border-slate-200/80"
+            className="grid border-b border-brand-purple/10"
             style={{
               gridTemplateColumns: GRID_COLUMNS(columns.length),
             }}
@@ -236,8 +244,8 @@ export function RewardsComparisonTable({
           {rows.map((row, rowIdx) => (
             <div
               key={row.label}
-              className={`grid border-b border-slate-100 last:border-0 ${
-                rowIdx % 2 === 1 ? "bg-slate-50/40" : ""
+              className={`grid border-b border-brand-purple/5 last:border-0 ${
+                rowIdx % 2 === 1 ? "bg-brand-purple-soft/15" : ""
               }`}
               style={{
                 gridTemplateColumns: GRID_COLUMNS(columns.length),

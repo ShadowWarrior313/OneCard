@@ -1,3 +1,9 @@
+import {
+  brandfetchLogoUrl,
+  brandfetchLogoUrls,
+  type BrandfetchLogoTheme,
+} from "./brandfetchLogo";
+
 const brandLogoCache = new Map<string, string | null>();
 
 export function brandLogoCacheKey(domains: string[]): string {
@@ -12,32 +18,44 @@ export function getCachedBrandLogo(
   return brandLogoCache.get(key) ?? null;
 }
 
-export async function fetchBrandLogo(
+/** Primary logo URL for a domain list (Logo API CDN — no Brand API quota). */
+export function resolveBrandLogoUrl(
   domains: string[],
-  surface: "light" | "dark" = "light",
-): Promise<string | null> {
+  surface: BrandfetchLogoTheme = "light",
+  size = 128,
+): string | null {
   const key = brandLogoCacheKey(domains);
   if (brandLogoCache.has(key)) {
     return brandLogoCache.get(key) ?? null;
   }
 
-  try {
-    const [primary, ...fallback] = domains;
-    if (!primary) return null;
+  const urls = brandfetchLogoUrls(domains, { theme: surface, size });
+  const src = urls[0] ?? null;
+  brandLogoCache.set(key, src);
+  return src;
+}
 
-    const qs = new URLSearchParams({
-      domain: primary,
-      surface,
-    });
-    if (fallback.length) qs.set("fallback", fallback.join(","));
+/** All candidate CDN URLs (primary + fallbacks) for onError retry. */
+export function resolveBrandLogoCandidates(
+  domains: string[],
+  surface: BrandfetchLogoTheme = "light",
+  size = 128,
+): string[] {
+  return brandfetchLogoUrls(domains, { theme: surface, size });
+}
 
-    const res = await fetch(`/api/brand?${qs}`);
-    const data = (await res.json()) as { src?: string | null };
-    const src = data.src ?? null;
-    brandLogoCache.set(key, src);
-    return src;
-  } catch {
-    brandLogoCache.set(key, null);
-    return null;
-  }
+/** @deprecated Use resolveBrandLogoUrl — kept for call-site compatibility. */
+export async function fetchBrandLogo(
+  domains: string[],
+  surface: "light" | "dark" = "light",
+): Promise<string | null> {
+  return resolveBrandLogoUrl(domains, surface);
+}
+
+/** Direct URL for a single domain (e.g. API route). */
+export function logoUrlForDomain(
+  domain: string,
+  surface: BrandfetchLogoTheme = "light",
+): string | null {
+  return brandfetchLogoUrl(domain, { theme: surface });
 }
