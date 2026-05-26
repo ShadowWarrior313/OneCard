@@ -15,6 +15,7 @@
     "@nestjs/platform-express": "^10.4.8",
     "@onecard/rewards-engine": "workspace:*",
     "@onecard/shared-types": "workspace:*",
+    "dotenv": "^17.4.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

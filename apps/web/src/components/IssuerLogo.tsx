@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { MerchantPreset } from "@/data/merchants";
-import { merchantLucideIcon } from "@/data/merchantIcons";
+import { issuerBrandDomains } from "@/data/issuerDomains";
+import { getCardTheme } from "@/data/cardThemes";
 import { MERCHANT_LOGO_FRAME } from "./BrandLogo";
 import {
   brandLogoCacheKey,
@@ -10,42 +10,31 @@ import {
   getCachedBrandLogo,
 } from "@/lib/brandLogoClient";
 
-function brandDomains(merchant: MerchantPreset): string[] {
-  const list = [
-    merchant.logoDomain,
-    ...(merchant.logoDomainFallbacks ?? []),
-  ].filter(Boolean) as string[];
-  return [...new Set(list)];
-}
-
-function LucideMerchantMark({
-  merchant,
+function IssuerLetterMark({
+  issuer,
+  cardId,
   size,
   className = "",
 }: {
-  merchant: MerchantPreset;
+  issuer: string;
+  cardId: string;
   size: number;
   className?: string;
 }) {
-  const { Icon, iconClass } = merchantLucideIcon(merchant.id, merchant.group);
-  const iconPx = Math.round(size * 0.5);
+  const theme = getCardTheme(cardId, issuer);
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center overflow-hidden ${MERCHANT_LOGO_FRAME} ${className}`}
-      style={{ width: size, height: size }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white ${className}`}
+      style={{ width: size, height: size, backgroundColor: theme.accent }}
       aria-hidden
     >
-      <Icon
-        className={iconClass}
-        style={{ width: iconPx, height: iconPx }}
-        strokeWidth={2}
-      />
+      {issuer.charAt(0)}
     </span>
   );
 }
 
-function RemoteLogo({
+function RemoteIssuerLogo({
   src,
   alt,
   size,
@@ -75,16 +64,18 @@ function RemoteLogo({
   );
 }
 
-export function MerchantLogo({
-  merchant,
+export function IssuerLogo({
+  issuer,
+  cardId,
   size = 44,
   className = "",
 }: {
-  merchant: MerchantPreset;
+  issuer: string;
+  cardId: string;
   size?: number;
   className?: string;
 }) {
-  const domains = brandDomains(merchant);
+  const domains = issuerBrandDomains(issuer);
   const cacheKey = brandLogoCacheKey(domains);
   const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
     const cached = getCachedBrandLogo(domains);
@@ -124,9 +115,9 @@ export function MerchantLogo({
 
   if (remoteSrc && !remoteFailed) {
     return (
-      <RemoteLogo
+      <RemoteIssuerLogo
         src={remoteSrc}
-        alt={merchant.name}
+        alt={issuer}
         size={size}
         className={className}
         onError={() => setRemoteFailed(true)}
@@ -134,5 +125,12 @@ export function MerchantLogo({
     );
   }
 
-  return <LucideMerchantMark merchant={merchant} size={size} className={className} />;
+  return (
+    <IssuerLetterMark
+      issuer={issuer}
+      cardId={cardId}
+      size={size}
+      className={className}
+    />
+  );
 }

@@ -18,10 +18,9 @@ export interface MerchantPreset {
   mcc: string;
   category: RewardCategory;
   kind: MerchantKind;
-  /** Local path under /public, e.g. /logos/uber-eats.png */
-  logoSrc?: string;
-  /** Clearbit fallback when no local asset */
+  /** Brandfetch domain(s) — first match wins */
   logoDomain?: string;
+  logoDomainFallbacks?: string[];
   group: MerchantGroup;
 }
 
@@ -87,7 +86,7 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
     mcc: "5812",
     category: "dining",
     kind: "brand",
-    logoSrc: "/logos/uber-eats.png",
+    logoDomain: "ubereats.com",
     group: "Food & drink",
   },
   {
@@ -97,7 +96,8 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
     mcc: "5814",
     category: "dining",
     kind: "brand",
-    logoDomain: "timhortons.ca",
+    logoDomain: "timhortons.com",
+    logoDomainFallbacks: ["timhortons.ca"],
     group: "Food & drink",
   },
   {
@@ -167,7 +167,8 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
     mcc: "5541",
     category: "gas",
     kind: "brand",
-    logoDomain: "shell.ca",
+    logoDomain: "shell.com",
+    logoDomainFallbacks: ["shell.ca"],
     group: "Gas",
   },
   {
@@ -195,7 +196,7 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
     mcc: "5399",
     category: "other",
     kind: "brand",
-    logoSrc: "/logos/amazon.png",
+    logoDomain: "amazon.ca",
     group: "Shopping",
   },
   {
@@ -221,7 +222,7 @@ export const MERCHANT_PRESETS: MerchantPreset[] = [
     mcc: "5815",
     category: "streaming",
     kind: "brand",
-    logoSrc: "/logos/netflix.png",
+    logoDomain: "netflix.com",
     group: "Subscriptions",
   },
   {

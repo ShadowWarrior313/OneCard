@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**"]
+      "outputs": ["dist/**", ".next/**"],
+      "inputs": ["src/**", "tsconfig.json", "package.json", "nest-cli.json"]
     },
     "dev": {
       "cache": false,

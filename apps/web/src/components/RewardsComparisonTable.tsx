@@ -2,10 +2,8 @@
 
 import type { CardProduct } from "@onecard/shared-types";
 import type { RoutingDecision } from "@onecard/shared-types";
-import { getCardTheme } from "@/data/cardThemes";
 import type { MerchantPreset } from "@/data/merchants";
-import { issuerLogoSrc } from "@/data/logos";
-import { BrandLogo } from "@/components/BrandLogo";
+import { IssuerLogo } from "@/components/IssuerLogo";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
 import { useMemo, useState, type ReactNode } from "react";
@@ -26,25 +24,7 @@ function IssuerMark({
   cardId: string;
   size?: number;
 }) {
-  const theme = getCardTheme(cardId, issuer);
-  const src = issuerLogoSrc(issuer);
-
-  return (
-    <BrandLogo
-      src={src}
-      alt={issuer}
-      size={size}
-      rounded="lg"
-      fallback={
-        <span
-          className="inline-flex shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white"
-          style={{ width: size, height: size, backgroundColor: theme.accent }}
-        >
-          {issuer.charAt(0)}
-        </span>
-      }
-    />
-  );
+  return <IssuerLogo issuer={issuer} cardId={cardId} size={size} />;
 }
 
 export function RewardsComparisonTable({

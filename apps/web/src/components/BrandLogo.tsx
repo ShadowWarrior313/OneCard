@@ -3,11 +3,18 @@
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
 
+type LogoSurface = "dark" | "light" | "warm";
+
+export const MERCHANT_LOGO_FRAME =
+  "rounded-xl border border-[#d4c4a8]/70 bg-[#ebe4d8]";
+
 export function BrandLogo({
   src,
   alt,
   size = 44,
   fallback,
+  surface = "light",
+  fill = false,
   className = "",
   rounded = "xl",
 }: {
@@ -17,9 +24,17 @@ export function BrandLogo({
   fallback?: ReactNode;
   className?: string;
   rounded?: "lg" | "xl" | "2xl";
+  surface?: LogoSurface;
+  fill?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const radius = rounded === "2xl" ? "rounded-2xl" : rounded === "lg" ? "rounded-lg" : "rounded-xl";
+  const frame =
+    surface === "dark"
+      ? `bg-zinc-900 border-zinc-700/80 ${radius}`
+      : surface === "warm"
+        ? `${MERCHANT_LOGO_FRAME}`
+        : `bg-white border-slate-200/80 ${radius}`;
 
   if (!src || failed) {
     return (
@@ -35,25 +50,30 @@ export function BrandLogo({
     );
   }
 
-  const pad = Math.max(4, Math.round(size * 0.12));
+  const inset = fill ? 0 : Math.max(4, Math.round(size * 0.12));
+  const inner = size - inset * 2;
 
   return (
     <span
-      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden border border-slate-200/80 bg-white ${radius} ${className}`}
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden border ${frame} ${className}`}
       style={{ width: size, height: size }}
     >
       <Image
         src={src}
         alt={alt}
-        width={size - pad * 2}
-        height={size - pad * 2}
-        className="object-contain"
-        style={{
-          width: size - pad * 2,
-          height: size - pad * 2,
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }}
+        width={inner || size}
+        height={inner || size}
+        className={fill ? "h-full w-full object-contain" : "object-contain"}
+        style={
+          fill
+            ? { width: "100%", height: "100%" }
+            : {
+                width: inner,
+                height: inner,
+                maxWidth: "100%",
+                maxHeight: "100%",
+              }
+        }
         onError={() => setFailed(true)}
         unoptimized
       />
