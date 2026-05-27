@@ -1,5 +1,6 @@
 import { vectorLogoZoneCandidates } from "@/lib/vectorLogoZone";
 import { brandfetchLogoUrl } from "@/lib/brandfetchLogo";
+import { logoDevLogoUrl } from "@/lib/logoDevLogo";
 import { simpleIconCandidates } from "@/lib/simpleIcons";
 
 export async function GET(request: Request) {
@@ -17,6 +18,13 @@ export async function GET(request: Request) {
 
   if (!domains.length || !domains.every((d) => domainPattern.test(d))) {
     return Response.json({ error: "Invalid domain", src: null }, { status: 400 });
+  }
+
+  for (const domain of domains) {
+    const logoDev = logoDevLogoUrl(domain, { theme: "light", size: 128 });
+    if (logoDev) {
+      return Response.json({ domain, name: domain, src: logoDev, source: "logo.dev" });
+    }
   }
 
   const simple = simpleIconCandidates({ domains, merchantId, issuer });

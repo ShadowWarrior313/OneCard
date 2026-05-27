@@ -686,7 +686,7 @@ export function CardShowcaseSection() {
 
             <ShowcaseTile
               title="Earn more on every category"
-              onExpand={openModal}
+              expandHref="/simulator"
             >
               <RoutingMiniVisual rows={routingRows} />
             </ShowcaseTile>

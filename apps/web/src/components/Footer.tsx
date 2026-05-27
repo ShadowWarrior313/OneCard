@@ -27,6 +27,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/card-finder" className="hover:text-brand-ink">
+                  Card Finder
+                </Link>
+              </li>
+              <li>
                 <Link href="/wallet" className="hover:text-brand-ink">
                   Wallet
                 </Link>

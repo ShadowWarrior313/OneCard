@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import type { CardProduct } from "@onecard/shared-types";
 import { getCardAppearance, tierLabel } from "@/data/cardAppearances";
-import { useCardImage } from "@/hooks/useCardImage";
 import { cardBackgroundStyle, cardTextClass } from "@/lib/cardBackground";
 import { PaymentNetworkLogo } from "@/components/PaymentNetworkLogo";
+import { IssuerLogo } from "@/components/IssuerLogo";
 
 function shortName(card: CardProduct): string {
   const parts = card.displayName.split(" ");
@@ -32,27 +31,11 @@ function NetworkMark({ network }: { network: "visa" | "mastercard" | "amex" }) {
   );
 }
 
-function CardArtLayer({
-  imageUrl,
-  alt,
-  onError,
-}: {
-  imageUrl: string;
-  alt: string;
-  onError: () => void;
-}) {
+function CardTexture() {
   return (
     <>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={imageUrl}
-        alt={alt}
-        className="absolute inset-0 h-full w-full object-cover object-center"
-        loading="lazy"
-        decoding="async"
-        onError={onError}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.22),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_40%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(255,255,255,0.1)_0%,transparent_28%,transparent_72%,rgba(255,255,255,0.07)_100%)]" />
     </>
   );
 }
@@ -73,31 +56,19 @@ export function WalletCardVisual({
   const label = appearance.faceLabel ?? shortName(card);
   const bg = cardBackgroundStyle(appearance);
   const text = cardTextClass(appearance);
-  const { imageUrl } = useCardImage(card.cardId);
-  const [imageFailed, setImageFailed] = useState(false);
-  const showArt = Boolean(imageUrl && !imageFailed);
-
   if (peek) {
     return (
       <div
-        className={`relative flex h-11 w-full items-center justify-between overflow-hidden rounded-t-2xl px-3 pb-1.5 pt-2 shadow-md ring-1 ring-black/15 ${
-          showArt ? "text-white" : text
-        } ${active ? "shadow-lg ring-2 ring-brand-ink/25" : ""}`}
-        style={showArt ? undefined : bg}
+        className={`relative flex h-11 w-full items-center justify-between overflow-hidden rounded-t-2xl px-3 pb-1.5 pt-2 shadow-md ring-1 ring-black/15 ${text} ${
+          active ? "shadow-lg ring-2 ring-brand-ink/25" : ""
+        }`}
+        style={bg}
       >
-        {showArt && imageUrl && (
-          <CardArtLayer
-            imageUrl={imageUrl}
-            alt={card.displayName}
-            onError={() => setImageFailed(true)}
-          />
-        )}
+        <CardTexture />
         <div className="relative z-10 flex min-w-0 items-center gap-2">
-          {!showArt && <EmvChip />}
+          <IssuerLogo issuer={card.issuer} cardId={card.cardId} size={16} className="rounded" />
           <span
-            className={`truncate text-[0.55rem] font-bold uppercase tracking-wide ${
-              showArt ? "drop-shadow-sm" : ""
-            }`}
+            className="truncate text-[0.55rem] font-bold uppercase tracking-wide"
           >
             {label}
           </span>
@@ -108,7 +79,7 @@ export function WalletCardVisual({
               Biz
             </span>
           )}
-          {!showArt && <NetworkMark network={appearance.network} />}
+          <NetworkMark network={appearance.network} />
         </div>
       </div>
     );
@@ -116,53 +87,41 @@ export function WalletCardVisual({
 
   return (
     <div
-      className={`relative flex aspect-[1.586] w-full flex-col justify-between overflow-hidden rounded-2xl p-4 shadow-xl ring-1 ring-black/15 ${
-        showArt ? "text-white" : text
-      }`}
-      style={showArt ? undefined : bg}
+      className={`relative flex aspect-[1.586] w-full flex-col justify-between overflow-hidden rounded-2xl p-4 shadow-xl ring-1 ring-black/15 ${text}`}
+      style={bg}
     >
-      {showArt && imageUrl && (
-        <CardArtLayer
-          imageUrl={imageUrl}
-          alt={card.displayName}
-          onError={() => setImageFailed(true)}
-        />
-      )}
+      <CardTexture />
 
-      {!showArt && (
-        <>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-2">
-              <EmvChip />
-              <div>
-                <p className="text-[0.5rem] font-bold uppercase opacity-90">
-                  {card.issuer}
-                </p>
-                {tier && (
-                  <p className="text-[0.5rem] font-semibold uppercase tracking-wider opacity-80">
-                    {tier}
-                  </p>
-                )}
-              </div>
-            </div>
-            <NetworkMark network={appearance.network} />
-          </div>
-          <div>
-            <p className="text-lg font-bold leading-tight">{label}</p>
-            <p className="mt-0.5 line-clamp-2 text-[0.65rem] font-medium opacity-90">
-              {card.displayName}
+      <div className="relative z-10 flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2">
+          <IssuerLogo issuer={card.issuer} cardId={card.cardId} size={22} className="rounded-md" />
+          <div className="min-w-0">
+            <p className="truncate text-[0.5rem] font-bold uppercase opacity-90">
+              {card.issuer}
             </p>
+            {tier && (
+              <p className="text-[0.5rem] font-semibold uppercase tracking-wider opacity-80">
+                {tier}
+              </p>
+            )}
           </div>
-        </>
-      )}
+        </div>
+        <div className="flex items-center gap-2">
+          <EmvChip />
+          <NetworkMark network={appearance.network} />
+        </div>
+      </div>
+
+      <div className="relative z-10">
+        <p className="text-lg font-bold leading-tight">{label}</p>
+        <p className="mt-0.5 line-clamp-2 text-[0.65rem] font-medium opacity-90">
+          {card.displayName}
+        </p>
+      </div>
 
       {isBusiness && (
         <span
-          className={`absolute bottom-3 right-3 z-10 rounded-full px-2 py-0.5 text-[0.5rem] font-bold uppercase ${
-            showArt
-              ? "bg-black/35 text-white backdrop-blur-sm"
-              : "bg-white/25"
-          }`}
+          className="absolute bottom-3 right-3 z-10 rounded-full bg-white/25 px-2 py-0.5 text-[0.5rem] font-bold uppercase"
         >
           Business
         </span>

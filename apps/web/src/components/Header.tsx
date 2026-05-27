@@ -9,6 +9,7 @@ import { OneCardLogo } from "./OneCardLogo";
 const links = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/simulator", label: "Simulator" },
+  { href: "/card-finder", label: "Card Finder" },
   { href: "/wallet", label: "Wallet" },
   { href: "/wallet/my-spend", label: "My Spend" },
 ];

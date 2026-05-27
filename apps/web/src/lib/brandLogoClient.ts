@@ -3,6 +3,7 @@ import {
   brandfetchLogoUrls,
   type BrandfetchLogoTheme,
 } from "./brandfetchLogo";
+import { logoDevLogoUrls } from "./logoDevLogo";
 import { simpleIconCandidates } from "./simpleIcons";
 import { vectorLogoZoneCandidates } from "./vectorLogoZone";
 
@@ -29,7 +30,7 @@ export function getCachedBrandLogo(
   return brandLogoCache.get(key) ?? null;
 }
 
-/** Primary logo URL — Simple Icons first, Brandfetch CDN as fallback. */
+/** Primary logo URL — Logo.dev first, then local/CDN fallbacks. */
 export function resolveBrandLogoUrl(
   domains: string[],
   surface: BrandfetchLogoTheme = "light",
@@ -47,13 +48,14 @@ export function resolveBrandLogoUrl(
   return src;
 }
 
-/** All candidate URLs for onError retry (Simple Icons → Brandfetch). */
+/** All candidate URLs for onError retry (Logo.dev → local/CDN fallbacks). */
 export function resolveBrandLogoCandidates(
   domains: string[],
   surface: BrandfetchLogoTheme = "light",
   size = 128,
   context?: BrandLogoContext,
 ): string[] {
+  const logoDev = logoDevLogoUrls(domains, { theme: surface, size });
   const simple = simpleIconCandidates({
     domains,
     merchantId: context?.merchantId,
@@ -64,7 +66,7 @@ export function resolveBrandLogoCandidates(
 
   const seen = new Set<string>();
   const merged: string[] = [];
-  for (const url of [...simple, ...vectorZone, ...brandfetch]) {
+  for (const url of [...logoDev, ...simple, ...vectorZone, ...brandfetch]) {
     if (seen.has(url)) continue;
     seen.add(url);
     merged.push(url);
