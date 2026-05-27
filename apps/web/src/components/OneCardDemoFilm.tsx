@@ -560,6 +560,7 @@ function DemoScrubber({
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
+  const pct = `${Math.max(progress * 100, 0)}%`;
 
   function positionToProgress(clientX: number) {
     const track = trackRef.current;
@@ -608,12 +609,12 @@ function DemoScrubber({
       }}
     >
       <div
-        className="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-sky-500 transition-[width] duration-75"
-        style={{ width: `${Math.max(progress * 100, 1)}%` }}
+        className="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-sky-500"
+        style={{ width: pct }}
       />
       <div
-        className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-2 border-white bg-sky-600 shadow-sm transition-[left] duration-75 group-hover:scale-110 sm:h-3.5 sm:w-3.5"
-        style={{ left: `calc(${progress * 100}% - 8px)` }}
+        className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-sky-600 shadow-sm group-hover:scale-110 sm:h-3.5 sm:w-3.5"
+        style={{ left: pct }}
       />
     </div>
   );
@@ -627,6 +628,7 @@ export function OneCardDemoFilm() {
   const [paused, setPaused] = useState(false);
   const [scrubbing, setScrubbing] = useState(false);
   const lastTick = useRef<number | null>(null);
+  const wasPlayingBeforeScrub = useRef(false);
 
   const phase = msToPhase(elapsedMs);
   const copy = PHASE_COPY[phase];
@@ -776,10 +778,16 @@ export function OneCardDemoFilm() {
             progress={progress}
             onScrub={scrubTo}
             onScrubStart={() => {
+              wasPlayingBeforeScrub.current = !paused;
               setScrubbing(true);
               setPaused(true);
             }}
-            onScrubEnd={() => setScrubbing(false)}
+            onScrubEnd={() => {
+              setScrubbing(false);
+              if (wasPlayingBeforeScrub.current) {
+                setPaused(false);
+              }
+            }}
           />
           <p className="mt-2 text-center text-[0.6rem] leading-relaxed text-brand-muted sm:text-[0.65rem]">
             Tap video to pause · drag bar to scrub
