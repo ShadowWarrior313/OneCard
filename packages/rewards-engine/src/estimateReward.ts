@@ -26,7 +26,13 @@ export function getCategorySpend(
   usage: CategoryUsage[],
   cardId: string,
   category: RewardCategory,
+  sharedCapGroup?: string,
 ): number {
+  if (sharedCapGroup) {
+    return usage
+      .filter((u) => u.cardId === cardId && u.sharedCapGroup === sharedCapGroup)
+      .reduce((sum, u) => sum + u.spendThisPeriod, 0);
+  }
   return (
     usage.find((u) => u.cardId === cardId && u.category === category)
       ?.spendThisPeriod ?? 0
@@ -38,8 +44,8 @@ export {
 } from "./getRewardRule.js";
 
 /**
- * Blends bonus vs base rate when monthly cap is partially exhausted.
- * capMonthly is dollars of eligible spend at the bonus multiplier.
+ * Blends bonus vs base rate when monthly/annual cap is partially exhausted.
+ * cap* fields are dollars of eligible spend at the bonus multiplier.
  */
 export function effectiveMultiplier(
   rule: RewardRule,
@@ -47,7 +53,7 @@ export function effectiveMultiplier(
   amount: number,
   spendThisPeriod: number,
 ): { multiplier: number; cappedOut: boolean } {
-  const cap = rule.capMonthly;
+  const cap = rule.capMonthly ?? rule.capAnnual;
   if (cap === undefined) {
     return { multiplier: rule.multiplier, cappedOut: false };
   }
@@ -105,7 +111,13 @@ export function estimateRewardForCard(
   const merchantId = transaction.merchantId;
   const rule = getRewardRule(card, category, merchantId);
   const otherRule = getRewardRule(card, "other", merchantId);
-  const spend = getCategorySpend(portfolio.usage, card.cardId, rule.category);
+  const spend = getCategorySpend(
+    portfolio.usage,
+    card.cardId,
+    rule.category,
+    rule.sharedCapGroup,
+  );
+  const capLimit = rule.capMonthly ?? rule.capAnnual;
   const { multiplier, cappedOut } = effectiveMultiplier(
     rule,
     otherRule,
@@ -117,7 +129,7 @@ export function estimateRewardForCard(
     transaction.amount * multiplier * pointValueCents(card);
   const capNote = cappedOut
     ? ` (${rule.category} cap exhausted — earning at ${otherRule.multiplier}x)`
-    : rule.capMonthly !== undefined && spend + transaction.amount > rule.capMonthly
+    : capLimit !== undefined && spend + transaction.amount > capLimit
       ? ` (partial cap — blended ${multiplier.toFixed(2)}x this purchase)`
       : "";
 

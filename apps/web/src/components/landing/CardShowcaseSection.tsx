@@ -21,6 +21,8 @@ import {
 } from "react";
 import { useUserProfile } from "@/context/UserProfileContext";
 import { useWallet } from "@/context/WalletContext";
+import { getCardById } from "@/data/cards";
+import { estimateRewardForCard } from "@onecard/rewards-engine";
 import type { CardProduct, RewardCategory } from "@onecard/shared-types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -111,16 +113,36 @@ function buildActivity(cards: CardProduct[]) {
   ];
 }
 
+const DEMO_GAS_AMOUNT = 62;
+
+function gasRewardDollars(card: CardProduct): number {
+  const est = estimateRewardForCard(
+    card,
+    {
+      amount: DEMO_GAS_AMOUNT,
+      merchantName: "Shell",
+      mcc: "5542",
+      category: "gas",
+    },
+    "gas",
+    { cards: [card], usage: [], preferences: { preferCashback: false } },
+  );
+  return est.estimatedRewardValueCents / 100;
+}
+
 function buildFeaturedRouting(cards: CardProduct[]) {
   const winner = bestWalletCardFor(cards, "gas", true);
-  const fallback: CardProduct = {
-    cardId: "demo",
-    issuer: "CIBC",
-    displayName: "CIBC Dividend Visa Infinite",
-    currency: "cashback %",
-    rewards: [{ category: "gas", multiplier: 4, capMonthly: 80 }],
-  };
+  const fallback = getCardById("cibc_dividend_infinite");
   const card = winner ?? fallback;
+  if (!card) {
+    return {
+      merchant: "Shell",
+      amount: "$62.00",
+      mcc: "Gas · MCC 5542",
+      card: "Your best gas card",
+      rate: "Best available rate",
+    };
+  }
   const mult = multiplierFor(card, "gas");
 
   return {
@@ -135,27 +157,32 @@ function buildFeaturedRouting(cards: CardProduct[]) {
 function buildRoutingComparison(cards: CardProduct[]) {
   const winner = bestWalletCardFor(cards, "gas", true);
   const runnerUp = bestWalletCardFor(cards, "gas", false);
-  const fallbackWinner = {
-    name: "CIBC Dividend",
-    rate: "4% gas",
-    reward: "$2.48",
-    win: true,
-  };
-  const fallbackRunner = {
-    name: "Amex Cobalt",
-    rate: "1× gas",
-    reward: "$0.62",
-    win: false,
-  };
 
-  if (!winner) return [fallbackWinner, fallbackRunner];
+  if (!winner) {
+    const demo = getCardById("cibc_dividend_infinite");
+    const cobalt = getCardById("amex_cobalt");
+    return [
+      {
+        name: "CIBC Dividend",
+        rate: demo ? rateLabel("gas", multiplierFor(demo, "gas"), demo.currency) : "4% gas",
+        reward: demo ? `$${gasRewardDollars(demo).toFixed(2)}` : "$2.48",
+        win: true,
+      },
+      {
+        name: "Amex Cobalt",
+        rate: cobalt ? rateLabel("gas", multiplierFor(cobalt, "gas"), cobalt.currency) : "1× gas",
+        reward: cobalt ? `$${gasRewardDollars(cobalt).toFixed(2)}` : "$0.62",
+        win: false,
+      },
+    ];
+  }
 
   const rows = [];
   if (winner) {
     rows.push({
       name: shortCardName(winner.displayName),
       rate: rateLabel("gas", multiplierFor(winner, "gas"), winner.currency),
-      reward: "$2.48",
+      reward: `$${gasRewardDollars(winner).toFixed(2)}`,
       win: true,
     });
   }
@@ -167,11 +194,20 @@ function buildRoutingComparison(cards: CardProduct[]) {
     rows.push({
       name: shortCardName(second.displayName),
       rate: rateLabel("gas", multiplierFor(second, "gas"), second.currency),
-      reward: "$0.62",
+      reward: `$${gasRewardDollars(second).toFixed(2)}`,
       win: false,
     });
   }
-  return rows.length >= 2 ? rows : [fallbackWinner, fallbackRunner];
+  return rows.length >= 2
+    ? rows
+    : [
+        rows[0] ?? {
+          name: "Best card",
+          rate: "—",
+          reward: "$0.00",
+          win: true,
+        },
+      ];
 }
 
 function usePointerTilt(disabled: boolean) {

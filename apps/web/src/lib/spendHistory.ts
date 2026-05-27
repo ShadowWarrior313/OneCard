@@ -35,6 +35,9 @@ const CATEGORY_LABELS: Record<RewardCategory, string> = {
   travel: "Travel",
   streaming: "Streaming",
   recurring_bills: "Bills",
+  entertainment: "Entertainment",
+  transportation: "Transportation",
+  drugstore: "Drugstore",
   other: "Other",
 };
 

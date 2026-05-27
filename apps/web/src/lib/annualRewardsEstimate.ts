@@ -22,13 +22,17 @@ export const ANNUAL_SPEND_CATEGORIES: SpendCategoryConfig[] = [
 export type MonthlySpendMap = Record<RewardCategory, number>;
 
 export function defaultMonthlySpend(): MonthlySpendMap {
-  return ANNUAL_SPEND_CATEGORIES.reduce(
+  const base = ANNUAL_SPEND_CATEGORIES.reduce(
     (acc, row) => {
       acc[row.category] = row.defaultMonthly;
       return acc;
     },
     {} as MonthlySpendMap,
   );
+  base.entertainment = 0;
+  base.transportation = 0;
+  base.drugstore = 0;
+  return base;
 }
 
 export interface AnnualRewardsComparison {

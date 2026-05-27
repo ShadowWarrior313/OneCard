@@ -1,0 +1,1741 @@
+[
+  {
+    "id": "amex_cobalt",
+    "issuer": "American Express",
+    "name": "American Express Cobalt Card",
+    "annualFee": 155.88,
+    "network": "amex",
+    "pointValueCAD": 0.02,
+    "currency": "MR points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": false,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "capMonthly": 2500,
+        "excludedMerchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "costco",
+          "costco_wholesale",
+          "save_on_foods",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 5,
+        "capMonthly": 2500
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "amex_gold",
+    "issuer": "American Express",
+    "name": "American Express Gold Rewards Card",
+    "annualFee": 250,
+    "network": "amex",
+    "pointValueCAD": 0.02,
+    "currency": "MR points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "amex_platinum",
+    "issuer": "American Express",
+    "name": "American Express Platinum Card",
+    "annualFee": 699,
+    "network": "amex",
+    "pointValueCAD": 0.02,
+    "currency": "MR points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "amex_simplycash_preferred",
+    "issuer": "American Express",
+    "name": "SimplyCash Preferred Card",
+    "annualFee": 99,
+    "network": "amex",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 300
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capMonthly": 300
+      },
+      {
+        "category": "other",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "amex_marriott",
+    "issuer": "American Express",
+    "name": "Marriott Bonvoy American Express Card",
+    "annualFee": 120,
+    "network": "amex",
+    "pointValueCAD": 0.009,
+    "currency": "Bonvoy points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 5,
+        "merchantIds": [
+          "marriott"
+        ]
+      },
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      }
+    ]
+  },
+  {
+    "id": "amex_green",
+    "issuer": "American Express",
+    "name": "American Express Green Card",
+    "annualFee": 0,
+    "network": "amex",
+    "pointValueCAD": 0.02,
+    "currency": "MR points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "amex_choice",
+    "issuer": "American Express",
+    "name": "American Express Choice Card",
+    "annualFee": 0,
+    "network": "amex",
+    "pointValueCAD": 0.02,
+    "currency": "MR points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_dividend_platinum",
+    "issuer": "CIBC",
+    "name": "CIBC Dividend Platinum Visa Card",
+    "annualFee": 99,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "gas",
+        "multiplier": 3
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_dividend",
+    "issuer": "CIBC",
+    "name": "CIBC Dividend Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_dividend_infinite",
+    "issuer": "CIBC",
+    "name": "CIBC Dividend Visa Infinite Card",
+    "annualFee": 120,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": false,
+    "rewards": [
+      {
+        "category": "gas",
+        "multiplier": 4,
+        "capMonthly": 80
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 80
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capMonthly": 80
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_aeroplan_infinite",
+    "issuer": "CIBC",
+    "name": "CIBC Aeroplan Visa Infinite Card",
+    "annualFee": 139,
+    "network": "visa",
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "dining",
+        "multiplier": 1.5
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 1.5
+      },
+      {
+        "category": "travel",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "cibc_aventura_infinite",
+    "issuer": "CIBC",
+    "name": "CIBC Aventura Visa Infinite Card",
+    "annualFee": 139,
+    "network": "visa",
+    "pointValueCAD": 0.012,
+    "currency": "Aventura points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "cibc_aventura_gold",
+    "issuer": "CIBC",
+    "name": "CIBC Aventura Gold Visa Card",
+    "annualFee": 89,
+    "network": "visa",
+    "pointValueCAD": 0.012,
+    "currency": "Aventura points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 1.5
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_select",
+    "issuer": "CIBC",
+    "name": "CIBC Select Visa Card",
+    "annualFee": 29,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_adapta",
+    "issuer": "CIBC",
+    "name": "CIBC Adapta Mastercard",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "cibc_costco",
+    "issuer": "CIBC",
+    "name": "CIBC Costco Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "merchantIds": [
+          "costco",
+          "costco_wholesale"
+        ],
+        "capMonthly": 5000
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capMonthly": 5000
+      },
+      {
+        "category": "other",
+        "multiplier": 2,
+        "merchantIds": [
+          "costco",
+          "costco_wholesale"
+        ],
+        "capMonthly": 8000
+      }
+    ]
+  },
+  {
+    "id": "rbc_avion_infinite",
+    "issuer": "RBC",
+    "name": "RBC Avion Visa Infinite Card",
+    "annualFee": 120,
+    "network": "visa",
+    "pointValueCAD": 0.014,
+    "currency": "Avion points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 1.25
+      },
+      {
+        "category": "dining",
+        "multiplier": 1.25
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "rbc_avion_infinite_privilege",
+    "issuer": "RBC",
+    "name": "RBC Avion Visa Infinite Privilege Card",
+    "annualFee": 399,
+    "network": "visa",
+    "pointValueCAD": 0.014,
+    "currency": "Avion points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 1.25
+      },
+      {
+        "category": "dining",
+        "multiplier": 1.25
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "rbc_ion",
+    "issuer": "RBC",
+    "name": "RBC Ion Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.014,
+    "currency": "Avion points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": false,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "rbc_ion_plus",
+    "issuer": "RBC",
+    "name": "RBC Ion+ Visa Card",
+    "annualFee": 48,
+    "network": "visa",
+    "pointValueCAD": 0.014,
+    "currency": "Avion points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "rbc_westjet",
+    "issuer": "RBC",
+    "name": "WestJet RBC World Elite Mastercard",
+    "annualFee": 119,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "WestJet dollars",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1.5
+      },
+      {
+        "category": "travel",
+        "multiplier": 3,
+        "merchantIds": [
+          "westjet"
+        ]
+      },
+      {
+        "category": "travel",
+        "multiplier": 1.5
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      }
+    ]
+  },
+  {
+    "id": "rbc_cashback_preferred",
+    "issuer": "RBC",
+    "name": "RBC Cash Back Preferred World Elite Mastercard",
+    "annualFee": 99,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "rbc_low_rate",
+    "issuer": "RBC",
+    "name": "RBC Visa Classic Low Rate Option",
+    "annualFee": 20,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "td_aeroplan_infinite",
+    "issuer": "TD",
+    "name": "TD Aeroplan Visa Infinite Card",
+    "annualFee": 139,
+    "network": "visa",
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "groceries",
+        "multiplier": 1.5
+      },
+      {
+        "category": "travel",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "td_aeroplan_platinum",
+    "issuer": "TD",
+    "name": "TD Aeroplan Visa Platinum Card",
+    "annualFee": 89,
+    "network": "visa",
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 1.5
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "td_cashback_infinite",
+    "issuer": "TD",
+    "name": "TD Cash Back Visa Infinite Card",
+    "annualFee": 139,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "capMonthly": 150
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capMonthly": 150
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 3,
+        "capMonthly": 150
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "td_cashback",
+    "issuer": "TD",
+    "name": "TD Cash Back Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 100
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capMonthly": 100
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "td_first_class",
+    "issuer": "TD",
+    "name": "TD First Class Travel Visa Infinite Card",
+    "annualFee": 139,
+    "network": "visa",
+    "pointValueCAD": 0.005,
+    "currency": "TD Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 8
+      },
+      {
+        "category": "dining",
+        "multiplier": 4
+      },
+      {
+        "category": "other",
+        "multiplier": 2
+      }
+    ]
+  },
+  {
+    "id": "td_rewards_visa",
+    "issuer": "TD",
+    "name": "TD Rewards Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.005,
+    "currency": "TD Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "td_emerald_flex",
+    "issuer": "TD",
+    "name": "TD Emerald Flex Rate Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "scotia_momentum",
+    "issuer": "Scotiabank",
+    "name": "Scotia Momentum Visa Infinite Card",
+    "annualFee": 120,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "verify": false,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 4,
+        "capMonthly": 250
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 4,
+        "capMonthly": 250
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "scotia_momentum_no_fee",
+    "issuer": "Scotiabank",
+    "name": "Scotia Momentum No-Fee Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 100
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capMonthly": 100
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "scotia_scene",
+    "issuer": "Scotiabank",
+    "name": "Scotiabank Scene+ Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "merchantIds": [
+          "sobeys",
+          "freshco",
+          "iga",
+          "safeway"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "merchantIds": [
+          "shell"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "scotia_passport",
+    "issuer": "Scotiabank",
+    "name": "Scotiabank Passport Visa Infinite Card",
+    "annualFee": 150,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 3
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "scotia_gold_amex",
+    "issuer": "Scotiabank",
+    "name": "Scotiabank Gold American Express Card",
+    "annualFee": 120,
+    "network": "amex",
+    "pointValueCAD": 0.01,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "dining",
+        "multiplier": 5,
+        "capMonthly": 200
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "merchantIds": [
+          "sobeys",
+          "freshco",
+          "iga",
+          "safeway"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 3
+      }
+    ]
+  },
+  {
+    "id": "bmo_eclipse",
+    "issuer": "BMO",
+    "name": "BMO eclipse Visa Infinite Privilege Card",
+    "annualFee": 499,
+    "network": "visa",
+    "pointValueCAD": 0.0067,
+    "currency": "BMO Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 5
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "bmo_eclipse_rise",
+    "issuer": "BMO",
+    "name": "BMO eclipse rise Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.0067,
+    "currency": "BMO Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "bmo_cashback_we",
+    "issuer": "BMO",
+    "name": "BMO CashBack World Elite Mastercard",
+    "annualFee": 120,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "capMonthly": 500
+      },
+      {
+        "category": "gas",
+        "multiplier": 4,
+        "capMonthly": 250
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "bmo_cashback",
+    "issuer": "BMO",
+    "name": "BMO CashBack Mastercard",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capMonthly": 100
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 1
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "bmo_airmiles",
+    "issuer": "BMO",
+    "name": "BMO AIR MILES World Elite Mastercard",
+    "annualFee": 120,
+    "network": "mastercard",
+    "pointValueCAD": 0.012,
+    "currency": "AIR MILES",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "gas",
+        "multiplier": 3
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "bmo_ascend",
+    "issuer": "BMO",
+    "name": "BMO Ascend World Elite Mastercard",
+    "annualFee": 150,
+    "network": "mastercard",
+    "pointValueCAD": 0.0067,
+    "currency": "BMO Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 5
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "bmo_rewards_mc",
+    "issuer": "BMO",
+    "name": "BMO Rewards Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.0067,
+    "currency": "BMO Rewards",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "nbc_platinum",
+    "issuer": "National Bank",
+    "name": "National Bank Platinum Mastercard",
+    "annualFee": 89,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "À la carte points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "nbc_world_elite",
+    "issuer": "National Bank",
+    "name": "National Bank World Elite Mastercard",
+    "annualFee": 150,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "À la carte points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "nbc_my_credit",
+    "issuer": "National Bank",
+    "name": "National Bank mycredit Mastercard",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "nbc_allure",
+    "issuer": "National Bank",
+    "name": "National Bank Allure Mastercard",
+    "annualFee": 60,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "À la carte points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "simplii_cashback_visa",
+    "issuer": "Simplii Financial",
+    "name": "Simplii Financial Cash Back Visa Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.simplii.com/en/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 4,
+        "capMonthly": 200
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capMonthly": 200
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 200
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "ws_credit_infinite",
+    "issuer": "Wealthsimple",
+    "name": "Wealthsimple Visa Infinite+ Credit Card",
+    "annualFee": 240,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.wealthsimple.com/en-ca/credit-card",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 2
+      }
+    ]
+  },
+  {
+    "id": "ws_credit_privilege",
+    "issuer": "Wealthsimple",
+    "name": "Wealthsimple Visa Infinite Privilege Credit Card",
+    "annualFee": 240,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.wealthsimple.com/en-ca/credit-card",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 2
+      }
+    ]
+  },
+  {
+    "id": "pc_mastercard",
+    "issuer": "PC Financial",
+    "name": "PC Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "PC Optimum points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.pcfinancial.ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2.5,
+        "merchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 3.5,
+        "merchantIds": [
+          "shoppers"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "merchantIds": [
+          "esso"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pc_world_mc",
+    "issuer": "PC Financial",
+    "name": "PC World Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "PC Optimum points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.pcfinancial.ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "merchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 4.5,
+        "merchantIds": [
+          "shoppers"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "merchantIds": [
+          "esso"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pc_world_elite_mc",
+    "issuer": "PC Financial",
+    "name": "PC World Elite Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "PC Optimum points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.pcfinancial.ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 4.5,
+        "merchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 6.5,
+        "merchantIds": [
+          "shoppers"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "merchantIds": [
+          "esso"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "pc_insiders_we_mc",
+    "issuer": "PC Financial",
+    "name": "PC Insiders World Elite Mastercard",
+    "annualFee": 119,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "PC Optimum points",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.pcfinancial.ca/en/credit-cards/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "merchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 7,
+        "merchantIds": [
+          "shoppers"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "merchantIds": [
+          "esso"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "neo_mastercard",
+    "issuer": "Neo Financial",
+    "name": "Neo Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.neofinancial.com/credit",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "neo_world_mc",
+    "issuer": "Neo Financial",
+    "name": "Neo World Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.neofinancial.com/credit",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "neo_world_elite_mc",
+    "issuer": "Neo Financial",
+    "name": "Neo World Elite Mastercard",
+    "annualFee": 125,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.neofinancial.com/credit",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "capMonthly": 1000
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 4,
+        "capMonthly": 500
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "capMonthly": 1000
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "tangerine_money_back",
+    "issuer": "Tangerine",
+    "name": "Tangerine Money-Back Credit Card",
+    "annualFee": 0,
+    "network": "visa",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.tangerine.ca/en/personal/spend/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "tangerine_world_elite",
+    "issuer": "Tangerine",
+    "name": "Tangerine World Elite Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.tangerine.ca/en/personal/spend/credit-cards",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  },
+  {
+    "id": "koho_essential",
+    "issuer": "KOHO",
+    "name": "KOHO Essential Prepaid Mastercard",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.koho.ca/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "koho_premium",
+    "issuer": "KOHO",
+    "name": "KOHO Premium Prepaid Mastercard",
+    "annualFee": 84,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.koho.ca/",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
+      }
+    ]
+  },
+  {
+    "id": "manulife_benefits",
+    "issuer": "Manulife",
+    "name": "Manulife Visa Benefits Card",
+    "annualFee": 0,
+    "network": "mastercard",
+    "pointValueCAD": 0.01,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-01-15",
+    "sourceUrl": "https://www.manulifebank.ca/personal-banking/credit-cards.html",
+    "verify": true,
+    "rewards": [
+      {
+        "category": "other",
+        "multiplier": 1
+      }
+    ]
+  }
+]

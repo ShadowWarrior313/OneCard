@@ -6,7 +6,8 @@ import type { RoutingDecision } from "@onecard/shared-types";
 import type { MerchantPreset } from "@/data/merchants";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
-import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
+import { formatDecimal } from "@/lib/formatNumber";
+import { formatRatesDisclaimer, formatEffectiveRewardPercent } from "@/data/cardRewards";
 import { ArrowRight, TrendingUp, Wallet } from "lucide-react";
 import Link from "next/link";
 import { RewardsComparisonTable } from "./RewardsComparisonTable";
@@ -59,8 +60,11 @@ export function SimulatorResultsPanel({
               {decision.selectedCardDisplayName}
             </p>
             <p className="text-sm text-brand-muted">
-              {formatMultiplier(decision.multiplier)}{" "}
-              {decision.category.replace(/_/g, " ")} · {sym}
+              {formatEffectiveRewardPercent(
+                decision.estimatedRewardValueCents,
+                taxTotal,
+              )}{" "}
+              · {decision.category.replace(/_/g, " ")} · {sym}
               {formatDecimal(taxTotal, 1)}
             </p>
           </div>
@@ -80,6 +84,9 @@ export function SimulatorResultsPanel({
           decision={decision}
           defaultCardId={defaultCardId}
         />
+        <p className="text-center text-xs leading-relaxed text-brand-muted">
+          {formatRatesDisclaimer()}
+        </p>
       </div>
     );
   }

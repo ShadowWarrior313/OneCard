@@ -9,6 +9,9 @@ export type RewardCategory =
   | "travel"
   | "streaming"
   | "recurring_bills"
+  | "entertainment"
+  | "transportation"
+  | "drugstore"
   | "other";
 
 /**
@@ -26,6 +29,10 @@ export interface RewardRule {
   multiplier: number;
   /** Monthly cap in dollars of eligible spend in this category, if any. */
   capMonthly?: number;
+  /** Annual cap in dollars of eligible spend in this category, if any. */
+  capAnnual?: number;
+  /** When set, cap spend is tracked across all rules sharing this group id. */
+  sharedCapGroup?: string;
   /** When set, this rule only applies at these merchant IDs (from the merchant catalog). */
   merchantIds?: string[];
   /** Merchants excluded from this category bonus (e.g. Amex Cobalt at Costco). */
@@ -57,6 +64,8 @@ export interface CategoryUsage {
   category: RewardCategory;
   /** Dollars of eligible spend already charged this billing period. */
   spendThisPeriod: number;
+  /** When set, spend counts toward a shared cap group instead of category-only. */
+  sharedCapGroup?: string;
 }
 
 export interface UserPreferences {

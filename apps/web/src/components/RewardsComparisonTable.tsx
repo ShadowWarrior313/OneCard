@@ -6,7 +6,8 @@ import type { MerchantPreset } from "@/data/merchants";
 import { IssuerLogo } from "@/components/IssuerLogo";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
-import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
+import { formatDecimal } from "@/lib/formatNumber";
+import { formatEffectiveRewardPercent } from "@/data/cardRewards";
 import { useMemo, useState, type ReactNode } from "react";
 
 const VISIBLE = 4;
@@ -96,11 +97,12 @@ export function RewardsComparisonTable({
       },
     },
     {
-      label: "Earn rate",
+      label: "Effective rate",
+      hint: "Normalized reward value on this purchase",
       value: (alt) => (
         <CellValue>
           <span className="max-w-full break-words text-sm font-medium tabular-nums text-brand-body">
-            {formatMultiplier(alt.multiplier)}
+            {formatEffectiveRewardPercent(alt.estimatedRewardValueCents, totalCharged)}
           </span>
           <span className="max-w-full break-words text-xs leading-snug text-brand-muted">
             {alt.category.replace(/_/g, " ")}
@@ -211,10 +213,10 @@ export function RewardsComparisonTable({
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <dt className="text-brand-muted">Earn rate</dt>
+                  <dt className="text-brand-muted">Effective rate</dt>
                   <dd className="font-medium text-brand-body">
-                    {formatMultiplier(alt.multiplier)}{" "}
-                    {alt.category.replace(/_/g, " ")}
+                    {formatEffectiveRewardPercent(alt.estimatedRewardValueCents, totalCharged)}{" "}
+                    · {alt.category.replace(/_/g, " ")}
                   </dd>
                 </div>
                 <div>
