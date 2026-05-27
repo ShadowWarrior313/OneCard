@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { FaqSection } from "@/components/landing/FaqSection";
 import { OneCardDemoFilm } from "@/components/OneCardDemoFilm";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -32,9 +33,9 @@ export default function HowItWorksPage() {
   return (
     <>
       <Header />
-      <main className="pt-16">
+      <main className="min-w-0 overflow-x-clip pt-16">
         <section className="border-b border-zinc-200 bg-white py-12 sm:py-14">
-          <div className="oc-container-wide mx-auto max-w-3xl">
+          <div className="oc-container-wide mx-auto min-w-0 max-w-3xl">
             <div className="text-center">
               <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
                 How it works
@@ -65,7 +66,7 @@ export default function HowItWorksPage() {
               ))}
             </ol>
 
-            <div className="mt-10 overflow-hidden rounded-xl border border-zinc-200">
+            <div className="mt-10 min-w-0">
               <OneCardDemoFilm />
             </div>
 
@@ -96,6 +97,12 @@ export default function HowItWorksPage() {
                 Get started
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-12 sm:py-16">
+          <div className="oc-container-wide mx-auto min-w-0 max-w-3xl">
+            <FaqSection />
           </div>
         </section>
       </main>

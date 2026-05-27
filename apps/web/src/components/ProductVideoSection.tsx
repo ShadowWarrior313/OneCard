@@ -45,7 +45,7 @@ export function ProductVideoSection() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="relative overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
+            <div className="relative min-w-0">
               <OneCardDemoFilm />
             </div>
           </motion.div>
