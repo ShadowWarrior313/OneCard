@@ -90,7 +90,7 @@ export function Waitlist() {
                       minLength={2}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Alex Chen"
+                      placeholder="John Smith"
                       className="oc-input mt-2 bg-brand-surface/50"
                     />
                   </div>

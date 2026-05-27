@@ -350,13 +350,18 @@ function ShowcaseTile({
   title,
   children,
   onExpand,
+  expandHref,
   featured = false,
 }: {
   title: string;
   children: ReactNode;
-  onExpand: () => void;
+  onExpand?: () => void;
+  expandHref?: string;
   featured?: boolean;
 }) {
+  const expandClassName =
+    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-ink text-white transition hover:bg-brand-charcoal";
+
   return (
     <article
       className={`group relative flex min-h-[22rem] flex-col overflow-hidden rounded-2xl border bg-white sm:min-h-[26rem] ${
@@ -369,14 +374,24 @@ function ShowcaseTile({
         <h3 className="max-w-[14rem] text-lg font-semibold leading-snug tracking-tight text-brand-ink sm:text-xl">
           {title}
         </h3>
-        <button
-          type="button"
-          onClick={onExpand}
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-ink text-white transition hover:bg-brand-charcoal"
-          aria-label={`Open ${title}`}
-        >
-          <Maximize2 className="h-4 w-4" />
-        </button>
+        {expandHref ? (
+          <Link
+            href={expandHref}
+            className={expandClassName}
+            aria-label={`Go to ${title.toLowerCase()}`}
+          >
+            <Maximize2 className="h-4 w-4" />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onExpand}
+            className={expandClassName}
+            aria-label={`Open ${title}`}
+          >
+            <Maximize2 className="h-4 w-4" />
+          </button>
+        )}
       </div>
       <div className="relative mt-2 flex flex-1 flex-col">{children}</div>
     </article>
@@ -620,7 +635,7 @@ export function CardShowcaseSection() {
           <div className="mt-10 grid gap-4 sm:gap-5 lg:grid-cols-3">
             <ShowcaseTile
               title="Link the cards you already carry"
-              onExpand={openModal}
+              expandHref="/wallet"
             >
               <WalletMiniVisual />
             </ShowcaseTile>

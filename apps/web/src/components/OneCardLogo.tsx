@@ -1,8 +1,9 @@
 import Image from "next/image";
+import { DEFAULT_CARDHOLDER_NAME } from "@/lib/userProfile";
 
 export function OneCardLogo({
   showWordmark = false,
-  cardholderName = "John Doe",
+  cardholderName = DEFAULT_CARDHOLDER_NAME,
   variant = "mark",
   light = false,
 }: {

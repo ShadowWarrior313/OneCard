@@ -83,7 +83,7 @@ export interface WaitlistEntry {
   at: string;
 }
 
-export const DEFAULT_CARDHOLDER_NAME = "Alex Chen";
+export const DEFAULT_CARDHOLDER_NAME = "John Smith";
 
 export function normalizeProfileName(name: string): string {
   return name.trim().replace(/\s+/g, " ");

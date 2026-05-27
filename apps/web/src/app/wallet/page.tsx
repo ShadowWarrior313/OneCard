@@ -4,7 +4,7 @@ import { WalletFold } from "@/components/wallet/WalletFold";
 import { CardPicker } from "@/components/wallet/CardPicker";
 import { BusinessCardPanel } from "@/components/wallet/BusinessCardPanel";
 import Link from "next/link";
-import { Calculator, CreditCard, Wallet } from "lucide-react";
+import { BarChart3, Calculator, CreditCard, Wallet } from "lucide-react";
 
 export default function WalletPage() {
   return (
@@ -48,8 +48,16 @@ export default function WalletPage() {
                 </div>
               </div>
               <Link
+                href="/wallet/my-spend"
+                className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm font-semibold text-brand-ink transition hover:bg-zinc-50 sm:px-6"
+              >
+                <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="sm:hidden">My Spend</span>
+                <span className="hidden sm:inline">My Spend — track by card & category</span>
+              </Link>
+              <Link
                 href="/simulator"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-ink px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal"
+                className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg bg-brand-ink px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal sm:px-6"
               >
                 <Calculator className="h-4 w-4 shrink-0" aria-hidden />
                 Test a purchase with this wallet

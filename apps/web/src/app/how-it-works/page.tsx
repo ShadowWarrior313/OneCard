@@ -1,5 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { AnnualRewardsStory } from "@/components/how-it-works/AnnualRewardsStory";
+import { RoutingMechanism } from "@/components/how-it-works/RoutingMechanism";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { OneCardDemoFilm } from "@/components/OneCardDemoFilm";
 import Link from "next/link";
@@ -99,6 +101,9 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </section>
+
+        <RoutingMechanism />
+        <AnnualRewardsStory />
 
         <section className="bg-white py-12 sm:py-16">
           <div className="oc-container-wide mx-auto min-w-0 max-w-3xl">

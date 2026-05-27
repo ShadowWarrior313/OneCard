@@ -10,6 +10,7 @@ import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
 import { ArrowRight, TrendingUp, Wallet } from "lucide-react";
 import Link from "next/link";
 import { RewardsComparisonTable } from "./RewardsComparisonTable";
+import { LogSpendButton } from "./spend/LogSpendButton";
 
 export function SimulatorResultsPanel({
   merchant,
@@ -29,7 +30,7 @@ export function SimulatorResultsPanel({
   cards: CardProduct[];
   decision: RoutingDecision | null;
   businessBlock: "no-card" | "merchant" | null;
-  purchaseType: string;
+  purchaseType: "personal" | "business";
   defaultCardId: string | null;
 }) {
   if (businessBlock) {
@@ -71,6 +72,13 @@ export function SimulatorResultsPanel({
           defaultCardId={defaultCardId}
           sym={sym}
           totalCharged={taxTotal}
+        />
+        <LogSpendButton
+          merchant={merchant}
+          amount={taxTotal}
+          purchaseType={purchaseType}
+          decision={decision}
+          defaultCardId={defaultCardId}
         />
       </div>
     );

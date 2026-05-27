@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { WalletProvider } from "@/context/WalletContext";
+import { SpendProvider } from "@/context/SpendContext";
 import { UserProfileProvider } from "@/context/UserProfileContext";
 import { getSiteUrl } from "@/lib/siteUrl";
 import "./globals.css";
@@ -49,7 +50,9 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="min-w-0">
         <UserProfileProvider>
-          <WalletProvider>{children}</WalletProvider>
+          <WalletProvider>
+            <SpendProvider>{children}</SpendProvider>
+          </WalletProvider>
         </UserProfileProvider>
       </body>
     </html>

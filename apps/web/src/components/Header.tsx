@@ -10,7 +10,13 @@ const links = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/simulator", label: "Simulator" },
   { href: "/wallet", label: "Wallet" },
+  { href: "/wallet/my-spend", label: "My Spend" },
 ];
+
+function isNavActive(pathname: string, href: string): boolean {
+  if (href === "/wallet") return pathname === "/wallet";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function Header() {
   const path = usePathname();
@@ -52,22 +58,27 @@ export function Header() {
           <OneCardLogo showWordmark light={transparent} />
         </Link>
 
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
-          {links.map((l) => (
+        <nav className="hidden items-center gap-5 lg:flex" aria-label="Main">
+          {links.map((l) => {
+            const active = isNavActive(path, l.href);
+            return (
             <Link
               key={l.href}
               href={l.href}
               className={`text-sm font-medium transition ${
                 transparent
-                  ? "text-zinc-300 hover:text-white"
-                  : path === l.href
+                  ? active
+                    ? "text-white"
+                    : "text-zinc-300 hover:text-white"
+                  : active
                     ? "text-brand-ink"
                     : "text-brand-muted hover:text-brand-ink"
               }`}
             >
               {l.label}
             </Link>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -93,7 +104,7 @@ export function Header() {
           </Link>
           <button
             type="button"
-            className={`rounded-lg p-2 md:hidden ${
+            className={`rounded-lg p-2 lg:hidden ${
               transparent
                 ? "text-white hover:bg-white/10"
                 : "text-brand-body hover:bg-zinc-100"
@@ -111,7 +122,7 @@ export function Header() {
       {open && (
         <nav
           id="mobile-nav"
-          className="border-t border-zinc-200 bg-white px-4 py-3 md:hidden"
+          className="border-t border-zinc-200 bg-white px-4 py-3 lg:hidden"
           aria-label="Mobile"
         >
           <ul className="space-y-1">
@@ -120,7 +131,11 @@ export function Header() {
                 <Link
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-lg px-3 py-3 text-sm font-medium text-brand-body hover:bg-zinc-50"
+                  className={`block rounded-lg px-3 py-3 text-sm font-medium hover:bg-zinc-50 ${
+                    isNavActive(path, l.href)
+                      ? "bg-zinc-50 font-semibold text-brand-ink"
+                      : "text-brand-body"
+                  }`}
                 >
                   {l.label}
                 </Link>
