@@ -2,9 +2,10 @@
 
 import { MySpendDashboard } from "@/components/spend/MySpendDashboard";
 
+/** Compact My Spend view inside the phone demo shell. */
 export function PhoneMySpendPanel() {
   return (
-    <div className="overflow-y-auto px-3 pb-24 pt-2">
+    <div className="w-full min-w-0 max-w-full pb-4">
       <MySpendDashboard variant="phone" />
     </div>
   );

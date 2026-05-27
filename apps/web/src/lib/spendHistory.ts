@@ -1,4 +1,5 @@
 import type { RewardCategory } from "@onecard/shared-types";
+import { merchantById } from "@/data/merchants";
 
 export type SpendPeriod = "week" | "month" | "quarter" | "year";
 
@@ -43,6 +44,20 @@ const CATEGORY_LABELS: Record<RewardCategory, string> = {
 
 export function categoryLabel(c: RewardCategory): string {
   return CATEGORY_LABELS[c];
+}
+
+/** Spend charts/listings: use reward category, or merchant group/name — never a generic "Other" bucket. */
+export function spendBucketLabel(record: SpendRecord): string {
+  if (record.category !== "other") {
+    return categoryLabel(record.category);
+  }
+
+  const merchant = merchantById(record.merchantId);
+  if (merchant && merchant.group !== "Other") {
+    return merchant.group;
+  }
+
+  return record.merchantName;
 }
 
 function startOfDay(d: Date): Date {
@@ -147,7 +162,7 @@ export interface CardAggregate {
 }
 
 export interface CategoryAggregate {
-  category: RewardCategory;
+  key: string;
   label: string;
   spend: number;
   rewards: number;
@@ -180,16 +195,17 @@ export function aggregateByCard(records: SpendRecord[]): CardAggregate[] {
 }
 
 export function aggregateByCategory(records: SpendRecord[]): CategoryAggregate[] {
-  const map = new Map<RewardCategory, CategoryAggregate>();
+  const map = new Map<string, CategoryAggregate>();
   for (const r of records) {
-    const existing = map.get(r.category);
+    const label = spendBucketLabel(r);
+    const existing = map.get(label);
     if (existing) {
       existing.spend += r.amount;
       existing.rewards += r.rewardCents / 100;
     } else {
-      map.set(r.category, {
-        category: r.category,
-        label: categoryLabel(r.category),
+      map.set(label, {
+        key: label,
+        label,
         spend: r.amount,
         rewards: r.rewardCents / 100,
       });
@@ -252,17 +268,14 @@ export function comparisonByCategory(
 ): PeriodComparisonRow[] {
   const cur = aggregateByCategory(current);
   const prev = aggregateByCategory(previous);
-  const keys = new Set([
-    ...cur.map((c) => c.category),
-    ...prev.map((p) => p.category),
-  ]);
+  const keys = new Set([...cur.map((c) => c.key), ...prev.map((p) => p.key)]);
 
-  return [...keys].map((cat) => {
-    const c = cur.find((x) => x.category === cat);
-    const p = prev.find((x) => x.category === cat);
+  return [...keys].map((key) => {
+    const c = cur.find((x) => x.key === key);
+    const p = prev.find((x) => x.key === key);
     return {
-      key: cat,
-      label: c?.label ?? p?.label ?? cat,
+      key,
+      label: c?.label ?? p?.label ?? key,
       current: c?.spend ?? 0,
       previous: p?.spend ?? 0,
     };

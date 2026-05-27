@@ -7,6 +7,7 @@ import { useWallet } from "@/context/WalletContext";
 import { getCardAppearance } from "@/data/cardAppearances";
 import { useCardImage } from "@/hooks/useCardImage";
 import { cardBackgroundStyle } from "@/lib/cardBackground";
+import { CompactCardAdder } from "@/components/wallet/CompactCardAdder";
 
 function CardSwatch({ cardId, issuer }: { cardId: string; issuer: string }) {
   const appearance = getCardAppearance(cardId, issuer);
@@ -37,10 +38,24 @@ function CardSwatch({ cardId, issuer }: { cardId: string; issuer: string }) {
 
 export function CardPicker() {
   const { hasCard, toggleCard } = useWallet();
-  const [open, setOpen] = useState<string | null>(ISSUER_GROUPS[0]);
+  const [open, setOpen] = useState<string | null>(null);
 
   return (
-    <div className="min-w-0 max-w-full max-h-[28rem] space-y-3 overflow-x-hidden overflow-y-auto pr-0.5">
+    <div className="min-w-0 max-w-full space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+          Add a card
+        </p>
+        <div className="mt-3">
+          <CompactCardAdder hasCard={hasCard} onAdd={toggleCard} />
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand-muted">
+          Browse by provider
+        </p>
+        <div className="max-h-[24rem] space-y-3 overflow-x-hidden overflow-y-auto pr-0.5">
       {ISSUER_GROUPS.map((issuer) => {
         const expanded = open === issuer;
         const list = cardsByIssuer(issuer);
@@ -119,6 +134,8 @@ export function CardPicker() {
           </div>
         );
       })}
+        </div>
+      </div>
     </div>
   );
 }

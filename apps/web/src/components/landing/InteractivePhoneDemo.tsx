@@ -30,6 +30,7 @@ import { MERCHANT_LOGO } from "@/data/merchantIcons";
 import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
 import { OneCardLogo } from "@/components/OneCardLogo";
 import { PhoneWalletFold } from "@/components/landing/PhoneWalletFold";
+import { PhoneMySpendPanel } from "@/components/spend/PhoneMySpendPanel";
 
 const PURCHASES = [
   { id: "uber_eats", amount: 54.9, when: "Today" },
@@ -74,7 +75,7 @@ const ACTIVITY: {
 ];
 
 type PhoneTab = "home" | "wallet" | "you";
-type PhoneScreen = PhoneTab | "activity";
+type PhoneScreen = PhoneTab | "activity" | "my-spend";
 
 function routeForPurchase(
   merchantId: string,
@@ -121,7 +122,8 @@ export function InteractivePhoneDemo() {
   const [activeId, setActiveId] = useState<string>(PURCHASES[0].id);
   const [phase, setPhase] = useState<"idle" | "routing" | "done">("done");
 
-  const tab: PhoneTab = screen === "activity" ? "home" : screen;
+  const tab: PhoneTab =
+    screen === "activity" ? "home" : screen === "my-spend" ? "wallet" : screen;
 
   const routed = useMemo(() => {
     const map = new Map<string, RoutingDecision | null>();
@@ -158,8 +160,16 @@ export function InteractivePhoneDemo() {
     if (screen === "activity") setScreen("home");
   }
 
-  function goTo(tabTarget: PhoneScreen) {
+  function goTo(tabTarget: PhoneTab) {
     setScreen(tabTarget);
+  }
+
+  function openScreen(next: PhoneScreen) {
+    setScreen(next);
+  }
+
+  function openMySpend() {
+    setScreen("my-spend");
   }
 
   return (
@@ -182,6 +192,9 @@ export function InteractivePhoneDemo() {
             >
               {screen === "activity" && (
                 <ScreenHeader title="Recent activity" onBack={() => goTo("home")} />
+              )}
+              {screen === "my-spend" && (
+                <ScreenHeader title="My Spend" onBack={() => goTo("wallet")} />
               )}
               {screen === "you" && (
                 <h3 className="py-2 text-sm font-semibold text-brand-ink">Account</h3>
@@ -374,7 +387,7 @@ export function InteractivePhoneDemo() {
                       </p>
                       <button
                         type="button"
-                        onClick={() => goTo("activity")}
+                        onClick={() => openScreen("activity")}
                         className="text-xs font-semibold text-brand-ink hover:underline"
                       >
                         See all
@@ -439,8 +452,11 @@ export function InteractivePhoneDemo() {
                   onSetDefault={setDefaultCardId}
                   onSetBusiness={setBusinessCardId}
                   onToggleCard={toggleCard}
+                  onOpenMySpend={openMySpend}
                 />
               )}
+
+              {screen === "my-spend" && <PhoneMySpendPanel />}
 
               {screen === "you" && (
                 <PhoneYouScreen
