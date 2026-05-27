@@ -20,6 +20,8 @@ import {
   type ReactNode,
 } from "react";
 import { useUserProfile } from "@/context/UserProfileContext";
+import { useWallet } from "@/context/WalletContext";
+import type { CardProduct, RewardCategory } from "@onecard/shared-types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -30,11 +32,147 @@ const FEATURES = [
   "Tokenized routing — your numbers never touch our servers",
 ];
 
-const ACTIVITY = [
-  { date: "Today", merchant: "Uber Eats", card: "Amex Cobalt", amount: "-$84.50", best: true },
-  { date: "Yesterday", merchant: "Shell", card: "PC Financial", amount: "-$62.00", best: false },
-  { date: "Mon", merchant: "Loblaws", card: "CIBC Dividend", amount: "-$118.40", best: false },
-];
+function shortCardName(displayName: string): string {
+  return displayName
+    .replace(/\s+Card$/i, "")
+    .replace(/\s+(Visa|Mastercard|American Express).*$/i, "")
+    .trim();
+}
+
+function issuerLabel(issuer: string): string {
+  if (issuer.includes("American Express")) return "Amex";
+  if (issuer.includes("Scotiabank")) return "Scotiabank";
+  return issuer.split(/\s+/)[0] ?? issuer;
+}
+
+function issuerSummary(cards: CardProduct[]): string {
+  const labels = [...new Set(cards.map((c) => issuerLabel(c.issuer)))];
+  if (labels.length === 0) return "Add cards in your wallet";
+  if (labels.length <= 4) return labels.join(" · ");
+  return `${labels.slice(0, 4).join(" · ")} · +${labels.length - 4} more`;
+}
+
+function multiplierFor(card: CardProduct, category: RewardCategory): number {
+  return (
+    card.rewards.find((r) => r.category === category)?.multiplier ??
+    card.rewards.find((r) => r.category === "other")?.multiplier ??
+    1
+  );
+}
+
+function rateLabel(category: RewardCategory, multiplier: number, currency: string): string {
+  if (currency.toLowerCase().includes("cashback")) {
+    return `${multiplier}% ${category.replace("_", " ")}`;
+  }
+  return `${multiplier}× ${category.replace("_", " ")}`;
+}
+
+function bestWalletCardFor(
+  cards: CardProduct[],
+  category: RewardCategory,
+  preferNonAmex = false,
+): CardProduct | undefined {
+  if (cards.length === 0) return undefined;
+
+  const ranked = [...cards].sort((a, b) => multiplierFor(b, category) - multiplierFor(a, category));
+  if (!preferNonAmex) return ranked[0];
+
+  const nonAmex = ranked.find((c) => !c.issuer.includes("American Express"));
+  return nonAmex ?? ranked[0];
+}
+
+function buildActivity(cards: CardProduct[]) {
+  const gasCard = bestWalletCardFor(cards, "gas", true);
+  const groceryCard = bestWalletCardFor(cards, "groceries", true);
+  const billsCard = bestWalletCardFor(cards, "recurring_bills", true);
+
+  return [
+    {
+      date: "Today",
+      merchant: "Shell",
+      card: gasCard ? shortCardName(gasCard.displayName) : "Your best gas card",
+      amount: "-$62.00",
+      best: true,
+    },
+    {
+      date: "Yesterday",
+      merchant: "Loblaws",
+      card: groceryCard ? shortCardName(groceryCard.displayName) : "Your best grocery card",
+      amount: "-$118.40",
+      best: false,
+    },
+    {
+      date: "Mon",
+      merchant: "Netflix",
+      card: billsCard ? shortCardName(billsCard.displayName) : "Your best bills card",
+      amount: "-$16.99",
+      best: false,
+    },
+  ];
+}
+
+function buildFeaturedRouting(cards: CardProduct[]) {
+  const winner = bestWalletCardFor(cards, "gas", true);
+  const fallback: CardProduct = {
+    cardId: "demo",
+    issuer: "CIBC",
+    displayName: "CIBC Dividend Visa Infinite",
+    currency: "cashback %",
+    rewards: [{ category: "gas", multiplier: 4, capMonthly: 80 }],
+  };
+  const card = winner ?? fallback;
+  const mult = multiplierFor(card, "gas");
+
+  return {
+    merchant: "Shell",
+    amount: "$62.00",
+    mcc: "Gas · MCC 5542",
+    card: shortCardName(card.displayName),
+    rate: rateLabel("gas", mult, card.currency),
+  };
+}
+
+function buildRoutingComparison(cards: CardProduct[]) {
+  const winner = bestWalletCardFor(cards, "gas", true);
+  const runnerUp = bestWalletCardFor(cards, "gas", false);
+  const fallbackWinner = {
+    name: "CIBC Dividend",
+    rate: "4% gas",
+    reward: "$2.48",
+    win: true,
+  };
+  const fallbackRunner = {
+    name: "Amex Cobalt",
+    rate: "1× gas",
+    reward: "$0.62",
+    win: false,
+  };
+
+  if (!winner) return [fallbackWinner, fallbackRunner];
+
+  const rows = [];
+  if (winner) {
+    rows.push({
+      name: shortCardName(winner.displayName),
+      rate: rateLabel("gas", multiplierFor(winner, "gas"), winner.currency),
+      reward: "$2.48",
+      win: true,
+    });
+  }
+  const second =
+    runnerUp && runnerUp.cardId !== winner?.cardId
+      ? runnerUp
+      : cards.find((c) => c.cardId !== winner?.cardId);
+  if (second) {
+    rows.push({
+      name: shortCardName(second.displayName),
+      rate: rateLabel("gas", multiplierFor(second, "gas"), second.currency),
+      reward: "$0.62",
+      win: false,
+    });
+  }
+  return rows.length >= 2 ? rows : [fallbackWinner, fallbackRunner];
+}
 
 function usePointerTilt(disabled: boolean) {
   const ref = useRef<HTMLDivElement>(null);
@@ -151,36 +289,43 @@ function InteractiveOneCard() {
 }
 
 function WalletMiniVisual() {
-  const layers = [
-    "from-emerald-800 to-emerald-950",
-    "from-slate-800 to-slate-950",
-    "from-blue-900 to-blue-950",
-  ];
-
   return (
     <div className="relative mx-auto flex h-full min-h-[240px] w-full items-center justify-center px-6 py-8">
-      {layers.map((gradient, i) => (
+      <div
+        className="relative w-[10.5rem]"
+        style={{ perspective: 900 }}
+      >
+        {/* Stack edge — gives physical thickness without extra cards */}
         <div
-          key={gradient}
-          className={`absolute aspect-[1.586] w-[9.5rem] rounded-xl bg-gradient-to-br ${gradient} shadow-lg ring-1 ring-white/10`}
-          style={{
-            transform: `translateY(${(2 - i) * 10}px) translateX(${(2 - i) * -6}px) rotate(${(2 - i) * -2.5}deg)`,
-            zIndex: i + 1,
-          }}
+          className="absolute inset-x-2 bottom-0 top-2 rounded-[1.05rem] bg-[#1a0f0a] shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
+          aria-hidden
         />
-      ))}
-      <Wallet className="relative z-10 h-10 w-10 text-brand-ink/20" strokeWidth={1.25} />
+        <div
+          className="absolute inset-x-1 bottom-0 top-1 rounded-[1.05rem] bg-[#241610]"
+          aria-hidden
+        />
+
+        {/* Leather wallet face */}
+        <div className="phone-leather-wallet relative z-10 aspect-[1.35/1] w-full overflow-hidden rounded-[1.05rem] shadow-[0_18px_40px_rgba(42,24,16,0.35)]">
+          <div className="absolute inset-x-0 top-0 h-[22%] phone-leather-lip rounded-t-[1.05rem]" aria-hidden />
+          <div className="relative flex h-full flex-col items-center justify-center pt-[8%]">
+            <Wallet className="h-11 w-11 text-amber-100/30" strokeWidth={1.35} />
+          </div>
+          {/* Stitch line along bottom fold */}
+          <div
+            className="pointer-events-none absolute inset-x-4 bottom-[18%] border-b border-dashed border-amber-100/15"
+            aria-hidden
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-function RoutingMiniVisual() {
+function RoutingMiniVisual({ rows }: { rows: ReturnType<typeof buildRoutingComparison> }) {
   return (
     <div className="flex h-full min-h-[240px] w-full flex-col justify-center gap-3 px-5 py-6">
-      {[
-        { name: "Amex Cobalt", rate: "5× dining", reward: "$8.47", win: true },
-        { name: "RBC Ion Visa", rate: "1× dining", reward: "$1.19", win: false },
-      ].map((row) => (
+      {rows.map((row) => (
         <div
           key={row.name}
           className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs ${
@@ -238,7 +383,19 @@ function ShowcaseTile({
   );
 }
 
-function OneCardExpandModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function OneCardExpandModal({
+  open,
+  onClose,
+  cards,
+}: {
+  open: boolean;
+  onClose: () => void;
+  cards: CardProduct[];
+}) {
+  const activity = buildActivity(cards);
+  const featured = buildFeaturedRouting(cards);
+  const linkedLabel = cards.length === 1 ? "1 linked" : `${cards.length} linked`;
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -315,14 +472,14 @@ function OneCardExpandModal({ open, onClose }: { open: boolean; onClose: () => v
                       </div>
                       <Sparkles className="h-5 w-5 text-sky-500" />
                     </div>
-                    <p className="mt-4 text-2xl font-bold tabular-nums text-brand-ink">3 linked</p>
-                    <p className="text-sm text-brand-muted">Amex · RBC · CIBC</p>
+                    <p className="mt-4 text-2xl font-bold tabular-nums text-brand-ink">{linkedLabel}</p>
+                    <p className="text-sm text-brand-muted">{issuerSummary(cards)}</p>
 
                     <p className="mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-brand-muted">
                       Recent routing
                     </p>
                     <ul className="space-y-2">
-                      {ACTIVITY.map((row) => (
+                      {activity.map((row) => (
                         <li
                           key={`${row.date}-${row.merchant}`}
                           className="flex items-center justify-between gap-2 rounded-lg bg-zinc-50/80 px-3 py-2.5 text-xs"
@@ -365,20 +522,20 @@ function OneCardExpandModal({ open, onClose }: { open: boolean; onClose: () => v
                       <div>
                         <label className="text-xs font-medium text-brand-muted">Purchase</label>
                         <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-semibold text-brand-ink">
-                          Uber Eats · $84.50
+                          {featured.merchant} · {featured.amount}
                         </p>
                       </div>
                       <div>
                         <label className="text-xs font-medium text-brand-muted">Merchant category</label>
                         <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-brand-ink">
-                          Dining · MCC 5812
+                          {featured.mcc}
                         </p>
                       </div>
                       <div>
                         <label className="text-xs font-medium text-brand-muted">Routed to</label>
                         <p className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900">
                           <Route className="h-4 w-4 shrink-0" />
-                          Amex Cobalt · 5× dining
+                          {featured.card} · {featured.rate}
                         </p>
                       </div>
                     </div>
@@ -438,7 +595,9 @@ function OneCardExpandModal({ open, onClose }: { open: boolean; onClose: () => v
 }
 
 export function CardShowcaseSection() {
+  const { cards } = useWallet();
   const [modalOpen, setModalOpen] = useState(false);
+  const routingRows = buildRoutingComparison(cards);
 
   const openModal = useCallback(() => setModalOpen(true), []);
   const closeModal = useCallback(() => setModalOpen(false), []);
@@ -478,7 +637,7 @@ export function CardShowcaseSection() {
               title="Earn more on every category"
               onExpand={openModal}
             >
-              <RoutingMiniVisual />
+              <RoutingMiniVisual rows={routingRows} />
             </ShowcaseTile>
           </div>
 
@@ -490,7 +649,7 @@ export function CardShowcaseSection() {
         </div>
       </section>
 
-      <OneCardExpandModal open={modalOpen} onClose={closeModal} />
+      <OneCardExpandModal open={modalOpen} onClose={closeModal} cards={cards} />
     </>
   );
 }
