@@ -6,7 +6,7 @@ import type { RoutingDecision } from "@onecard/shared-types";
 import type { MerchantPreset } from "@/data/merchants";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
-import { formatDecimal } from "@/lib/formatNumber";
+import { formatMoney } from "@/lib/formatNumber";
 import { formatRatesDisclaimer, formatEffectiveRewardPercent } from "@/data/cardRewards";
 import { ArrowRight, TrendingUp, Wallet } from "lucide-react";
 import Link from "next/link";
@@ -50,22 +50,22 @@ export function SimulatorResultsPanel({
             Business purchase — business card only
           </p>
         )}
-        <div className="oc-simulator-highlight">
+        <div className="oc-simulator-highlight overflow-x-auto">
           <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.hero} />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+          <div className="min-w-0">
+            <p className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-brand-muted">
               OneCard routes to
             </p>
-            <p className="line-clamp-2 break-words text-base font-bold text-brand-ink sm:text-lg">
-              {decision.selectedCardDisplayName}
+            <p className="whitespace-nowrap text-base font-bold text-brand-ink sm:text-lg">
+              {decision.selectedCardDisplayName.replace(/American Express/g, "Amex")}
             </p>
-            <p className="text-sm text-brand-muted">
+            <p className="whitespace-nowrap text-sm text-brand-muted">
               {formatEffectiveRewardPercent(
                 decision.estimatedRewardValueCents,
                 taxTotal,
               )}{" "}
               · {decision.category.replace(/_/g, " ")} · {sym}
-              {formatDecimal(taxTotal, 1)}
+              {formatMoney(taxTotal)}
             </p>
           </div>
         </div>

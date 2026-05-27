@@ -14,7 +14,8 @@ function formatMoney(n: number): string {
   return n.toLocaleString("en-CA", {
     style: "currency",
     currency: "CAD",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 }
 

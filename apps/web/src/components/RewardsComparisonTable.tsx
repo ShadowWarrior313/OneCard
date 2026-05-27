@@ -6,7 +6,7 @@ import type { MerchantPreset } from "@/data/merchants";
 import { IssuerLogo } from "@/components/IssuerLogo";
 import { MerchantLogo } from "@/components/MerchantLogo";
 import { MERCHANT_LOGO } from "@/data/merchantIcons";
-import { formatDecimal } from "@/lib/formatNumber";
+import { formatMoney } from "@/lib/formatNumber";
 import { formatEffectiveRewardPercent } from "@/data/cardRewards";
 import { useMemo, useState, type ReactNode } from "react";
 
@@ -17,7 +17,7 @@ function comparisonMinWidth(columnCount: number): string {
 }
 
 const GRID_COLUMNS = (count: number) =>
-  `minmax(8rem, 1.15fr) repeat(${count}, minmax(7rem, 1fr))`;
+  `minmax(9rem, 1.15fr) repeat(${count}, minmax(8.5rem, 1fr))`;
 
 function CellValue({
   children,
@@ -28,16 +28,15 @@ function CellValue({
 }) {
   return (
     <div
-      className={`flex min-w-0 max-w-full flex-col items-center justify-center gap-0.5 text-center ${className}`}
+      className={`flex flex-col items-center justify-center gap-0.5 text-center ${className}`}
     >
       {children}
     </div>
   );
 }
 
-function shortCardName(name: string): string {
-  if (name.length <= 22) return name;
-  return name.replace(/American Express/g, "Amex").slice(0, 22) + "…";
+function displayCardName(name: string): string {
+  return name.replace(/American Express/g, "Amex");
 }
 
 export function RewardsComparisonTable({
@@ -81,11 +80,11 @@ export function RewardsComparisonTable({
       label: "You earn",
       hint: "Estimated reward on this purchase",
       value: (alt, isWinner) => {
-        const v = formatDecimal(alt.estimatedRewardValueCents / 100, 1);
+        const v = formatMoney(alt.estimatedRewardValueCents / 100);
         return (
           <CellValue>
             <span
-              className={`max-w-full break-words text-base font-bold tabular-nums leading-tight ${
+              className={`whitespace-nowrap text-base font-bold tabular-nums leading-tight ${
                 isWinner ? "text-brand-ink" : "text-red-600"
               }`}
             >
@@ -101,10 +100,10 @@ export function RewardsComparisonTable({
       hint: "Normalized reward value on this purchase",
       value: (alt) => (
         <CellValue>
-          <span className="max-w-full break-words text-sm font-medium tabular-nums text-brand-body">
+          <span className="whitespace-nowrap text-sm font-medium tabular-nums text-brand-body">
             {formatEffectiveRewardPercent(alt.estimatedRewardValueCents, totalCharged)}
           </span>
-          <span className="max-w-full break-words text-xs leading-snug text-brand-muted">
+          <span className="whitespace-nowrap text-xs leading-snug text-brand-muted">
             {alt.category.replace(/_/g, " ")}
           </span>
         </CellValue>
@@ -121,13 +120,13 @@ export function RewardsComparisonTable({
         return (
           <CellValue>
             <span
-              className={`max-w-full break-words text-sm font-semibold tabular-nums leading-tight ${
+              className={`whitespace-nowrap text-sm font-semibold tabular-nums leading-tight ${
                 delta > 0 ? "text-brand-ink" : "text-red-600"
               }`}
             >
               {sign}
               {sym}
-              {formatDecimal(delta, 1)}
+              {formatMoney(delta)}
             </span>
           </CellValue>
         );
@@ -137,7 +136,7 @@ export function RewardsComparisonTable({
       label: "Bonus cap",
       value: (alt) => (
         <CellValue>
-          <span className="max-w-full break-words text-sm text-brand-body">
+          <span className="whitespace-nowrap text-sm text-brand-body">
             {alt.cappedOut ? (
               <span className="text-amber-700">Cap reached</span>
             ) : (
@@ -150,28 +149,28 @@ export function RewardsComparisonTable({
   ];
 
   return (
-    <div className="min-w-0 max-w-full overflow-x-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="grid gap-4 border-b border-zinc-100 px-4 py-4 sm:grid-cols-3 sm:px-5">
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-brand-muted">Merchant</p>
-          <div className="mt-1.5 flex min-w-0 items-center gap-2">
+    <div className="max-w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+      <div className="flex min-w-min flex-col gap-4 border-b border-zinc-100 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-8 sm:gap-y-3 sm:px-5">
+        <div className="shrink-0">
+          <p className="whitespace-nowrap text-xs font-medium text-brand-muted">Merchant</p>
+          <div className="mt-1.5 flex items-center gap-2">
             <MerchantLogo merchant={merchant} size={MERCHANT_LOGO.tile} />
-            <span className="min-w-0 break-words font-semibold text-brand-ink">
+            <span className="whitespace-nowrap font-semibold text-brand-ink">
               {merchant.name}
             </span>
           </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-brand-muted">Purchase</p>
-          <p className="mt-1 text-lg font-bold tabular-nums text-brand-ink">
+        <div className="shrink-0">
+          <p className="whitespace-nowrap text-xs font-medium text-brand-muted">Purchase</p>
+          <p className="mt-1 whitespace-nowrap text-lg font-bold tabular-nums text-brand-ink">
             {sym}
             {totalCharged.toFixed(2)}
           </p>
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-brand-muted">OneCard picks</p>
-          <p className="mt-1 line-clamp-2 break-words text-sm font-bold text-brand-ink">
-            {decision.selectedCardDisplayName}
+        <div className="shrink-0">
+          <p className="whitespace-nowrap text-xs font-medium text-brand-muted">OneCard picks</p>
+          <p className="mt-1 whitespace-nowrap text-sm font-bold text-brand-ink">
+            {displayCardName(decision.selectedCardDisplayName)}
           </p>
         </div>
       </div>
@@ -187,13 +186,13 @@ export function RewardsComparisonTable({
               key={alt.cardId}
               className={`px-4 py-4 ${isWinner ? "bg-emerald-50/60" : ""}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3 overflow-x-auto">
                 {card && (
                   <IssuerLogo issuer={card.issuer} cardId={alt.cardId} size={36} />
                 )}
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-brand-ink">
-                    {alt.displayName}
+                <div className="min-w-0 shrink-0">
+                  <p className="whitespace-nowrap text-sm font-semibold text-brand-ink">
+                    {displayCardName(alt.displayName)}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-2">
                     {isWinner && (
@@ -208,13 +207,13 @@ export function RewardsComparisonTable({
                 </div>
                 <p className="shrink-0 text-lg font-bold tabular-nums text-brand-ink">
                   {sym}
-                  {formatDecimal(alt.estimatedRewardValueCents / 100, 1)}
+                  {formatMoney(alt.estimatedRewardValueCents / 100)}
                 </p>
               </div>
               <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <dt className="text-brand-muted">Effective rate</dt>
-                  <dd className="font-medium text-brand-body">
+                  <dd className="overflow-x-auto whitespace-nowrap font-medium text-brand-body">
                     {formatEffectiveRewardPercent(alt.estimatedRewardValueCents, totalCharged)}{" "}
                     · {alt.category.replace(/_/g, " ")}
                   </dd>
@@ -256,8 +255,8 @@ export function RewardsComparisonTable({
                   {card && (
                     <IssuerLogo issuer={card.issuer} cardId={alt.cardId} size={44} />
                   )}
-                  <p className="mt-2 max-w-full break-words text-xs font-semibold leading-snug text-brand-ink">
-                    {shortCardName(alt.displayName)}
+                  <p className="mt-2 whitespace-nowrap text-xs font-semibold text-brand-ink">
+                    {displayCardName(alt.displayName)}
                   </p>
                   {isWinner && (
                     <span className="mt-1.5 rounded bg-brand-ink px-2 py-0.5 text-[0.6rem] font-bold uppercase text-white">
@@ -325,7 +324,7 @@ export function RewardsComparisonTable({
       )}
 
       <p className="border-t border-zinc-100 px-4 py-3 text-center text-xs leading-relaxed text-brand-muted sm:px-5">
-        <span className="break-words">{decision.reason}</span>
+        {decision.reason}
       </p>
     </div>
   );

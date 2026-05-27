@@ -3,6 +3,7 @@
  * Reward value is normalized via pointValueCAD so points and cashback compare in dollars.
  */
 import type { CardNetwork, CardProduct, RewardCategory, RewardRule } from "@onecard/shared-types";
+import { formatPercent } from "@/lib/formatNumber";
 import { AMEX_GROCERY_EXCLUSIONS } from "./merchantPartners";
 import legacySnapshot from "./cardRewards.snapshot.json";
 
@@ -465,5 +466,5 @@ export function formatEffectiveRewardPercent(
   rewardValueCents: number,
   spendDollars: number,
 ): string {
-  return `${effectiveRewardPercent(rewardValueCents, spendDollars).toFixed(1)}% back`;
+  return `${formatPercent(effectiveRewardPercent(rewardValueCents, spendDollars))} back`;
 }

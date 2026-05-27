@@ -80,7 +80,7 @@
   }
 
   .oc-simulator-sidebar {
-    @apply min-w-0 max-w-full space-y-4 lg:sticky lg:top-20 lg:self-start;
+    @apply min-w-0 max-w-full space-y-4 overflow-x-auto lg:sticky lg:top-20 lg:self-start;
   }
 
   .oc-simulator-highlight {

@@ -423,7 +423,7 @@ function PurchaseControls({
               </div>
               <div className="flex justify-between text-brand-body">
                 <dt>
-                  {tax.label} ({(tax.rate * 100).toFixed(2)}%)
+                  {tax.label} ({Math.round(tax.rate * 100)}%)
                 </dt>
                 <dd className="font-medium tabular-nums">
                   {sym}
@@ -601,7 +601,7 @@ function MerchantBrandGrid({
           title={m.name}
         >
           <MerchantLogo merchant={m} size={MERCHANT_LOGO.tile} />
-          <span className="line-clamp-2 text-center text-[0.65rem] font-medium leading-tight text-brand-body">
+          <span className="block w-full overflow-x-auto whitespace-nowrap text-center text-[0.65rem] font-medium text-brand-body">
             {m.shortName ?? m.name}
           </span>
         </button>
