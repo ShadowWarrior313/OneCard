@@ -78,7 +78,7 @@ function StageNode({
   const Icon = stage.icon;
 
   return (
-    <motion.li
+    <motion.div
       initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -93,7 +93,7 @@ function StageNode({
       </div>
       <p className="mt-3 text-sm font-semibold leading-snug text-brand-ink">{stage.label}</p>
       <p className="mt-1 text-xs leading-relaxed text-brand-muted">{stage.detail}</p>
-    </motion.li>
+    </motion.div>
   );
 }
 
