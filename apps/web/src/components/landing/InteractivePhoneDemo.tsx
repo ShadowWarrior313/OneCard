@@ -178,7 +178,7 @@ export function InteractivePhoneDemo() {
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <div
               data-phone-scroll
-              className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-y-contain px-3 pb-20 pt-2 [scrollbar-width:none] sm:px-4 [&::-webkit-scrollbar]:hidden"
+              className="min-h-0 flex-1 overflow-y-auto overflow-x-clip overscroll-y-contain px-3 pb-20 pt-2 [scrollbar-width:none] sm:px-4 [&::-webkit-scrollbar]:hidden"
             >
               {screen === "activity" && (
                 <ScreenHeader title="Recent activity" onBack={() => goTo("home")} />

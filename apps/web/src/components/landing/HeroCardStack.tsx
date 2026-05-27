@@ -11,9 +11,9 @@ const STACK_DESKTOP = [
 ];
 
 const STACK_MOBILE = [
-  { label: "Dining", mult: "5×", from: "#1e293b", to: "#334155", rotate: -6, y: 28, x: -8, scale: 0.9 },
-  { label: "Travel", mult: "3×", from: "#0f172a", to: "#1e3a5f", rotate: 4, y: 18, x: 8, scale: 0.93 },
-  { label: "Groceries", mult: "4×", from: "#14532d", to: "#166534", rotate: -2, y: 8, x: -2, scale: 0.96 },
+  { label: "Dining", mult: "5×", from: "#1e293b", to: "#334155", rotate: -7, y: 32, x: -12, scale: 0.9 },
+  { label: "Travel", mult: "3×", from: "#0f172a", to: "#1e3a5f", rotate: 5, y: 20, x: 10, scale: 0.93 },
+  { label: "Groceries", mult: "4×", from: "#14532d", to: "#166534", rotate: -2, y: 10, x: -3, scale: 0.96 },
 ];
 
 function MiniCard({
@@ -42,7 +42,7 @@ function MiniCard({
   return (
     <motion.div
       className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${
-        compact ? "w-[min(200px,calc(100vw-3.5rem))]" : "w-[220px]"
+        compact ? "w-[82%] max-w-[200px]" : "w-[220px]"
       }`}
       style={{ rotate, y, x, scale }}
       initial={{ opacity: 0, y: y + 40 }}
@@ -105,12 +105,12 @@ export function HeroCardStack() {
   return (
     <div
       ref={ref}
-      className="relative mx-auto aspect-square w-full max-w-[420px] overflow-visible px-5 sm:px-0"
+      className="relative mx-auto aspect-square w-full max-w-[420px] overflow-visible"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       style={{ perspective: 1200 }}
     >
-      <div className="pointer-events-none absolute inset-[15%] rounded-full bg-white/[0.04] blur-[70px]" />
+      <div className="pointer-events-none absolute inset-[12%] rounded-full bg-white/[0.04] blur-[70px]" />
 
       {stack.map((card, i) => (
         <MiniCard key={card.label} {...card} delay={0.15 + i * 0.1} compact={compact} />
@@ -118,7 +118,7 @@ export function HeroCardStack() {
 
       <motion.div
         className={`absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 ${
-          compact ? "w-[min(216px,calc(100vw-3rem))]" : "w-[240px]"
+          compact ? "w-[88%] max-w-[216px]" : "w-[240px]"
         }`}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         animate={{ y: [0, -8, 0] }}

@@ -32,7 +32,13 @@ export function WalletFold() {
 
   useEffect(() => {
     if (!cards.length || !activeId || activeIndex > 2) return;
-    ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const scrollEl = ref.current?.closest("main");
+    if (!scrollEl || !ref.current) return;
+    const walletTop = ref.current.getBoundingClientRect().top;
+    const mainTop = scrollEl.getBoundingClientRect().top;
+    if (walletTop - mainTop < WALLET_SLIDE_UP) {
+      scrollEl.scrollBy({ top: walletTop - mainTop - WALLET_SLIDE_UP - 8, behavior: "smooth" });
+    }
   }, [activeId, activeIndex, cards.length]);
 
   if (!cards.length) {
@@ -50,7 +56,7 @@ export function WalletFold() {
   return (
     <div
       ref={ref}
-      className={`relative mx-auto w-full max-w-[22rem] ${active ? "pb-4" : ""}`}
+      className={`relative mx-auto w-full max-w-[22rem] overflow-visible ${active ? "pb-4" : ""}`}
     >
       <motion.div
         aria-hidden

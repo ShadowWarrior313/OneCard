@@ -55,9 +55,15 @@ export function PhoneWalletFold({
   const headroom = walletSlideHeadroom(activeIndex);
 
   useEffect(() => {
-    if (!activeId || activeIndex > 2) return;
+    if (!activeId) return;
     const scrollEl = ref.current?.closest("[data-phone-scroll]");
-    scrollEl?.scrollTo({ top: 0, behavior: "smooth" });
+    const walletEl = ref.current;
+    if (!scrollEl || !walletEl) return;
+    const scrollRect = scrollEl.getBoundingClientRect();
+    const walletRect = walletEl.getBoundingClientRect();
+    const target =
+      walletRect.top - scrollRect.top + scrollEl.scrollTop - WALLET_SLIDE_UP - 8;
+    scrollEl.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
   }, [activeId, activeIndex]);
 
   if (cards.length === 0) {
@@ -72,7 +78,7 @@ export function PhoneWalletFold({
   }
 
   return (
-    <div ref={ref} className="mx-auto min-w-0 max-w-full pb-6">
+    <div ref={ref} className="mx-auto min-w-0 max-w-full overflow-visible pb-6">
       {/* Scroll headroom — top cards (e.g. CIBC) need space to slide up like TD */}
       <motion.div
         aria-hidden

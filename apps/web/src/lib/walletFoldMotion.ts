@@ -6,8 +6,9 @@ export const WALLET_SPRING = {
   damping: 32,
 };
 
-/** Space above the fold so top-stack cards can slide up without clipping. */
+/** Space above the fold so cards can slide up without clipping. */
 export function walletSlideHeadroom(activeIndex: number): number {
   if (activeIndex < 0) return 0;
-  return Math.max(0, WALLET_SLIDE_UP - activeIndex * WALLET_PEEK + 12);
+  // Always reserve full slide distance — partial headroom clips top-stack cards.
+  return WALLET_SLIDE_UP + 16;
 }

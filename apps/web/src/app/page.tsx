@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main className="min-w-0 overflow-x-hidden">
+      <main className="min-w-0 overflow-x-clip">
         <HeroSection />
         <InteractiveDemo />
         <FeaturesSection />

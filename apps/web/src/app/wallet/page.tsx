@@ -10,7 +10,7 @@ export default function WalletPage() {
   return (
     <>
       <Header />
-      <main className="min-w-0 overflow-x-hidden pt-20">
+      <main className="min-w-0 overflow-x-clip pt-20">
         <section className="oc-section bg-brand-surface pt-24">
           <div className="oc-container-wide">
             <header className="mb-10 max-w-2xl">
@@ -28,7 +28,7 @@ export default function WalletPage() {
           </div>
         </section>
 
-        <section className="oc-container-wide min-w-0 pb-16">
+        <section className="oc-container-wide min-w-0 overflow-visible pb-16">
           <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:items-start">
             <div className="flex min-w-0 justify-center overflow-visible lg:justify-start">
               <WalletFold />

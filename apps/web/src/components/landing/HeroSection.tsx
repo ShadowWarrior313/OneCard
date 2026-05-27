@@ -4,7 +4,7 @@ import { HeroCardStack } from "./HeroCardStack";
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#0c0c0e] pt-28 pb-24 sm:pt-32 sm:pb-28">
+    <section className="relative overflow-x-clip overflow-y-visible bg-[#0c0c0e] pt-28 pb-28 sm:pt-32 sm:pb-32">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_70%_20%,rgba(255,255,255,0.07),transparent_55%)]" />
 
       <div className="oc-container-wide relative grid min-w-0 items-center gap-12 lg:grid-cols-2 lg:gap-10">
