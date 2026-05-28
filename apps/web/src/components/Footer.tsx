@@ -22,8 +22,18 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/wallet" className="hover:text-brand-ink">
+                  Wallet
+                </Link>
+              </li>
+              <li>
                 <Link href="/simulator" className="hover:text-brand-ink">
                   Simulator
+                </Link>
+              </li>
+              <li>
+                <Link href="/wallet/my-spend" className="hover:text-brand-ink">
+                  My Spend
                 </Link>
               </li>
               <li>
@@ -32,13 +42,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/wallet" className="hover:text-brand-ink">
-                  Wallet
-                </Link>
-              </li>
-              <li>
-                <Link href="/wallet/my-spend" className="hover:text-brand-ink">
-                  My Spend
+                <Link href="/wallet/bills" className="hover:text-brand-ink">
+                  Bill pay
                 </Link>
               </li>
               <li>

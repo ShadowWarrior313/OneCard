@@ -9,14 +9,20 @@ import {
   useState,
 } from "react";
 import {
+  appendWaitlistEntry,
   cardholderLabel,
+  clearStoredSession,
   displayName,
   normalizeProfileName,
   readStoredPersonalDetails,
+  readStoredProfile,
+  readStoredSession,
   type PersonalDetails,
   type UserProfile,
   DEFAULT_PERSONAL_DETAILS,
   writeStoredPersonalDetails,
+  writeStoredProfile,
+  writeStoredSession,
 } from "@/lib/userProfile";
 
 interface UserProfileContextValue {
@@ -27,19 +33,46 @@ interface UserProfileContextValue {
   displayName: string;
   cardholderName: string;
   isOnWaitlist: boolean;
-  signupStart: (input: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => Promise<{ delivery: "smtp" | "log"; deliveryReason?: "provider_unset" | "postmark_pending_approval" }>;
-  verifySignupCode: (input: { email: string; code: string }) => Promise<void>;
-  login: (input: { email: string; password: string }) => Promise<void>;
+  joinWaitlist: (input: { name: string; email: string }) => Promise<void>;
+  login: (input: { name: string; email: string }) => Promise<void>;
   logout: () => void;
   updatePersonalDetails: (patch: Partial<PersonalDetails>) => void;
 }
 
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
+
+async function saveProfile(input: { name: string; email: string }): Promise<UserProfile> {
+  const name = normalizeProfileName(input.name);
+  const email = input.email.trim().toLowerCase();
+
+  if (name.length < 2) {
+    throw new Error("Enter your full name");
+  }
+  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    throw new Error("Enter a valid email address");
+  }
+
+  const res = await fetch("/api/waitlist", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email }),
+  });
+
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(data.error ?? "Could not save your profile");
+  }
+
+  const existing = readStoredProfile();
+  const joinedAt =
+    existing?.email === email ? (existing.joinedAt ?? new Date().toISOString()) : new Date().toISOString();
+
+  const next: UserProfile = { name, email, joinedAt };
+  writeStoredProfile(next);
+  appendWaitlistEntry({ name, email, at: joinedAt });
+  writeStoredSession({ email, loggedInAt: new Date().toISOString() });
+  return next;
+}
 
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -51,110 +84,26 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     setPersonalDetails(readStoredPersonalDetails());
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then(async (res) => {
-        if (!res.ok) {
-          setProfile(null);
-          setIsLoggedIn(false);
-          return;
-        }
-        const data = (await res.json()) as { user?: UserProfile };
-        if (data.user?.email) {
-          setProfile(data.user);
-          setIsLoggedIn(true);
-        } else {
-          setProfile(null);
-          setIsLoggedIn(false);
-        }
-      })
-      .finally(() => setHydrated(true));
+    setProfile(readStoredProfile());
+    setIsLoggedIn(Boolean(readStoredSession()));
+    setHydrated(true);
   }, []);
 
-  const signupStart = useCallback(
-    async (input: {
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-    }) => {
-      const name = normalizeProfileName(input.name);
-      const email = input.email.trim().toLowerCase();
-      const password = input.password;
-      const confirmPassword = input.confirmPassword;
-
-      if (name.length < 2) {
-        throw new Error("Enter your full name");
-      }
-      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        throw new Error("Enter a valid email address");
-      }
-      if (password.length < 8) {
-        throw new Error("Password must be at least 8 characters");
-      }
-      if (password !== confirmPassword) {
-        throw new Error("Passwords do not match");
-      }
-
-      const res = await fetch("/api/auth/signup/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, confirmPassword }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-        delivery?: "smtp" | "log";
-        deliveryReason?: "provider_unset" | "postmark_pending_approval";
-      };
-      if (!res.ok) throw new Error(data.error ?? "Could not start signup");
-      return { delivery: data.delivery ?? "log", deliveryReason: data.deliveryReason };
-    },
-    [],
-  );
-
-  const verifySignupCode = useCallback(async (input: { email: string; code: string }) => {
-    const email = input.email.trim().toLowerCase();
-    const code = input.code.trim();
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) || !code.match(/^\d{6}$/)) {
-      throw new Error("Enter a valid email and 6-digit code");
-    }
-
-    const res = await fetch("/api/auth/signup/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code }),
-    });
-    const data = (await res.json().catch(() => ({}))) as {
-      error?: string;
-      user?: UserProfile;
-    };
-    if (!res.ok || !data.user) {
-      throw new Error(data.error ?? "Could not verify code");
-    }
-    setProfile(data.user);
-    setIsLoggedIn(true);
-  }, []);
-
-  const login = useCallback(async (input: { email: string; password: string }) => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    });
-    const data = (await res.json().catch(() => ({}))) as {
-      error?: string;
-      user?: UserProfile;
-    };
-    if (!res.ok || !data.user) {
-      throw new Error(data.error ?? "Could not log in");
-    }
-    setProfile(data.user);
+  const login = useCallback(async (input: { name: string; email: string }) => {
+    const next = await saveProfile(input);
+    setProfile(next);
     setIsLoggedIn(true);
   }, []);
 
   const logout = useCallback(() => {
-    void fetch("/api/auth/logout", { method: "POST" });
+    clearStoredSession();
     setIsLoggedIn(false);
-    setProfile(null);
+  }, []);
+
+  const joinWaitlist = useCallback(async (input: { name: string; email: string }) => {
+    const next = await saveProfile(input);
+    setProfile(next);
+    setIsLoggedIn(true);
   }, []);
 
   const updatePersonalDetails = useCallback((patch: Partial<PersonalDetails>) => {
@@ -193,15 +142,14 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
       hydrated,
       isLoggedIn,
       displayName: displayName(profile?.name),
-      cardholderName: cardholderLabel(profile?.name),
+      cardholderName: cardholderLabel(isLoggedIn ? profile?.name : null),
       isOnWaitlist: Boolean(profile),
-      signupStart,
-      verifySignupCode,
+      joinWaitlist,
       login,
       logout,
       updatePersonalDetails,
     }),
-    [profile, personalDetails, hydrated, isLoggedIn, signupStart, verifySignupCode, login, logout, updatePersonalDetails],
+    [profile, personalDetails, hydrated, isLoggedIn, joinWaitlist, login, logout, updatePersonalDetails],
   );
 
   return (

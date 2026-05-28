@@ -1,15 +1,10 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import {
-  ArrowRight,
-  Check,
-  Maximize2,
-  Route,
-  Sparkles,
-  Wallet,
-  X,
-} from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { ArrowRight, Maximize2, RotateCw, Wallet } from "lucide-react";
+import { FlippableOneCard } from "@/components/landing/FlippableOneCard";
+import { TapOnceExpandModal } from "@/components/landing/TapOnceExpandModal";
+import { WalletLinkExpandModal } from "@/components/landing/WalletLinkExpandModal";
 import Link from "next/link";
 import {
   useCallback,
@@ -19,195 +14,21 @@ import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
-import { useUserProfile } from "@/context/UserProfileContext";
 import { useWallet } from "@/context/WalletContext";
-import { getCardById } from "@/data/cards";
-import { estimateRewardForCard } from "@onecard/rewards-engine";
-import type { CardProduct, RewardCategory } from "@onecard/shared-types";
+import { merchantById } from "@/data/merchants";
+import {
+  buildRoutingRowsForScenario,
+  formatCad,
+  TAP_DEMO_SCENARIOS,
+  type RoutingRow,
+} from "@/lib/tapDemoScenarios";
+import type { CardProduct } from "@onecard/shared-types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const SHOWCASE_SCENARIO = TAP_DEMO_SCENARIOS[0]!;
 
-const FEATURES = [
-  "Link every card you already carry — no new accounts",
-  "Tap once; merchant category routes to the best earn rate",
-  "Rewards still post on your existing Amex, Visa, and more",
-  "Tokenized routing — your numbers never touch our servers",
-];
-
-function shortCardName(displayName: string): string {
-  return displayName
-    .replace(/\s+Card$/i, "")
-    .replace(/\s+(Visa|Mastercard|American Express).*$/i, "")
-    .trim();
-}
-
-function issuerLabel(issuer: string): string {
-  if (issuer.includes("American Express")) return "Amex";
-  if (issuer.includes("Scotiabank")) return "Scotiabank";
-  return issuer.split(/\s+/)[0] ?? issuer;
-}
-
-function issuerSummary(cards: CardProduct[]): string {
-  const labels = [...new Set(cards.map((c) => issuerLabel(c.issuer)))];
-  if (labels.length === 0) return "Add cards in your wallet";
-  if (labels.length <= 4) return labels.join(" · ");
-  return `${labels.slice(0, 4).join(" · ")} · +${labels.length - 4} more`;
-}
-
-function multiplierFor(card: CardProduct, category: RewardCategory): number {
-  return (
-    card.rewards.find((r) => r.category === category)?.multiplier ??
-    card.rewards.find((r) => r.category === "other")?.multiplier ??
-    1
-  );
-}
-
-function rateLabel(category: RewardCategory, multiplier: number, currency: string): string {
-  if (currency.toLowerCase().includes("cashback")) {
-    return `${multiplier}% ${category.replace("_", " ")}`;
-  }
-  return `${multiplier}× ${category.replace("_", " ")}`;
-}
-
-function bestWalletCardFor(
-  cards: CardProduct[],
-  category: RewardCategory,
-  preferNonAmex = false,
-): CardProduct | undefined {
-  if (cards.length === 0) return undefined;
-
-  const ranked = [...cards].sort((a, b) => multiplierFor(b, category) - multiplierFor(a, category));
-  if (!preferNonAmex) return ranked[0];
-
-  const nonAmex = ranked.find((c) => !c.issuer.includes("American Express"));
-  return nonAmex ?? ranked[0];
-}
-
-function buildActivity(cards: CardProduct[]) {
-  const gasCard = bestWalletCardFor(cards, "gas", true);
-  const groceryCard = bestWalletCardFor(cards, "groceries", true);
-  const billsCard = bestWalletCardFor(cards, "recurring_bills", true);
-
-  return [
-    {
-      date: "Today",
-      merchant: "Shell",
-      card: gasCard ? shortCardName(gasCard.displayName) : "Your best gas card",
-      amount: "-$62.00",
-      best: true,
-    },
-    {
-      date: "Yesterday",
-      merchant: "Loblaws",
-      card: groceryCard ? shortCardName(groceryCard.displayName) : "Your best grocery card",
-      amount: "-$118.40",
-      best: false,
-    },
-    {
-      date: "Mon",
-      merchant: "Netflix",
-      card: billsCard ? shortCardName(billsCard.displayName) : "Your best bills card",
-      amount: "-$16.99",
-      best: false,
-    },
-  ];
-}
-
-const DEMO_GAS_AMOUNT = 62;
-
-function gasRewardDollars(card: CardProduct): number {
-  const est = estimateRewardForCard(
-    card,
-    {
-      amount: DEMO_GAS_AMOUNT,
-      merchantName: "Shell",
-      mcc: "5542",
-      category: "gas",
-    },
-    "gas",
-    { cards: [card], usage: [], preferences: { preferCashback: false } },
-  );
-  return est.estimatedRewardValueCents / 100;
-}
-
-function buildFeaturedRouting(cards: CardProduct[]) {
-  const winner = bestWalletCardFor(cards, "gas", true);
-  const fallback = getCardById("cibc_dividend_infinite");
-  const card = winner ?? fallback;
-  if (!card) {
-    return {
-      merchant: "Shell",
-      amount: "$62.00",
-      mcc: "Gas · MCC 5542",
-      card: "Your best gas card",
-      rate: "Best available rate",
-    };
-  }
-  const mult = multiplierFor(card, "gas");
-
-  return {
-    merchant: "Shell",
-    amount: "$62.00",
-    mcc: "Gas · MCC 5542",
-    card: shortCardName(card.displayName),
-    rate: rateLabel("gas", mult, card.currency),
-  };
-}
-
-function buildRoutingComparison(cards: CardProduct[]) {
-  const winner = bestWalletCardFor(cards, "gas", true);
-  const runnerUp = bestWalletCardFor(cards, "gas", false);
-
-  if (!winner) {
-    const demo = getCardById("cibc_dividend_infinite");
-    const cobalt = getCardById("amex_cobalt");
-    return [
-      {
-        name: "CIBC Dividend",
-        rate: demo ? rateLabel("gas", multiplierFor(demo, "gas"), demo.currency) : "4% gas",
-        reward: demo ? `$${gasRewardDollars(demo).toFixed(2)}` : "$2.48",
-        win: true,
-      },
-      {
-        name: "Amex Cobalt",
-        rate: cobalt ? rateLabel("gas", multiplierFor(cobalt, "gas"), cobalt.currency) : "1× gas",
-        reward: cobalt ? `$${gasRewardDollars(cobalt).toFixed(2)}` : "$0.62",
-        win: false,
-      },
-    ];
-  }
-
-  const rows = [];
-  if (winner) {
-    rows.push({
-      name: shortCardName(winner.displayName),
-      rate: rateLabel("gas", multiplierFor(winner, "gas"), winner.currency),
-      reward: `$${gasRewardDollars(winner).toFixed(2)}`,
-      win: true,
-    });
-  }
-  const second =
-    runnerUp && runnerUp.cardId !== winner?.cardId
-      ? runnerUp
-      : cards.find((c) => c.cardId !== winner?.cardId);
-  if (second) {
-    rows.push({
-      name: shortCardName(second.displayName),
-      rate: rateLabel("gas", multiplierFor(second, "gas"), second.currency),
-      reward: `$${gasRewardDollars(second).toFixed(2)}`,
-      win: false,
-    });
-  }
-  return rows.length >= 2
-    ? rows
-    : [
-        rows[0] ?? {
-          name: "Best card",
-          rate: "—",
-          reward: "$0.00",
-          win: true,
-        },
-      ];
+function buildRoutingComparison(cards: CardProduct[]): RoutingRow[] {
+  return buildRoutingRowsForScenario(cards, SHOWCASE_SCENARIO).rows;
 }
 
 function usePointerTilt(disabled: boolean) {
@@ -240,44 +61,74 @@ function usePointerTilt(disabled: boolean) {
   return { ref, rotateX, rotateY, glowX, glowY, onMove, onLeave };
 }
 
-function OneCardVisual({ className = "" }: { className?: string }) {
-  const { cardholderName } = useUserProfile();
+function FloatingRouteChips({
+  rows,
+  active,
+  merchantName,
+  amountLabel,
+}: {
+  rows: RoutingRow[];
+  active: boolean;
+  merchantName: string;
+  amountLabel: string;
+}) {
+  const winner = rows.find((r) => r.win) ?? rows[0];
+  const merchant = merchantById(SHOWCASE_SCENARIO.merchantId);
 
   return (
-    <div
-      className={`relative aspect-[1.586] w-full overflow-hidden rounded-[1.15rem] shadow-[0_24px_64px_rgba(14,116,144,0.28)] ring-1 ring-white/20 ${className}`}
-      style={{
-        background: "linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 42%, #18181b 100%)",
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/10 via-transparent to-violet-500/10" />
-      <div className="relative flex h-full flex-col justify-between p-5 text-white sm:p-6">
-        <div className="flex items-start justify-between">
-          <div className="h-6 w-9 rounded-md bg-gradient-to-br from-amber-200/95 to-amber-500/90 shadow-inner" />
-          <span className="text-[0.55rem] font-bold uppercase tracking-[0.25em] text-white/40">
-            OneCard
-          </span>
-        </div>
-        <div>
-          <p className="text-[0.65rem] font-medium uppercase tracking-[0.2em] text-white/45">
-            Universal wallet
-          </p>
-          <p className="mt-1 text-lg font-semibold tracking-wide sm:text-xl">{cardholderName}</p>
-        </div>
-        <div className="flex items-end justify-between">
-          <span className="font-mono text-[0.65rem] text-white/35">Tap · Route · Earn</span>
-          <span className="flex gap-0.5">
-            <span className="h-4 w-4 rounded-full bg-red-500/90" />
-            <span className="-ml-2 h-4 w-4 rounded-full bg-amber-400/90" />
-          </span>
-        </div>
-      </div>
-    </div>
+    <>
+      <motion.div
+        className="pointer-events-none absolute left-3 top-12 z-0 max-w-[7.5rem] rounded-xl border border-white/70 bg-white/90 px-2.5 py-2 shadow-md backdrop-blur-sm sm:left-4 sm:top-14"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.55, y: active ? 0 : 6, scale: active ? 1 : 0.96 }}
+        transition={{ duration: 0.35, ease: EASE }}
+      >
+        <p className="text-[0.6rem] font-medium text-brand-muted">Merchant</p>
+        <p className="text-xs font-semibold text-brand-ink">
+          {merchantName}
+          {merchant ? ` · ${merchant.group}` : ""}
+        </p>
+        <p className="mt-0.5 text-[0.6rem] tabular-nums text-brand-muted">{amountLabel}</p>
+      </motion.div>
+
+      <motion.div
+        className="pointer-events-none absolute right-2 top-[4.5rem] z-0 flex max-w-[8.5rem] items-center gap-1 rounded-xl border border-white/70 bg-white/90 px-2 py-1.5 shadow-md backdrop-blur-sm sm:right-3"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.5, x: active ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: EASE, delay: 0.04 }}
+      >
+        <ArrowRight className="h-3 w-3 shrink-0 text-emerald-600" aria-hidden />
+        <p className="truncate text-[0.65rem] font-semibold text-brand-ink">
+          {winner?.name ?? "Best card"}
+        </p>
+      </motion.div>
+
+      <motion.div
+        className="pointer-events-none absolute bottom-16 left-4 z-0 rounded-xl border border-emerald-200/80 bg-emerald-50/95 px-2.5 py-1.5 shadow-sm sm:bottom-[4.5rem]"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.45, y: active ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: EASE, delay: 0.08 }}
+      >
+        <p className="text-[0.65rem] font-semibold text-emerald-800">
+          {winner?.reward ?? "$0.00"} · {winner?.rate ?? "Best rate"}
+        </p>
+      </motion.div>
+    </>
   );
 }
 
-function InteractiveOneCard() {
+function InteractiveOneCard({
+  routingRows,
+  merchantName,
+  amountLabel,
+}: {
+  routingRows: RoutingRow[];
+  merchantName: string;
+  amountLabel: string;
+}) {
   const [compact, setCompact] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const { ref, rotateX, rotateY, glowX, glowY, onMove, onLeave } = usePointerTilt(compact);
   const glowX2 = useTransform(glowX, (v) => -v * 0.6);
   const glowY2 = useTransform(glowY, (v) => -v * 0.5);
@@ -292,34 +143,62 @@ function InteractiveOneCard() {
 
   return (
     <div
-      ref={ref}
-      className="relative flex h-full min-h-[240px] w-full items-center justify-center px-4 py-6"
-      style={{ perspective: 1400 }}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
+      className="relative mx-3 mb-3 mt-1 flex min-h-[16.5rem] flex-1 flex-col overflow-hidden rounded-xl sm:mx-4 sm:mb-4 sm:min-h-[18rem] sm:rounded-2xl"
+      style={{
+        background:
+          "radial-gradient(ellipse 90% 70% at 20% 10%, rgba(196,181,253,0.55), transparent 55%), radial-gradient(ellipse 80% 60% at 90% 90%, rgba(253,186,140,0.45), transparent 50%), linear-gradient(160deg, #f5f3ff 0%, #eff6ff 45%, #fff7ed 100%)",
+      }}
     >
-      <motion.div
-        className="pointer-events-none absolute h-40 w-40 rounded-full bg-sky-400/25 blur-3xl"
-        style={{ x: glowX, y: glowY }}
-        aria-hidden
-      />
-      <motion.div
-        className="pointer-events-none absolute h-32 w-32 rounded-full bg-violet-400/15 blur-3xl"
-        style={{ x: glowX2, y: glowY2 }}
-        aria-hidden
-      />
-
-      <motion.div
-        className="w-[min(100%,13.5rem)] sm:w-[15rem]"
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      <div
+        ref={ref}
+        className="relative flex flex-1 flex-col items-center justify-center px-4 py-4 pb-3"
+        style={{ perspective: 1400 }}
+        onMouseMove={onMove}
+        onMouseLeave={() => {
+          onLeave();
+          setHovered(false);
+        }}
+        onMouseEnter={() => setHovered(true)}
       >
+        <FloatingRouteChips
+          rows={routingRows}
+          active={hovered || compact}
+          merchantName={merchantName}
+          amountLabel={amountLabel}
+        />
+
         <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="pointer-events-none absolute h-40 w-40 rounded-full bg-sky-400/20 blur-3xl"
+          style={{ x: glowX, y: glowY }}
+          aria-hidden
+        />
+        <motion.div
+          className="pointer-events-none absolute h-32 w-32 rounded-full bg-violet-400/15 blur-3xl"
+          style={{ x: glowX2, y: glowY2 }}
+          aria-hidden
+        />
+
+        <motion.div
+          className="relative z-10 w-[min(100%,13.75rem)] sm:w-[15.25rem]"
+          style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
         >
-          <OneCardVisual />
+          <motion.div
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <FlippableOneCard flipped={flipped} />
+          </motion.div>
         </motion.div>
-      </motion.div>
+
+        <button
+          type="button"
+          onClick={() => setFlipped((v) => !v)}
+          className="relative z-10 mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:border-sky-200 hover:bg-white"
+        >
+          <RotateCw className="h-3.5 w-3.5" aria-hidden />
+          {flipped ? "Show front" : "Rotate card"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -396,7 +275,7 @@ function ShowcaseTile({
   featured?: boolean;
 }) {
   const expandClassName =
-    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-ink text-white transition hover:bg-brand-charcoal";
+    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-ink text-white transition-colors duration-200 group-hover:bg-orange-500 group-hover:hover:bg-orange-600";
 
   return (
     <article
@@ -434,224 +313,18 @@ function ShowcaseTile({
   );
 }
 
-function OneCardExpandModal({
-  open,
-  onClose,
-  cards,
-}: {
-  open: boolean;
-  onClose: () => void;
-  cards: CardProduct[];
-}) {
-  const activity = buildActivity(cards);
-  const featured = buildFeaturedRouting(cards);
-  const linkedLabel = cards.length === 1 ? "1 linked" : `${cards.length} linked`;
-
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
-
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[10000] flex items-end justify-center sm:items-center sm:p-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="OneCard product overview"
-        >
-          <button
-            type="button"
-            className="absolute inset-0 bg-brand-ink/50 backdrop-blur-sm"
-            onClick={onClose}
-            aria-label="Close"
-          />
-
-          <motion.div
-            className="relative flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
-            initial={{ opacity: 0, y: 48, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 32, scale: 0.98 }}
-            transition={{ duration: 0.4, ease: EASE }}
-            style={{
-              paddingBottom: "env(safe-area-inset-bottom)",
-            }}
-          >
-            <div className="flex items-start justify-between border-b border-zinc-100 px-5 py-4 sm:px-8 sm:py-5">
-              <div className="min-w-0 pr-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
-                  OneCard
-                </p>
-                <h2 className="mt-1 text-xl font-semibold tracking-tight text-brand-ink sm:text-2xl">
-                  One card. Every reward program.
-                </h2>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-brand-ink hover:bg-zinc-50"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="overflow-y-auto">
-              <div className="grid gap-0 lg:grid-cols-[1fr_1fr]">
-                {/* Activity dashboard */}
-                <div className="border-b border-zinc-100 bg-brand-surface/50 p-5 sm:p-8 lg:border-b-0 lg:border-r">
-                  <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-                    <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
-                          Wallet
-                        </p>
-                        <p className="mt-0.5 text-lg font-semibold text-brand-ink">Your cards</p>
-                      </div>
-                      <Sparkles className="h-5 w-5 text-sky-500" />
-                    </div>
-                    <p className="mt-4 text-2xl font-bold tabular-nums text-brand-ink">{linkedLabel}</p>
-                    <p className="text-sm text-brand-muted">{issuerSummary(cards)}</p>
-
-                    <p className="mb-3 mt-6 text-xs font-semibold uppercase tracking-wider text-brand-muted">
-                      Recent routing
-                    </p>
-                    <ul className="space-y-2">
-                      {activity.map((row) => (
-                        <li
-                          key={`${row.date}-${row.merchant}`}
-                          className="flex items-center justify-between gap-2 rounded-lg bg-zinc-50/80 px-3 py-2.5 text-xs"
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate font-semibold text-brand-ink">{row.merchant}</p>
-                            <p className="truncate text-brand-muted">
-                              {row.date} · {row.card}
-                            </p>
-                          </div>
-                          <div className="shrink-0 text-right">
-                            <p className="font-semibold tabular-nums text-brand-ink">{row.amount}</p>
-                            {row.best && (
-                              <span className="text-[0.6rem] font-bold uppercase text-emerald-600">
-                                Best earn
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mt-4 flex justify-center lg:hidden">
-                    <div className="w-[11rem]">
-                      <OneCardVisual />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Routing panel */}
-                <div className="p-5 sm:p-8">
-                  <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">
-                      At checkout
-                    </p>
-                    <h3 className="mt-1 text-lg font-semibold text-brand-ink">Smart routing</h3>
-
-                    <div className="mt-4 space-y-3">
-                      <div>
-                        <label className="text-xs font-medium text-brand-muted">Purchase</label>
-                        <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm font-semibold text-brand-ink">
-                          {featured.merchant} · {featured.amount}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-muted">Merchant category</label>
-                        <p className="mt-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 text-sm text-brand-ink">
-                          {featured.mcc}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-brand-muted">Routed to</label>
-                        <p className="mt-1 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-900">
-                          <Route className="h-4 w-4 shrink-0" />
-                          {featured.card} · {featured.rate}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-lg px-4 py-2 text-sm font-semibold text-brand-muted hover:text-brand-ink"
-                      >
-                        Close
-                      </button>
-                      <Link
-                        href="/how-it-works"
-                        onClick={onClose}
-                        className="rounded-lg bg-brand-ink px-4 py-2 text-sm font-semibold text-white hover:bg-brand-charcoal"
-                      >
-                        See how it works
-                      </Link>
-                    </div>
-                  </div>
-
-                  <ul className="mt-6 space-y-2.5">
-                    {FEATURES.map((line) => (
-                      <li key={line} className="flex items-start gap-2.5 text-sm text-brand-body">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" strokeWidth={2.5} />
-                        {line}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      href="/get-started"
-                      onClick={onClose}
-                      className="oc-btn-primary inline-flex min-h-[44px]"
-                    >
-                      Get started
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                    <Link
-                      href="/simulator"
-                      onClick={onClose}
-                      className="oc-btn-secondary inline-flex min-h-[44px]"
-                    >
-                      Try simulator
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 export function CardShowcaseSection() {
   const { cards } = useWallet();
-  const [modalOpen, setModalOpen] = useState(false);
+  const [tapModalOpen, setTapModalOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const routingRows = buildRoutingComparison(cards);
+  const showcaseMeta = buildRoutingRowsForScenario(cards, SHOWCASE_SCENARIO);
+  const amountLabel = formatCad(SHOWCASE_SCENARIO.amount);
 
-  const openModal = useCallback(() => setModalOpen(true), []);
-  const closeModal = useCallback(() => setModalOpen(false), []);
+  const openTapModal = useCallback(() => setTapModalOpen(true), []);
+  const closeTapModal = useCallback(() => setTapModalOpen(false), []);
+  const openWalletModal = useCallback(() => setWalletModalOpen(true), []);
+  const closeWalletModal = useCallback(() => setWalletModalOpen(false), []);
 
   return (
     <>
@@ -671,17 +344,21 @@ export function CardShowcaseSection() {
           <div className="mt-10 grid gap-4 sm:gap-5 lg:grid-cols-3">
             <ShowcaseTile
               title="Link the cards you already carry"
-              expandHref="/wallet"
+              onExpand={openWalletModal}
             >
               <WalletMiniVisual />
             </ShowcaseTile>
 
             <ShowcaseTile
               title="Tap once with OneCard everywhere"
-              onExpand={openModal}
+              onExpand={openTapModal}
               featured
             >
-              <InteractiveOneCard />
+              <InteractiveOneCard
+                routingRows={routingRows}
+                merchantName={showcaseMeta.merchantName}
+                amountLabel={amountLabel}
+              />
             </ShowcaseTile>
 
             <ShowcaseTile
@@ -693,14 +370,16 @@ export function CardShowcaseSection() {
           </div>
 
           <p className="mt-6 text-center text-sm text-brand-muted">
-            Hover the card to explore · tap{" "}
-            <Maximize2 className="inline h-3.5 w-3.5 align-text-bottom" aria-hidden /> to open the
-            full product view
+            Tap{" "}
+            <Maximize2 className="inline h-3.5 w-3.5 align-text-bottom" aria-hidden /> on Link cards or Tap once
+            to expand · use <strong className="font-medium text-brand-body">Rotate card</strong> on the
+            middle tile to flip
           </p>
         </div>
       </section>
 
-      <OneCardExpandModal open={modalOpen} onClose={closeModal} cards={cards} />
+      <WalletLinkExpandModal open={walletModalOpen} onClose={closeWalletModal} />
+      <TapOnceExpandModal open={tapModalOpen} onClose={closeTapModal} />
     </>
   );
 }

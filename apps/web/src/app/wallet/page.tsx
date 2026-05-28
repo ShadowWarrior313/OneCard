@@ -4,11 +4,8 @@ import { WalletFold } from "@/components/wallet/WalletFold";
 import { CardPicker } from "@/components/wallet/CardPicker";
 import { BusinessCardPanel } from "@/components/wallet/BusinessCardPanel";
 import Link from "next/link";
-import { BarChart3, Calculator, CreditCard, Wallet } from "lucide-react";
-import { requireAuth } from "@/lib/server/requireAuth";
-
-export default async function WalletPage() {
-  await requireAuth("/wallet");
+import { BarChart3, Calculator, CreditCard, Receipt, Wallet } from "lucide-react";
+export default function WalletPage() {
   return (
     <>
       <Header />
@@ -49,6 +46,13 @@ export default async function WalletPage() {
                   <CardPicker />
                 </div>
               </div>
+              <Link
+                href="/wallet/bills"
+                className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3.5 text-sm font-semibold text-brand-ink transition hover:bg-sky-100 sm:px-6"
+              >
+                <Receipt className="h-4 w-4 shrink-0" aria-hidden />
+                Bill pay — view & pay statements
+              </Link>
               <Link
                 href="/wallet/my-spend"
                 className="inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-3.5 text-sm font-semibold text-brand-ink transition hover:bg-zinc-50 sm:px-6"

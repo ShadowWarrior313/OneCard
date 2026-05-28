@@ -9,6 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/simulator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/get-started`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/wallet`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/wallet/bills`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.75 },
+    { url: `${baseUrl}/wallet/my-spend`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.75 },
+    { url: `${baseUrl}/card-finder`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/login`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
   ];
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Wifi } from "lucide-react";
+import { RotateCw, Wifi } from "lucide-react";
 import { useState } from "react";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -274,22 +274,22 @@ export function PosTapScene({
         </motion.div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[10.75rem] z-30 flex justify-center sm:top-[12rem]">
+      <div className="mt-4 flex flex-col items-center gap-2">
         <button
           type="button"
           onClick={() => setCardFlipped((v) => !v)}
-          className="pointer-events-auto rounded-full border border-sky-200 bg-white px-3 py-1.5 text-[0.62rem] font-semibold text-brand-ink shadow-sm transition hover:bg-sky-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-white px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:bg-sky-50"
         >
+          <RotateCw className="h-3.5 w-3.5" aria-hidden />
           {cardFlipped ? "Show front" : "Rotate card"}
         </button>
+        <motion.p
+          animate={{ opacity: contentVisible ? 1 : 0 }}
+          className="text-center text-[0.6rem] font-medium tracking-wide text-sky-600/70 sm:text-[0.65rem]"
+        >
+          Contactless tap
+        </motion.p>
       </div>
-
-      <motion.p
-        animate={{ opacity: contentVisible ? 1 : 0 }}
-        className="mt-3 text-center text-[0.6rem] font-medium tracking-wide text-sky-600/70 sm:mt-4 sm:text-[0.65rem]"
-      >
-        Contactless tap
-      </motion.p>
     </div>
   );
 }

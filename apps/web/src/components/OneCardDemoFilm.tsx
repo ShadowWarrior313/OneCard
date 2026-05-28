@@ -621,7 +621,7 @@ function DemoScrubber({
 }
 
 export function OneCardDemoFilm() {
-  const { displayName } = useUserProfile();
+  const { cardholderName } = useUserProfile();
   const containerRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen } = useDemoFullscreen(containerRef);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -758,7 +758,7 @@ export function OneCardDemoFilm() {
             >
               {phase === "tap" ? (
                 <PosTapScene
-                  cardholderName={displayName}
+                  cardholderName={cardholderName}
                   stage={tapStage}
                   contentVisible={tapContentVisible}
                 />

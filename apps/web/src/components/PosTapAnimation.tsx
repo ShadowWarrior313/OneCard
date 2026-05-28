@@ -55,7 +55,7 @@ const STATUS: Record<Phase, string> = {
 };
 
 export function PosTapAnimation() {
-  const { displayName } = useUserProfile();
+  const { cardholderName } = useUserProfile();
   const [phase, setPhase] = useState<Phase>("idle");
   const [scrollIndex, setScrollIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -156,7 +156,7 @@ export function PosTapAnimation() {
           </div>
         </div>
         <div className="relative -mt-6 z-10">
-          <OneCardLogo variant="card" cardholderName={displayName} />
+          <OneCardLogo variant="card" cardholderName={cardholderName} />
         </div>
       </div>
 

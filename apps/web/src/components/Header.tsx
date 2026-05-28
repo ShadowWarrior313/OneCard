@@ -9,10 +9,10 @@ import { useUserProfile } from "@/context/UserProfileContext";
 
 const links = [
   { href: "/how-it-works", label: "How it works" },
-  { href: "/simulator", label: "Simulator" },
-  { href: "/card-finder", label: "Card Finder" },
   { href: "/wallet", label: "Wallet" },
+  { href: "/simulator", label: "Simulator" },
   { href: "/wallet/my-spend", label: "My Spend" },
+  { href: "/card-finder", label: "Card Finder" },
 ];
 
 function isNavActive(pathname: string, href: string): boolean {
