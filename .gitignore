@@ -4,6 +4,8 @@ dist
 .turbo
 .env
 .env.local
+.data
+**/.data
 *.log
 coverage
 .DS_Store

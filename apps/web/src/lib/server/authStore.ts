@@ -9,6 +9,8 @@ export type AuthUserRecord = {
   verified: boolean;
   verificationCodeHash?: string;
   verificationCodeExpiresAt?: string;
+  verificationFailedAttempts?: number;
+  verificationLockedUntil?: string;
   createdAt: string;
   updatedAt: string;
 };

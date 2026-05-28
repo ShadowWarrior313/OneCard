@@ -3,6 +3,12 @@ import { generateVerificationCode, hashPassword, hashVerificationCode } from "@/
 import { sendVerificationCodeEmail } from "@/lib/server/authEmail";
 import { getUserByEmail, upsertUser } from "@/lib/server/authStore";
 
+function futureTime(value: string | undefined): number {
+  if (!value) return 0;
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
 export async function POST(request: Request) {
   let body: {
     name?: string;
@@ -30,6 +36,13 @@ export async function POST(request: Request) {
   if (existing?.verified) {
     return Response.json({ error: "Account already exists. Log in instead." }, { status: 409 });
   }
+  const nowMs = Date.now();
+  if (futureTime(existing?.verificationLockedUntil) > nowMs) {
+    return Response.json({ error: "Too many verification attempts. Try again later." }, { status: 429 });
+  }
+  if (existing?.verificationCodeHash && futureTime(existing.verificationCodeExpiresAt) > nowMs) {
+    return Response.json({ error: "Verification already pending. Check your email for the code." }, { status: 409 });
+  }
 
   const code = generateVerificationCode();
   const { salt, hash } = await hashPassword(password);
@@ -44,6 +57,8 @@ export async function POST(request: Request) {
     verified: false,
     verificationCodeHash: hashVerificationCode(code),
     verificationCodeExpiresAt: expires,
+    verificationFailedAttempts: 0,
+    verificationLockedUntil: undefined,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   });
