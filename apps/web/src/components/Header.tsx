@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { OneCardLogo } from "./OneCardLogo";
+import { useUserProfile } from "@/context/UserProfileContext";
 
 const links = [
   { href: "/how-it-works", label: "How it works" },
@@ -21,6 +22,7 @@ function isNavActive(pathname: string, href: string): boolean {
 
 export function Header() {
   const path = usePathname();
+  const { isLoggedIn, logout } = useUserProfile();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const onHome = path === "/";
@@ -48,7 +50,7 @@ export function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+      className={`fixed inset-x-0 top-0 z-[120] transition-colors duration-300 ${
         transparent
           ? "border-transparent bg-transparent"
           : "border-b border-zinc-200 bg-white/95 backdrop-blur-sm"
@@ -83,25 +85,39 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {isLoggedIn ? (
+            <button
+              type="button"
+              onClick={logout}
+              className={`hidden rounded-lg px-3 py-2 text-sm font-medium sm:inline-flex ${
+                transparent
+                  ? "text-zinc-200 hover:text-white"
+                  : "text-brand-body hover:text-brand-ink"
+              }`}
+            >
+              Log out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className={`hidden rounded-lg px-3 py-2 text-sm font-medium sm:inline-flex ${
+                transparent
+                  ? "text-zinc-200 hover:text-white"
+                  : "text-brand-body hover:text-brand-ink"
+              }`}
+            >
+              Log in
+            </Link>
+          )}
           <Link
-            href="/login"
-            className={`hidden rounded-lg px-3 py-2 text-sm font-medium sm:inline-flex ${
-              transparent
-                ? "text-zinc-200 hover:text-white"
-                : "text-brand-body hover:text-brand-ink"
-            }`}
-          >
-            Log in
-          </Link>
-          <Link
-            href="/get-started"
+            href={isLoggedIn ? "/wallet" : "/get-started"}
             className={`hidden rounded-lg px-4 py-2 text-sm font-semibold sm:inline-flex ${
               transparent
                 ? "bg-white text-brand-ink hover:bg-zinc-100"
                 : "bg-brand-ink text-white hover:bg-brand-charcoal"
             }`}
           >
-            Get started
+            {isLoggedIn ? "Open wallet" : "Get started"}
           </Link>
           <button
             type="button"
@@ -143,21 +159,34 @@ export function Header() {
               </li>
             ))}
             <li>
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-3 text-sm font-medium text-brand-body hover:bg-zinc-50"
-              >
-                Log in
-              </Link>
+              {isLoggedIn ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setOpen(false);
+                  }}
+                  className="block w-full rounded-lg px-3 py-3 text-left text-sm font-medium text-brand-body hover:bg-zinc-50"
+                >
+                  Log out
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-3 text-sm font-medium text-brand-body hover:bg-zinc-50"
+                >
+                  Log in
+                </Link>
+              )}
             </li>
             <li className="pt-2">
               <Link
-                href="/get-started"
+                href={isLoggedIn ? "/wallet" : "/get-started"}
                 onClick={() => setOpen(false)}
                 className="block rounded-lg bg-brand-ink px-3 py-3 text-center text-sm font-semibold text-white"
               >
-                Get started
+                {isLoggedIn ? "Open wallet" : "Get started"}
               </Link>
             </li>
           </ul>

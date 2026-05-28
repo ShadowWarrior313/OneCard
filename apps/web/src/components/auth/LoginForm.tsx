@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useUserProfile } from "@/context/UserProfileContext";
 import { OneCardLogo } from "@/components/OneCardLogo";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { profile, isLoggedIn, login, hydrated } = useUserProfile();
+  const nextPath = searchParams.get("next") || "/wallet";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,9 +24,9 @@ export function LoginForm() {
 
   useEffect(() => {
     if (hydrated && isLoggedIn) {
-      router.replace("/wallet");
+      router.replace(nextPath);
     }
-  }, [hydrated, isLoggedIn, router]);
+  }, [hydrated, isLoggedIn, router, nextPath]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -31,7 +34,7 @@ export function LoginForm() {
     setSubmitting(true);
     try {
       await login({ email, password });
-      router.push("/wallet");
+      router.push(nextPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not log in");
     } finally {
@@ -79,19 +82,24 @@ export function LoginForm() {
             <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-muted" />
             <input
               id="login-password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
-              minLength={6}
+              minLength={8}
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="oc-input py-3 pl-11 pr-4"
+              className="oc-input py-3 pl-11 pr-12"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-ink"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
-          <p className="mt-2 text-xs text-brand-muted">
-            Demo — any password with 6+ characters works.
-          </p>
         </div>
 
         {error && (

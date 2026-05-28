@@ -3,8 +3,10 @@ import { Header } from "@/components/Header";
 import { MySpendDashboard } from "@/components/spend/MySpendDashboard";
 import Link from "next/link";
 import { ArrowLeft, BarChart3 } from "lucide-react";
+import { requireAuth } from "@/lib/server/requireAuth";
 
-export default function MySpendPage() {
+export default async function MySpendPage() {
+  await requireAuth("/wallet/my-spend");
   return (
     <>
       <Header />

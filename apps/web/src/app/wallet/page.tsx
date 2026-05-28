@@ -5,8 +5,10 @@ import { CardPicker } from "@/components/wallet/CardPicker";
 import { BusinessCardPanel } from "@/components/wallet/BusinessCardPanel";
 import Link from "next/link";
 import { BarChart3, Calculator, CreditCard, Wallet } from "lucide-react";
+import { requireAuth } from "@/lib/server/requireAuth";
 
-export default function WalletPage() {
+export default async function WalletPage() {
+  await requireAuth("/wallet");
   return (
     <>
       <Header />

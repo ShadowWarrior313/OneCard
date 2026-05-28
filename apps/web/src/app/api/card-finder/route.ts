@@ -1,35 +1,6 @@
 import { CARD_FINDER_PROVIDERS, type CardProvider } from "@/data/cardFinderProviders";
-
-type CreditBand = "building" | "fair" | "good" | "excellent";
-type RewardFocus = "cashback" | "travel" | "points" | "balanced";
-type Region = "CA" | "US";
-
-type FinderProfile = {
-  region: Region;
-  isStudent: boolean;
-  creditBand: CreditBand;
-  creditScore?: number;
-  rewardFocus: RewardFocus;
-  openedCardsLast12Months: number;
-};
-
-type ScrapedOffer = {
-  providerId: string;
-  providerName: string;
-  title: string;
-  url: string;
-  score: number;
-  reasons: string[];
-  details: {
-    annualFee?: string;
-    additionalUserFee?: string;
-    welcomeBonus?: string;
-    minSpend?: string;
-    rewardsRate?: string;
-    offerExpiry?: string;
-    introApr?: string;
-  };
-};
+import { bonusesCardsToOffers, fetchCardBonusesFeed } from "@/lib/cardBonusesFeed";
+import type { CreditBand, FinderOffer, FinderProfile, Region, RewardFocus } from "@/types/cardFinder";
 
 const OFFER_KEYWORDS = /(credit|card|cards|student|cash\s?back|cashback|rewards|travel|bonus|welcome|offer|points)/i;
 const BONUS_KEYWORDS = /(welcome|bonus|earn|points|miles|cash\s?back|cashback|offer)/i;
@@ -95,7 +66,7 @@ function firstMatch(text: string, patterns: RegExp[]): string | undefined {
   return undefined;
 }
 
-function extractOfferDetails(text: string): ScrapedOffer["details"] {
+function extractOfferDetails(text: string): FinderOffer["details"] {
   const annualFee = firstMatch(text, [
     /\$?\s?\d{1,4}\s*(?:\/?\s*year|annual)\s*fee/gi,
     /annual fee\s*[:\-]?\s*\$?\s?\d{1,4}/gi,
@@ -146,10 +117,13 @@ function extractOfferDetails(text: string): ScrapedOffer["details"] {
   };
 }
 
-function extractOfferCandidates(html: string, baseUrl: string): Array<{ title: string; url: string; details: ScrapedOffer["details"] }> {
+function extractOfferCandidates(
+  html: string,
+  baseUrl: string,
+): Array<{ title: string; url: string; details: FinderOffer["details"] }> {
   const matches = [...html.matchAll(/<a\b[^>]*href=(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/gi)];
   const seen = new Set<string>();
-  const rows: Array<{ title: string; url: string; details: ScrapedOffer["details"] }> = [];
+  const rows: Array<{ title: string; url: string; details: FinderOffer["details"] }> = [];
 
   for (const m of matches) {
     const hrefRaw = (m[2] ?? "").trim();
@@ -178,7 +152,7 @@ function extractOfferCandidates(html: string, baseUrl: string): Array<{ title: s
   return rows;
 }
 
-function scoreOffer(offerTitle: string, profile: FinderProfile): { score: number; reasons: string[] } {
+function scoreScrapedOffer(offerTitle: string, profile: FinderProfile): { score: number; reasons: string[] } {
   let score = 0;
   const reasons: string[] = [];
   const t = offerTitle.toLowerCase();
@@ -230,7 +204,7 @@ function scoreOffer(offerTitle: string, profile: FinderProfile): { score: number
   return { score, reasons };
 }
 
-async function fetchProviderPage(provider: CardProvider): Promise<{ provider: CardProvider; html: string | null; pageTitle: string | null }> {
+async function fetchProviderPage(provider: CardProvider): Promise<{ provider: CardProvider; html: string | null }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
   try {
@@ -242,29 +216,30 @@ async function fetchProviderPage(provider: CardProvider): Promise<{ provider: Ca
       },
       cache: "no-store",
     });
-    if (!res.ok) return { provider, html: null, pageTitle: null };
+    if (!res.ok) return { provider, html: null };
     const html = await res.text();
-    return { provider, html, pageTitle: extractTitle(html) };
+    return { provider, html };
   } catch {
-    return { provider, html: null, pageTitle: null };
+    return { provider, html: null };
   } finally {
     clearTimeout(timeout);
   }
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const profile = parseProfile(url);
-  const providers = CARD_FINDER_PROVIDERS.filter((p) => p.region === "GLOBAL" || p.region === profile.region);
-
+async function fetchScrapedOffers(profile: FinderProfile): Promise<{
+  offers: FinderOffer[];
+  providersChecked: number;
+  providersResponded: number;
+}> {
+  const providers = CARD_FINDER_PROVIDERS.filter((p) => p.region === "CA" || p.region === "GLOBAL");
   const pages = await Promise.all(providers.map(fetchProviderPage));
-  const offers: ScrapedOffer[] = [];
+  const offers: FinderOffer[] = [];
 
   for (const page of pages) {
     if (!page.html) continue;
     const candidates = extractOfferCandidates(page.html, page.provider.cardsUrl);
     for (const candidate of candidates) {
-      const { score, reasons } = scoreOffer(candidate.title, profile);
+      const { score, reasons } = scoreScrapedOffer(candidate.title, profile);
       offers.push({
         providerId: page.provider.id,
         providerName: page.provider.name,
@@ -272,9 +247,57 @@ export async function GET(request: Request) {
         url: candidate.url,
         score,
         reasons,
+        source: "scraped",
         details: candidate.details,
       });
     }
+  }
+
+  return {
+    offers,
+    providersChecked: providers.length,
+    providersResponded: pages.filter((p) => !!p.html).length,
+  };
+}
+
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const profile = parseProfile(url);
+  const offers: FinderOffer[] = [];
+  let providersChecked = 0;
+  let providersResponded = 0;
+  let structuredCount = 0;
+  let scrapedCount = 0;
+  const notes: string[] = [
+    "This is not financial advice; verify eligibility and terms on issuer sites before applying.",
+    "Credit score is optional and used only to tune recommendation fit for this request.",
+  ];
+
+  if (profile.region === "US") {
+    try {
+      const cards = await fetchCardBonusesFeed();
+      const structured = bonusesCardsToOffers(cards, profile);
+      offers.push(...structured);
+      structuredCount = structured.length;
+      providersChecked = 1;
+      providersResponded = 1;
+      notes.unshift(
+        "US offers use structured sign-up bonus data from the public credit-card-bonuses-api project on GitHub (community-maintained; not Credit Karma — CK has no public offers API).",
+      );
+    } catch {
+      notes.unshift(
+        "Structured US bonus feed is temporarily unavailable; try again shortly or switch region to Canada for issuer-page results.",
+      );
+    }
+  } else {
+    const scraped = await fetchScrapedOffers(profile);
+    offers.push(...scraped.offers);
+    scrapedCount = scraped.offers.length;
+    providersChecked = scraped.providersChecked;
+    providersResponded = scraped.providersResponded;
+    notes.unshift(
+      "Canadian offers are parsed from public issuer pages (best-effort). US structured bonus data is available when region is United States.",
+    );
   }
 
   offers.sort((a, b) => b.score - a.score);
@@ -282,15 +305,10 @@ export async function GET(request: Request) {
   return Response.json({
     fetchedAt: new Date().toISOString(),
     profile,
-    providersChecked: providers.length,
-    providersResponded: pages.filter((p) => !!p.html).length,
+    providersChecked,
+    providersResponded,
+    sources: { structured: structuredCount, scraped: scrapedCount },
     offers: offers.slice(0, 40),
-    notes: [
-      "Offer data is scraped from public issuer pages and can change quickly.",
-      "This is not financial advice; users should verify eligibility and terms on issuer sites.",
-      "Credit score is optional and used only to tune recommendation fit for this request.",
-      "Future profile inputs (income, utilization, delinquencies) can improve ranking accuracy.",
-    ],
+    notes,
   });
 }
-

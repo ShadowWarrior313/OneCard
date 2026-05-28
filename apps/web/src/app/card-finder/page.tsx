@@ -4,36 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-
-type CreditBand = "building" | "fair" | "good" | "excellent";
-type RewardFocus = "cashback" | "travel" | "points" | "balanced";
-type Region = "CA" | "US";
-
-type FinderOffer = {
-  providerId: string;
-  providerName: string;
-  title: string;
-  url: string;
-  score: number;
-  reasons: string[];
-  details: {
-    annualFee?: string;
-    additionalUserFee?: string;
-    welcomeBonus?: string;
-    minSpend?: string;
-    rewardsRate?: string;
-    offerExpiry?: string;
-    introApr?: string;
-  };
-};
-
-type FinderResponse = {
-  fetchedAt: string;
-  providersChecked: number;
-  providersResponded: number;
-  offers: FinderOffer[];
-  notes: string[];
-};
+import type { CreditBand, FinderOffer, FinderResponse, Region, RewardFocus } from "@/types/cardFinder";
 
 function creditBandFromScore(score: number): CreditBand {
   if (score < 580) return "building";
@@ -104,8 +75,9 @@ export default function CardFinderPage() {
               Discover cards worth applying for
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-muted sm:text-base">
-              We scan public issuer pages and rank offers by your profile fit: student status,
-              credit history band, reward preference, and recent application activity.
+              United States results use a structured public bonus dataset (similar depth to aggregator
+              sites, without Credit Karma login). Canada results are parsed from issuer pages. We rank
+              by student status, credit band, reward focus, and recent applications.
             </p>
 
             <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
@@ -196,7 +168,7 @@ export default function CardFinderPage() {
                   disabled={loading}
                   className="min-h-[44px] rounded-lg bg-brand-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-charcoal disabled:opacity-70"
                 >
-                  {loading ? "Scanning issuers..." : "Find card offers"}
+                  {loading ? (region === "US" ? "Loading offers..." : "Scanning issuers...") : "Find card offers"}
                 </button>
                 <Link
                   href="/simulator"
@@ -216,13 +188,22 @@ export default function CardFinderPage() {
             {data && (
               <div className="mt-6 space-y-4">
                 <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-brand-muted">
-                  Checked {data.providersResponded}/{data.providersChecked} issuer pages · updated{" "}
-                  {new Date(data.fetchedAt).toLocaleString("en-CA")}
+                  {region === "US" ? (
+                    <>
+                      {data.sources.structured} structured US offers
+                      {data.sources.scraped > 0 ? ` · ${data.sources.scraped} scraped` : ""}
+                    </>
+                  ) : (
+                    <>
+                      Checked {data.providersResponded}/{data.providersChecked} issuer pages
+                    </>
+                  )}{" "}
+                  · updated {new Date(data.fetchedAt).toLocaleString("en-CA")}
                 </div>
 
                 {grouped.length === 0 && (
                   <div className="rounded-xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-brand-muted">
-                    No matching offers found from current scrape. Try another profile or region.
+                    No matching offers found. Try another profile or region.
                   </div>
                 )}
 
@@ -241,9 +222,16 @@ export default function CardFinderPage() {
                             >
                               {offer.title}
                             </a>
-                            <span className="shrink-0 rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
-                              Fit {offer.score}
-                            </span>
+                            <div className="flex shrink-0 flex-col items-end gap-1">
+                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
+                                Fit {offer.score}
+                              </span>
+                              {offer.source === "structured" && (
+                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                                  Verified SUB
+                                </span>
+                              )}
+                            </div>
                           </div>
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {offer.details.welcomeBonus && (
@@ -297,7 +285,18 @@ export default function CardFinderPage() {
                     {data.notes.map((n) => (
                       <li key={n}>• {n}</li>
                     ))}
-                    <li>• Parsed details are best-effort from issuer page text and should be verified before applying.</li>
+                    <li>
+                      • Scraped Canadian details are best-effort; US structured rows come from{" "}
+                      <a
+                        href="https://github.com/andenacitelli/credit-card-bonuses-api"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline underline-offset-2"
+                      >
+                        credit-card-bonuses-api
+                      </a>
+                      .
+                    </li>
                   </ul>
                 </div>
               </div>

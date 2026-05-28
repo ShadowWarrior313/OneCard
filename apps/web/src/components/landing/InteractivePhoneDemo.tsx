@@ -475,7 +475,7 @@ export function InteractivePhoneDemo() {
 
           </div>
 
-          <nav className="absolute inset-x-0 bottom-0 z-50 border-t border-zinc-200 bg-white px-1 pb-3 pt-2 sm:px-2">
+          <nav className="absolute inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white px-1 pb-3 pt-2 sm:px-2">
             <ul className="grid grid-cols-3 gap-1 text-center">
               {(
                 [

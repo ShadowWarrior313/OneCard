@@ -6,7 +6,7 @@ import { InteractivePhoneDemo } from "@/components/landing/InteractivePhoneDemo"
 
 export function InteractiveDemo() {
   return (
-    <section className="oc-section border-t border-zinc-200 bg-white">
+    <section className="oc-section scroll-mt-24 border-t border-zinc-200 bg-white pt-8 sm:pt-10">
       <div className="oc-container-wide">
         <div className="grid min-w-0 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="order-2 lg:order-1">

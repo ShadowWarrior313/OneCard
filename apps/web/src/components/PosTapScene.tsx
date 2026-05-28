@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Wifi } from "lucide-react";
+import { useState } from "react";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export type TapStage = "idle" | "approach" | "contact" | "reading" | "done";
@@ -58,10 +59,12 @@ function PaymentCard({
   name,
   stage,
   visible,
+  flipped,
 }: {
   name: string;
   stage: TapStage;
   visible: boolean;
+  flipped: boolean;
 }) {
   const tapped = stage === "contact" || stage === "reading" || stage === "done";
 
@@ -82,6 +85,10 @@ function PaymentCard({
         rotateZ: tapped ? 0 : -2,
         scale: tapped ? 0.94 : visible ? 0.98 : 0.94,
       }}
+      whileHover={{
+        y: visible ? (tapped ? -2 : -6) : 0,
+        scale: tapped ? 0.95 : 1,
+      }}
       transition={{
         opacity: { duration: 0.7, ease: EASE },
         y: { duration: 0.75, ease: EASE },
@@ -97,25 +104,63 @@ function PaymentCard({
             ? "0 6px 20px rgba(14,116,144,0.22)"
             : "0 16px 32px rgba(14,116,144,0.16)",
         }}
-        className="flex aspect-[1.586/1] h-auto w-full flex-col overflow-hidden rounded-[0.9rem] bg-gradient-to-br from-[#1a1a1c] via-zinc-950 to-black p-3.5 text-white ring-1 ring-white/15 sm:rounded-[0.95rem] sm:p-4"
+        className="relative aspect-[1.586/1] h-auto w-full rounded-[0.9rem] ring-1 ring-white/15 sm:rounded-[0.95rem]"
+        style={{ transformStyle: "preserve-3d" }}
       >
-        <div className="flex items-start justify-between">
-          <div className="h-[1.15rem] w-[1.65rem] rounded-sm bg-gradient-to-br from-amber-200 to-amber-500 shadow-inner sm:h-5 sm:w-7" />
-          <span className="text-[0.45rem] font-bold uppercase tracking-[0.2em] text-white/35">
-            OneCard
-          </span>
-        </div>
-        <div className="mt-auto">
-          <p className="text-[0.45rem] font-medium uppercase tracking-wider text-white/40">
-            Universal wallet
-          </p>
-          <p className="mt-0.5 truncate text-[0.72rem] font-semibold sm:text-[0.78rem]">{name}</p>
-          <div className="mt-2.5 flex justify-end gap-0.5 sm:mt-3">
-            <span className="h-3 w-3 rounded-full bg-red-500/90" />
-            <span className="-ml-1.5 h-3 w-3 rounded-full bg-amber-400/90" />
+        <motion.div
+          className="absolute inset-0 overflow-hidden rounded-[0.9rem] bg-gradient-to-br from-[#1a1a1c] via-zinc-950 to-black p-3.5 text-white sm:rounded-[0.95rem] sm:p-4"
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: 0.5, ease: EASE }}
+          style={{
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <div
+            className="absolute inset-0 flex flex-col"
+            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+          >
+            <div className="flex items-start justify-between p-3.5 sm:p-4">
+              <div className="h-[1.15rem] w-[1.65rem] rounded-sm bg-gradient-to-br from-amber-200 to-amber-500 shadow-inner sm:h-5 sm:w-7" />
+              <span className="text-[0.45rem] font-bold uppercase tracking-[0.2em] text-white/35">
+                OneCard
+              </span>
+            </div>
+            <div className="mt-auto p-3.5 pt-0 sm:p-4 sm:pt-0">
+              <p className="text-[0.45rem] font-medium uppercase tracking-wider text-white/40">
+                Universal wallet
+              </p>
+              <p className="mt-0.5 truncate text-[0.72rem] font-semibold sm:text-[0.78rem]">{name}</p>
+              <div className="mt-2.5 flex justify-end gap-0.5 sm:mt-3">
+                <span className="h-3 w-3 rounded-full bg-red-500/90" />
+                <span className="-ml-1.5 h-3 w-3 rounded-full bg-amber-400/90" />
+              </div>
+            </div>
           </div>
-        </div>
+
+          <div
+            className="absolute inset-0 rounded-[0.9rem] bg-gradient-to-br from-[#111318] via-zinc-900 to-black sm:rounded-[0.95rem]"
+            style={{
+              transform: "rotateY(180deg)",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+            }}
+          >
+            <div className="mt-3.5 h-5 w-full bg-zinc-900/95 sm:mt-4 sm:h-6" />
+            <div className="px-3.5 pt-3 sm:px-4 sm:pt-3.5">
+              <div className="h-6 rounded-sm bg-zinc-100/90 px-2 py-1 text-right font-mono text-[0.6rem] font-semibold tracking-widest text-zinc-800 sm:h-6.5 sm:text-[0.62rem]">
+                827
+              </div>
+              <div className="mt-2 h-6 rounded-sm bg-zinc-800/80 px-2 py-1 text-[0.5rem] leading-tight text-zinc-400 sm:h-7 sm:text-[0.55rem]">
+                Authorized signature
+              </div>
+              <p className="mt-2 text-[0.48rem] leading-relaxed text-zinc-400 sm:text-[0.5rem]">
+                This card is property of OneCard. If found, please return to issuer.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </motion.div>
+
     </motion.div>
   );
 }
@@ -182,12 +227,18 @@ export function PosTapScene({
 }) {
   const pulsing = stage === "idle" || stage === "approach";
   const flash = stage === "contact" || stage === "reading";
+  const [cardFlipped, setCardFlipped] = useState(false);
 
   return (
     <div className="relative mx-auto w-full min-w-0 max-w-[21rem] overflow-visible px-1 pb-2 pt-2">
       {/* Headroom so the card never clips at the top */}
       <div className="relative mx-auto overflow-visible pt-[5.5rem] sm:pt-[6.75rem]">
-        <PaymentCard name={cardholderName} stage={stage} visible={contentVisible} />
+        <PaymentCard
+          name={cardholderName}
+          stage={stage}
+          visible={contentVisible}
+          flipped={cardFlipped}
+        />
 
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -221,6 +272,16 @@ export function PosTapScene({
             </div>
           </div>
         </motion.div>
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 top-[10.75rem] z-30 flex justify-center sm:top-[12rem]">
+        <button
+          type="button"
+          onClick={() => setCardFlipped((v) => !v)}
+          className="pointer-events-auto rounded-full border border-sky-200 bg-white px-3 py-1.5 text-[0.62rem] font-semibold text-brand-ink shadow-sm transition hover:bg-sky-50"
+        >
+          {cardFlipped ? "Show front" : "Rotate card"}
+        </button>
       </div>
 
       <motion.p
