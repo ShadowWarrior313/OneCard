@@ -9,6 +9,7 @@ export async function sendVerificationCodeEmail(input: {
 }> {
   const postmarkKey = process.env.POSTMARK_SERVER_TOKEN;
   const from = process.env.AUTH_FROM_EMAIL;
+  const allowDevCodeLogs = process.env.NODE_ENV !== "production";
 
   if (postmarkKey && from) {
     const res = await fetch("https://api.postmarkapp.com/email", {
@@ -28,7 +29,7 @@ export async function sendVerificationCodeEmail(input: {
     if (!res.ok) {
       const detail = await res.text();
       const pendingApproval = res.status === 422 || detail.includes("\"ErrorCode\":412");
-      if (pendingApproval) {
+      if (pendingApproval && allowDevCodeLogs) {
         console.warn(`[Auth email fallback] Postmark pending approval: ${detail}`);
         console.info(`[Auth dev code] ${input.email}: ${input.code}`);
         return { sent: true, mode: "log", reason: "postmark_pending_approval" };
@@ -38,6 +39,10 @@ export async function sendVerificationCodeEmail(input: {
     return { sent: true, mode: "smtp" };
   }
 
-  console.info(`[Auth dev code] ${input.email}: ${input.code}`);
-  return { sent: true, mode: "log", reason: "provider_unset" };
+  if (allowDevCodeLogs) {
+    console.info(`[Auth dev code] ${input.email}: ${input.code}`);
+    return { sent: true, mode: "log", reason: "provider_unset" };
+  }
+
+  throw new Error("Verification email delivery is not configured");
 }

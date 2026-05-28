@@ -7,11 +7,19 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useUserProfile } from "@/context/UserProfileContext";
 import { OneCardLogo } from "@/components/OneCardLogo";
 
+function safeNextPath(next: string | null): string {
+  if (!next) return "/wallet";
+  if (!next.startsWith("/") || next.startsWith("//") || next.includes("\\")) {
+    return "/wallet";
+  }
+  return next;
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile, isLoggedIn, login, hydrated } = useUserProfile();
-  const nextPath = searchParams.get("next") || "/wallet";
+  const nextPath = safeNextPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

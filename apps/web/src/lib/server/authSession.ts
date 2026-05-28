@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 const SESSION_COOKIE = "onecard_auth_session";
+const DEV_SESSION_SECRET = "dev_only_change_me";
+const MIN_PRODUCTION_SECRET_LENGTH = 32;
 
 type SessionPayload = {
   email: string;
@@ -13,7 +15,24 @@ function base64url(input: string): string {
 }
 
 function getSessionSecret(): string {
-  return process.env.AUTH_SESSION_SECRET ?? "dev_only_change_me";
+  const secret = process.env.AUTH_SESSION_SECRET?.trim();
+  if (secret) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      secret.length < MIN_PRODUCTION_SECRET_LENGTH
+    ) {
+      throw new Error(
+        `AUTH_SESSION_SECRET must be at least ${MIN_PRODUCTION_SECRET_LENGTH} characters in production`,
+      );
+    }
+    return secret;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SESSION_SECRET must be set in production");
+  }
+
+  return DEV_SESSION_SECRET;
 }
 
 export function createSessionToken(email: string, ttlSeconds = 60 * 60 * 24 * 30): string {
