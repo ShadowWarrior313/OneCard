@@ -30,6 +30,7 @@ import { MERCHANT_LOGO } from "@/data/merchantIcons";
 import { formatDecimal, formatMultiplier } from "@/lib/formatNumber";
 import { OneCardLogo } from "@/components/OneCardLogo";
 import { PhoneWalletFold } from "@/components/landing/PhoneWalletFold";
+import { PhoneBillPayPanel } from "@/components/bills/PhoneBillPayPanel";
 import { PhoneMySpendPanel } from "@/components/spend/PhoneMySpendPanel";
 
 const PURCHASES = [
@@ -75,7 +76,7 @@ const ACTIVITY: {
 ];
 
 type PhoneTab = "home" | "wallet" | "you";
-type PhoneScreen = PhoneTab | "activity" | "my-spend";
+type PhoneScreen = PhoneTab | "activity" | "my-spend" | "bill-pay";
 
 function routeForPurchase(
   merchantId: string,
@@ -123,7 +124,11 @@ export function InteractivePhoneDemo() {
   const [phase, setPhase] = useState<"idle" | "routing" | "done">("done");
 
   const tab: PhoneTab =
-    screen === "activity" ? "home" : screen === "my-spend" ? "wallet" : screen;
+    screen === "activity"
+      ? "home"
+      : screen === "my-spend" || screen === "bill-pay"
+        ? "wallet"
+        : screen;
 
   const routed = useMemo(() => {
     const map = new Map<string, RoutingDecision | null>();
@@ -172,6 +177,10 @@ export function InteractivePhoneDemo() {
     setScreen("my-spend");
   }
 
+  function openBillPay() {
+    setScreen("bill-pay");
+  }
+
   return (
     <div className="mx-auto w-full max-w-[340px] touch-manipulation">
       <div className="rounded-[2rem] border border-zinc-300 bg-zinc-200 p-1.5 shadow-card sm:rounded-[2.25rem] sm:p-2">
@@ -195,6 +204,9 @@ export function InteractivePhoneDemo() {
               )}
               {screen === "my-spend" && (
                 <ScreenHeader title="My Spend" onBack={() => goTo("wallet")} />
+              )}
+              {screen === "bill-pay" && (
+                <ScreenHeader title="Bill pay" onBack={() => goTo("wallet")} />
               )}
               {screen === "you" && (
                 <h3 className="py-2 text-sm font-semibold text-brand-ink">Account</h3>
@@ -453,10 +465,12 @@ export function InteractivePhoneDemo() {
                   onSetBusiness={setBusinessCardId}
                   onToggleCard={toggleCard}
                   onOpenMySpend={openMySpend}
+                  onOpenBillPay={openBillPay}
                 />
               )}
 
               {screen === "my-spend" && <PhoneMySpendPanel />}
+              {screen === "bill-pay" && <PhoneBillPayPanel />}
 
               {screen === "you" && (
                 <PhoneYouScreen

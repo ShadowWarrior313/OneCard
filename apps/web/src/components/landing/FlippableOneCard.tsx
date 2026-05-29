@@ -10,6 +10,7 @@ import {
 } from "@/lib/oneCardDisplay";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const PAN_GROUPS = ONECARD_DEMO_NUMBER.split(" ");
 
 function BackMeta({
   label,
@@ -61,16 +62,24 @@ export function FlippableOneCard({ flipped }: { flipped: boolean }) {
       >
         <div className="h-8 w-full shrink-0 bg-black sm:h-9" aria-hidden />
 
-        <div className="mt-1 h-4 w-full shrink-0 bg-zinc-100/90 sm:mt-1.5 sm:h-[1.125rem]" aria-hidden />
+        <div
+          className="mt-1 h-4 w-full shrink-0 bg-zinc-100/90 sm:mt-1.5 sm:h-[1.125rem]"
+          aria-hidden
+        />
 
-        <div className="flex min-h-0 flex-1 flex-col bg-[#0a0a0b] px-4 pb-2 pt-2 sm:px-5 sm:pt-2.5">
+        <div className="flex min-h-0 flex-1 flex-col bg-[#0a0a0b] px-3 pb-2 pt-2 sm:px-5 sm:pt-2.5">
           <p className="truncate text-[0.5rem] font-semibold uppercase tracking-[0.18em] text-zinc-400 sm:text-[0.55rem]">
             {cardholderName}
           </p>
-          <p className="mt-1.5 whitespace-nowrap font-mono text-[10px] font-semibold leading-none tracking-[0.04em] text-white tabular-nums sm:mt-2 sm:text-[11px]">
-            {ONECARD_DEMO_NUMBER}
+          <p
+            className="mt-1.5 flex w-full justify-between gap-0.5 font-mono text-[9px] font-semibold leading-none tracking-[0.02em] text-white tabular-nums sm:mt-2 sm:text-[11px] sm:tracking-[0.04em]"
+            aria-label={`Card number ${ONECARD_DEMO_NUMBER}`}
+          >
+            {PAN_GROUPS.map((group) => (
+              <span key={group}>{group}</span>
+            ))}
           </p>
-          <div className="mt-1.5 flex shrink-0 items-end gap-5 sm:mt-2 sm:gap-6">
+          <div className="mt-1.5 flex shrink-0 items-end gap-4 sm:mt-2 sm:gap-6">
             <BackMeta label="Good thru" value={ONECARD_DEMO_EXPIRY} />
             <BackMeta label="CVV" value={ONECARD_DEMO_CVV} />
           </div>

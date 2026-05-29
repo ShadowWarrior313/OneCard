@@ -16,10 +16,7 @@ import {
   type ReactNode,
 } from "react";
 import { useWallet } from "@/context/WalletContext";
-import { getCardById } from "@/data/cards";
-import { getCardAppearance } from "@/data/cardAppearances";
 import { merchantById } from "@/data/merchants";
-import { cardBackgroundStyle, cardTextClass } from "@/lib/cardBackground";
 import {
   buildRoutingRowsForScenario,
   buildShowcaseCategoryRows,
@@ -69,6 +66,8 @@ function usePointerTilt(disabled: boolean) {
 
 const SHOWCASE_PANEL_CLASS =
   "relative mx-3 mb-3 mt-1 flex min-h-[16.5rem] flex-1 flex-col overflow-hidden rounded-xl sm:mx-4 sm:mb-4 sm:min-h-[18rem] sm:rounded-2xl";
+
+const SHOWCASE_ASSET_WIDTH = "w-[min(100%,13.75rem)] sm:w-[15.25rem]";
 
 function InteractiveShowcasePanel({
   gradient,
@@ -259,7 +258,7 @@ function InteractiveOneCard({
       {({ rotateX, rotateY }) => (
         <>
           <motion.div
-            className="relative z-10 w-[min(100%,13.75rem)] sm:w-[15.25rem]"
+            className={`relative z-10 ${SHOWCASE_ASSET_WIDTH}`}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1400 }}
           >
             <motion.div
@@ -284,184 +283,31 @@ function InteractiveOneCard({
   );
 }
 
-const SHOWCASE_WALLET_SLOT_IDS = [
-  "rbc_ion",
-  "amex_cobalt",
-  "cibc_dividend_infinite",
-  "scotia_momentum",
-  "td_cashback",
-  "bmo_eclipse",
-] as const;
+const SHOWCASE_CLOSED_WALLET_WIDTH = "w-[9.25rem] sm:w-[10.5rem]";
 
-function useShowcaseWalletSlots(): CardProduct[] {
-  const { cards } = useWallet();
-  return useMemo(() => {
-    const merged: CardProduct[] = [...cards];
-    for (const id of SHOWCASE_WALLET_SLOT_IDS) {
-      if (merged.length >= 6) break;
-      const card = getCardById(id);
-      if (card && !merged.some((c) => c.cardId === card.cardId)) merged.push(card);
-    }
-    while (merged.length < 6) {
-      const fallback = getCardById(
-        SHOWCASE_WALLET_SLOT_IDS[merged.length % SHOWCASE_WALLET_SLOT_IDS.length]!,
-      );
-      if (fallback) merged.push(fallback);
-      else break;
-    }
-    return merged.slice(0, 6);
-  }, [cards]);
-}
-
-function ShowcaseSlotCard({ card }: { card: CardProduct }) {
-  const appearance = getCardAppearance(card.cardId, card.issuer);
-  const bg = cardBackgroundStyle(appearance);
-  const text = cardTextClass(appearance);
-  const label =
-    appearance.faceLabel ??
-    (card.displayName.split(" ").length > 2
-      ? card.displayName.split(" ").slice(-2).join(" ")
-      : card.displayName);
-
+function ShowcaseClosedWallet() {
   return (
-    <div
-      className={`relative h-[1.55rem] w-full overflow-hidden rounded-[0.45rem] shadow-sm ring-1 ring-black/15 ${text}`}
-      style={bg}
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
-      <div className="relative flex h-full items-center px-1.5">
-        <span className="truncate text-[0.48rem] font-bold uppercase tracking-wide">{label}</span>
-      </div>
-    </div>
-  );
-}
-
-function ShowcaseWalletPanel({
-  side,
-  cards,
-}: {
-  side: "left" | "right";
-  cards: CardProduct[];
-}) {
-  const isLeft = side === "left";
-
-  return (
-    <div
-      className={`phone-leather-wallet relative min-w-0 flex-1 px-2 py-2.5 shadow-[0_12px_28px_rgba(42,24,16,0.32)] ${
-        isLeft ? "rounded-l-[0.85rem] rounded-r-sm" : "rounded-l-sm rounded-r-[0.85rem]"
-      }`}
-    >
+    <div className="relative flex items-center justify-center">
       <div
-        className={`absolute inset-x-0 top-0 h-[16%] phone-leather-lip ${
-          isLeft ? "rounded-tl-[0.85rem]" : "rounded-tr-[0.85rem]"
-        }`}
-        aria-hidden
-      />
-      <div className="relative mt-2.5 flex flex-col gap-1.5">
-        {cards.map((card) => (
-          <ShowcaseSlotCard key={card.cardId} card={card} />
-        ))}
-      </div>
-      <div
-        className="pointer-events-none absolute inset-x-2.5 bottom-2.5 border-b border-dashed border-amber-100/12"
-        aria-hidden
-      />
-    </div>
-  );
-}
-
-const SHOWCASE_OPEN_WALLET_CLASS = "w-[min(100%,13.75rem)] sm:w-[15.25rem]";
-const WALLET_FOLD_SPRING = { type: "spring" as const, stiffness: 210, damping: 24 };
-/** Nearly shut — panels face each other; springs to 0° when fully open flat */
-const WALLET_CLOSED_LEFT_Y = -168;
-const WALLET_CLOSED_RIGHT_Y = 168;
-
-function ShowcaseBifoldWallet({ open, cards }: { open: boolean; cards: CardProduct[] }) {
-  const left = cards.slice(0, 3);
-  const right = cards.slice(3, 6);
-
-  return (
-    <div
-      className={`relative flex min-h-[9rem] items-center justify-center overflow-hidden ${SHOWCASE_OPEN_WALLET_CLASS}`}
-      style={{ perspective: 1200 }}
-    >
-      <div
-        className={`flex items-stretch ${SHOWCASE_OPEN_WALLET_CLASS}`}
-        style={{ transformStyle: "preserve-3d" }}
+        className={`phone-leather-wallet relative aspect-[1.35/1] overflow-hidden rounded-[1.05rem] shadow-[0_12px_28px_rgba(42,24,16,0.32)] ${SHOWCASE_CLOSED_WALLET_WIDTH}`}
       >
-        <motion.div
-          className="min-w-0 flex-1"
-          style={{
-            transformOrigin: "right center",
-            transformStyle: "preserve-3d",
-            backfaceVisibility: "hidden",
-          }}
-          initial={false}
-          animate={{ rotateY: open ? 0 : WALLET_CLOSED_LEFT_Y }}
-          transition={WALLET_FOLD_SPRING}
-        >
-          <ShowcaseWalletPanel side="left" cards={left} />
-        </motion.div>
-
-        <motion.div
-          className="relative z-10 w-[3px] shrink-0 self-stretch rounded-full bg-[#1a0f0a] shadow-[inset_0_0_4px_rgba(0,0,0,0.5)]"
+        <div
+          className="absolute inset-x-0 top-0 h-[22%] phone-leather-lip rounded-t-[1.05rem]"
           aria-hidden
-          initial={false}
-          animate={{ opacity: open ? 1 : 0.4, scaleY: open ? 1 : 0.55 }}
-          transition={WALLET_FOLD_SPRING}
         />
-
-        <motion.div
-          className="min-w-0 flex-1"
-          style={{
-            transformOrigin: "left center",
-            transformStyle: "preserve-3d",
-            backfaceVisibility: "hidden",
-          }}
-          initial={false}
-          animate={{ rotateY: open ? 0 : WALLET_CLOSED_RIGHT_Y }}
-          transition={WALLET_FOLD_SPRING}
-        >
-          <ShowcaseWalletPanel side="right" cards={right} />
-        </motion.div>
+        <div className="relative flex h-full flex-col items-center justify-center pt-[8%]">
+          <Wallet className="h-9 w-9 text-amber-100/30 sm:h-10 sm:w-10" strokeWidth={1.35} />
+        </div>
+        <div
+          className="pointer-events-none absolute inset-x-3 bottom-[18%] border-b border-dashed border-amber-100/15 sm:inset-x-4"
+          aria-hidden
+        />
       </div>
-
-      <AnimatePresence>
-        {!open && (
-          <motion.div
-            key="closed-cover"
-            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.94 }}
-            transition={{ duration: 0.28, ease: EASE }}
-          >
-            <div className="relative w-[10.5rem]">
-              <div className="phone-leather-wallet relative z-10 aspect-[1.35/1] w-full overflow-hidden rounded-[1.05rem]">
-                <div
-                  className="absolute inset-x-0 top-0 h-[22%] phone-leather-lip rounded-t-[1.05rem]"
-                  aria-hidden
-                />
-                <div className="relative flex h-full flex-col items-center justify-center pt-[8%]">
-                  <Wallet className="h-11 w-11 text-amber-100/30" strokeWidth={1.35} />
-                </div>
-                <div
-                  className="pointer-events-none absolute inset-x-4 bottom-[18%] border-b border-dashed border-amber-100/15"
-                  aria-hidden
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
 
 function InteractiveWalletVisual() {
-  const [open, setOpen] = useState(false);
-  const slotCards = useShowcaseWalletSlots();
-
   return (
     <InteractiveShowcasePanel
       gradient="radial-gradient(ellipse 90% 70% at 18% 12%, rgba(251,191,36,0.42), transparent 55%), radial-gradient(ellipse 80% 60% at 88% 88%, rgba(180,83,9,0.28), transparent 50%), linear-gradient(160deg, #fffbeb 0%, #fef3c7 42%, #fff7ed 100%)"
@@ -470,32 +316,17 @@ function InteractiveWalletVisual() {
       overlays={(active) => <FloatingWalletChips active={active} />}
     >
       {({ rotateX, rotateY }) => (
-        <>
+        <motion.div
+          className="relative z-10"
+          style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 900 }}
+        >
           <motion.div
-            className="relative z-10"
-            style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 900 }}
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <motion.div
-              animate={{ y: open ? 0 : [0, -5, 0] }}
-              transition={
-                open
-                  ? { duration: 0.3, ease: EASE }
-                  : { duration: 5, repeat: Infinity, ease: "easeInOut" }
-              }
-            >
-              <ShowcaseBifoldWallet open={open} cards={slotCards} />
-            </motion.div>
+            <ShowcaseClosedWallet />
           </motion.div>
-
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? "Close wallet" : "Open wallet"}
-            className="relative z-10 mt-3 inline-flex items-center justify-center rounded-full border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:border-sky-200 hover:bg-white"
-          >
-            {open ? "Close" : "Open"}
-          </button>
-        </>
+        </motion.div>
       )}
     </InteractiveShowcasePanel>
   );

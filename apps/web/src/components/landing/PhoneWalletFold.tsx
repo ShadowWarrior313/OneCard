@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import type { CardProduct } from "@onecard/shared-types";
-import { Briefcase, BarChart3, Check, Star } from "lucide-react";
+import { Briefcase, BarChart3, Check, Receipt, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { IssuerLogo } from "@/components/IssuerLogo";
 import { WalletCardVisual } from "@/components/wallet/WalletCardVisual";
@@ -24,6 +24,7 @@ export function PhoneWalletFold({
   onSetBusiness,
   onToggleCard,
   onOpenMySpend,
+  onOpenBillPay,
 }: {
   cards: CardProduct[];
   defaultCardId: string | undefined;
@@ -33,6 +34,7 @@ export function PhoneWalletFold({
   onSetBusiness: (id: string | undefined) => void;
   onToggleCard: (id: string) => void;
   onOpenMySpend?: () => void;
+  onOpenBillPay?: () => void;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -71,15 +73,29 @@ export function PhoneWalletFold({
           <p className="text-sm font-semibold text-amber-100/90">Wallet is empty</p>
           <p className="mt-1 text-xs text-amber-100/60">Add cards below</p>
         </div>
-        {onOpenMySpend && (
-          <button
-            type="button"
-            onClick={onOpenMySpend}
-            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
-          >
-            <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
-            My Spend
-          </button>
+        {(onOpenMySpend || onOpenBillPay) && (
+          <div className="grid grid-cols-2 gap-2">
+            {onOpenMySpend && (
+              <button
+                type="button"
+                onClick={onOpenMySpend}
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
+              >
+                <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
+                My Spend
+              </button>
+            )}
+            {onOpenBillPay && (
+              <button
+                type="button"
+                onClick={onOpenBillPay}
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
+              >
+                <Receipt className="h-4 w-4 shrink-0" aria-hidden />
+                Bill pay
+              </button>
+            )}
+          </div>
         )}
         {hasAddable && (
           <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
@@ -199,15 +215,29 @@ export function PhoneWalletFold({
         </p>
       )}
 
-      {onOpenMySpend && (
-        <button
-          type="button"
-          onClick={onOpenMySpend}
-          className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
-        >
-          <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
-          My Spend
-        </button>
+      {(onOpenMySpend || onOpenBillPay) && (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {onOpenMySpend && (
+            <button
+              type="button"
+              onClick={onOpenMySpend}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
+            >
+              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden />
+              My Spend
+            </button>
+          )}
+          {onOpenBillPay && (
+            <button
+              type="button"
+              onClick={onOpenBillPay}
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-brand-ink shadow-sm hover:bg-zinc-50"
+            >
+              <Receipt className="h-4 w-4 shrink-0" aria-hidden />
+              Bill pay
+            </button>
+          )}
+        </div>
       )}
 
       {hasAddable && (
