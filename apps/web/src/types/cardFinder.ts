@@ -22,6 +22,8 @@ export type FinderOffer = {
   reasons: string[];
   source: OfferSource;
   details: FinderOfferDetails;
+  /** Local catalog id when known (for card art) */
+  cardId?: string;
 };
 
 export type FinderProfile = {

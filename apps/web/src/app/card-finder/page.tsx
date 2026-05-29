@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import type { CreditBand, FinderOffer, FinderResponse, Region, RewardFocus } from "@/types/cardFinder";
+import { CardFinderOfferCard } from "@/components/card-finder/CardFinderOfferCard";
+import { offerKey } from "@/lib/cardFinderDisplay";
+import type { CreditBand, FinderResponse, Region, RewardFocus } from "@/types/cardFinder";
 
 function creditBandFromScore(score: number): CreditBand {
   if (score < 580) return "building";
@@ -23,6 +25,7 @@ export default function CardFinderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<FinderResponse | null>(null);
+  const [compareKeys, setCompareKeys] = useState<Set<string>>(() => new Set());
   const parsedScore = Number(creditScore);
   const validScore =
     Number.isFinite(parsedScore) && parsedScore >= 300 && parsedScore <= 850
@@ -33,6 +36,7 @@ export default function CardFinderPage() {
   async function runSearch() {
     setLoading(true);
     setError(null);
+    setCompareKeys(new Set());
     try {
       const params = new URLSearchParams({
         region,
@@ -53,16 +57,19 @@ export default function CardFinderPage() {
     }
   }
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, FinderOffer[]>();
-    for (const offer of data?.offers ?? []) {
-      const list = map.get(offer.providerName) ?? [];
-      list.push(offer);
-      map.set(offer.providerName, list);
-    }
-    for (const [k, v] of map) map.set(k, v.slice(0, 4));
-    return [...map.entries()];
-  }, [data]);
+  const sortedOffers = useMemo(
+    () => [...(data?.offers ?? [])].sort((a, b) => b.score - a.score),
+    [data],
+  );
+
+  function toggleCompare(key: string, checked: boolean) {
+    setCompareKeys((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }
 
   return (
     <>
@@ -201,83 +208,27 @@ export default function CardFinderPage() {
                   · updated {new Date(data.fetchedAt).toLocaleString("en-CA")}
                 </div>
 
-                {grouped.length === 0 && (
+                {sortedOffers.length === 0 && (
                   <div className="rounded-xl border border-zinc-200 bg-white px-4 py-8 text-center text-sm text-brand-muted">
                     No matching offers found. Try another profile or region.
                   </div>
                 )}
 
-                {grouped.map(([provider, offers]) => (
-                  <section key={provider} className="rounded-2xl border border-zinc-200 bg-white p-4 sm:p-5">
-                    <h2 className="text-lg font-semibold text-brand-ink">{provider}</h2>
-                    <ul className="mt-3 space-y-2.5">
-                      {offers.map((offer) => (
-                        <li key={`${offer.url}-${offer.title}`} className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <a
-                              href={offer.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="break-words text-sm font-semibold text-brand-ink underline-offset-2 hover:underline"
-                            >
-                              {offer.title}
-                            </a>
-                            <div className="flex shrink-0 flex-col items-end gap-1">
-                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-700">
-                                Fit {offer.score}
-                              </span>
-                              {offer.source === "structured" && (
-                                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                                  Verified SUB
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            {offer.details.welcomeBonus && (
-                              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                Bonus: {offer.details.welcomeBonus}
-                              </span>
-                            )}
-                            {offer.details.annualFee && (
-                              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
-                                Annual fee: {offer.details.annualFee}
-                              </span>
-                            )}
-                            {offer.details.additionalUserFee && (
-                              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
-                                AU fee: {offer.details.additionalUserFee}
-                              </span>
-                            )}
-                            {offer.details.minSpend && (
-                              <span className="rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-                                Min spend: {offer.details.minSpend}
-                              </span>
-                            )}
-                            {offer.details.rewardsRate && (
-                              <span className="rounded-md bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
-                                Rate: {offer.details.rewardsRate}
-                              </span>
-                            )}
-                            {offer.details.offerExpiry && (
-                              <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
-                                Ends: {offer.details.offerExpiry}
-                              </span>
-                            )}
-                            {offer.details.introApr && (
-                              <span className="rounded-md bg-orange-50 px-2 py-0.5 text-[11px] font-medium text-orange-700">
-                                Intro APR: {offer.details.introApr}
-                              </span>
-                            )}
-                          </div>
-                          {offer.reasons.length > 0 && (
-                            <p className="mt-1.5 text-xs text-brand-muted">{offer.reasons.join(" · ")}</p>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
+                {sortedOffers.length > 0 && (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {sortedOffers.map((offer) => {
+                      const key = offerKey(offer);
+                      return (
+                        <CardFinderOfferCard
+                          key={key}
+                          offer={offer}
+                          compared={compareKeys.has(key)}
+                          onCompareChange={(checked) => toggleCompare(key, checked)}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
 
                 <div className="rounded-xl border border-zinc-200 bg-white p-4">
                   <h3 className="text-sm font-semibold text-brand-ink">Notes</h3>

@@ -1,4 +1,5 @@
 import type { FinderOffer, FinderProfile } from "@/types/cardFinder";
+import { matchFinderOfferToCardId } from "@/lib/cardFinderMatch";
 
 /** Public SUB dataset (US-focused). Not affiliated with Credit Karma. */
 const DEFAULT_BONUSES_API_URL =
@@ -253,6 +254,7 @@ export function bonusesCardsToOffers(cards: BonusesCreditCard[], profile: Finder
       score,
       reasons,
       source: "structured",
+      cardId: matchFinderOfferToCardId(title, providerName),
       details: {
         welcomeBonus,
         minSpend,

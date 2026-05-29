@@ -1,9 +1,18 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { RotateCw, Wifi } from "lucide-react";
-import { useState } from "react";
+import { Check, Wifi } from "lucide-react";
+import { DemoPhoneShell } from "@/components/demo/DemoPhoneShell";
+import { DemoOneCard } from "@/components/demo/DemoOneCard";
+
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+/** Layout — cluster phone + reader in the white stage (separate from 3D tilt) */
+const TAP_CLUSTER_Y = "56%";
+const TAP_IDLE_Y = "56%";
+const TAP_CLUSTER_SCALE = 0.88;
+/** Gap between reader bottom and phone top (NFC dot sits in this space) */
+const READER_ABOVE_PHONE = "mb-1";
 
 export type TapStage = "idle" | "approach" | "contact" | "reading" | "done";
 
@@ -21,275 +30,242 @@ export function tapStageAtProgress(p: number): TapStage {
   if (t < 0.12) return "idle";
   if (t < 0.38) return "approach";
   if (t < 0.52) return "contact";
-  if (t < 0.82) return "reading";
+  if (t < 0.72) return "reading";
   return "done";
 }
 
-function ContactlessIcon({ pulsing }: { pulsing: boolean }) {
+function WalletHome({ stage }: { stage: TapStage }) {
+  const nearReader = stage === "approach" || stage === "contact" || stage === "reading";
+  const approved = stage === "done";
+
   return (
-    <div className="relative flex h-10 w-10 items-center justify-center">
-      {pulsing && (
-        <>
-          <motion.span
-            className="absolute inset-0 rounded-full border border-sky-400/45"
-            animate={{ scale: [1, 1.6], opacity: [0.5, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-          />
-          <motion.span
-            className="absolute inset-0 rounded-full border border-sky-400/30"
-            animate={{ scale: [1, 1.35], opacity: [0.4, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay: 0.35 }}
-          />
-        </>
-      )}
-      <svg viewBox="0 0 32 32" className="relative h-8 w-8 text-sky-500" aria-hidden>
-        <path
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          d="M8 16c0-4.4 3.6-8 8-8M4 16c0-6.6 5.4-12 12-12M12 16c0-2.2 1.8-4 4-4"
-        />
-      </svg>
+    <div className="flex flex-col items-center gap-2.5 py-2">
+      <p className="text-center text-[0.625rem] font-semibold text-brand-muted">Wallet</p>
+      <DemoOneCard />
+      <AnimatePresence>
+        {approved && (
+          <motion.div
+            key="approved"
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 420, damping: 22 }}
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 shadow-[0_0_24px_rgba(16,185,129,0.45)] ring-2 ring-emerald-400/40"
+            aria-hidden
+          >
+            <Check className="h-5 w-5 text-white" strokeWidth={2.75} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <p className="text-center text-[0.5625rem] leading-relaxed text-brand-muted">
+        {approved
+          ? "Payment approved"
+          : nearReader
+            ? "Hold top of iPhone near reader"
+            : "Ready to pay with OneCard"}
+      </p>
     </div>
   );
 }
 
-function PaymentCard({
-  name,
+function PosTerminal({
   stage,
-  visible,
-  flipped,
+  merchantName,
+  amount,
 }: {
-  name: string;
   stage: TapStage;
-  visible: boolean;
-  flipped: boolean;
+  merchantName: string;
+  amount: string;
 }) {
-  const tapped = stage === "contact" || stage === "reading" || stage === "done";
+  const active = stage === "approach" || stage === "contact" || stage === "reading";
+  const status =
+    stage === "idle"
+      ? "Ready"
+      : stage === "approach"
+        ? "Hold iPhone near reader"
+        : stage === "done"
+          ? "Approved"
+          : stage === "reading"
+            ? "Reading card…"
+            : "Hold near reader…";
 
   return (
-    <motion.div
-      className="absolute left-1/2 z-20 w-[10.25rem] sm:w-[11.5rem]"
-      style={{
-        x: "-50%",
-        transformPerspective: 900,
-        transformStyle: "preserve-3d",
-      }}
-      initial={false}
-      animate={{
-        opacity: visible ? 1 : 0,
-        top: tapped ? "1.25rem" : "-1.75rem",
-        y: visible ? 0 : -10,
-        rotateX: tapped ? 6 : -8,
-        rotateZ: tapped ? 0 : -2,
-        scale: tapped ? 0.94 : visible ? 0.98 : 0.94,
-      }}
-      whileHover={{
-        y: visible ? (tapped ? -2 : -6) : 0,
-        scale: tapped ? 0.95 : 1,
-      }}
-      transition={{
-        opacity: { duration: 0.7, ease: EASE },
-        y: { duration: 0.75, ease: EASE },
-        top: { duration: 0.85, ease: EASE },
-        rotateX: { duration: 0.85, ease: EASE },
-        rotateZ: { duration: 0.85, ease: EASE },
-        scale: { duration: 0.75, ease: EASE },
-      }}
-    >
-      <motion.div
-        animate={{
-          boxShadow: tapped
-            ? "0 6px 20px rgba(14,116,144,0.22)"
-            : "0 16px 32px rgba(14,116,144,0.16)",
-        }}
-        className="relative aspect-[1.586/1] h-auto w-full rounded-[0.9rem] ring-1 ring-white/15 sm:rounded-[0.95rem]"
-        style={{ transformStyle: "preserve-3d" }}
-      >
-        <motion.div
-          className="absolute inset-0 overflow-hidden rounded-[0.9rem] bg-gradient-to-br from-[#1a1a1c] via-zinc-950 to-black p-3.5 text-white sm:rounded-[0.95rem] sm:p-4"
-          animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-          style={{
-            transformStyle: "preserve-3d",
-          }}
-        >
-          <div
-            className="absolute inset-0 flex flex-col"
-            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
-          >
-            <div className="flex items-start justify-between p-3.5 sm:p-4">
-              <div className="h-[1.15rem] w-[1.65rem] rounded-sm bg-gradient-to-br from-amber-200 to-amber-500 shadow-inner sm:h-5 sm:w-7" />
-              <span className="text-[0.45rem] font-bold uppercase tracking-[0.2em] text-white/35">
-                OneCard
-              </span>
-            </div>
-            <div className="mt-auto p-3.5 pt-0 sm:p-4 sm:pt-0">
-              <p className="text-[0.45rem] font-medium uppercase tracking-wider text-white/40">
-                Universal wallet
-              </p>
-              <p className="mt-0.5 truncate text-[0.72rem] font-semibold sm:text-[0.78rem]">{name}</p>
-              <div className="mt-2.5 flex justify-end gap-0.5 sm:mt-3">
-                <span className="h-3 w-3 rounded-full bg-red-500/90" />
-                <span className="-ml-1.5 h-3 w-3 rounded-full bg-amber-400/90" />
-              </div>
-            </div>
+    <div className="relative z-10 mx-auto w-full max-w-[9.5rem]">
+      <div className="rounded-xl bg-gradient-to-b from-slate-600 to-slate-800 p-2 shadow-lg ring-1 ring-slate-600/50">
+        <div className="overflow-hidden rounded-lg bg-[#0f172a] px-2.5 py-2 text-white">
+          <div className="flex items-center justify-between text-[0.45rem] text-white/45">
+            <span className="tabular-nums">9:41</span>
+            <Wifi className="h-2 w-2" />
           </div>
-
-          <div
-            className="absolute inset-0 rounded-[0.9rem] bg-gradient-to-br from-[#111318] via-zinc-900 to-black sm:rounded-[0.95rem]"
-            style={{
-              transform: "rotateY(180deg)",
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-            }}
+          <p className="mt-1.5 text-[0.5rem] font-semibold text-sky-300">{merchantName}</p>
+          <p className="text-sm font-bold tabular-nums">{amount}</p>
+          <p className="mt-1 min-h-[0.75rem] text-[0.5rem] text-white/50">{status}</p>
+          {(stage === "reading" || stage === "done") && (
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              className="mt-1.5 h-0.5 origin-left rounded-full bg-emerald-400"
+            />
+          )}
+        </div>
+        <div className="mt-2 flex justify-center pb-0.5">
+          <motion.span
+            animate={
+              active
+                ? { opacity: [0.35, 1, 0.35], scale: [1, 1.1, 1] }
+                : stage === "done"
+                  ? { opacity: 1, scale: 1 }
+                  : { opacity: 0.35, scale: 1 }
+            }
+            transition={{ duration: 1.1, repeat: active ? Infinity : 0 }}
+            className={`flex h-7 w-7 items-center justify-center rounded-full border-2 ${
+              stage === "done"
+                ? "border-emerald-400 bg-emerald-500/25"
+                : "border-sky-400/60 bg-sky-500/10"
+            }`}
           >
-            <div className="mt-3.5 h-5 w-full bg-zinc-900/95 sm:mt-4 sm:h-6" />
-            <div className="px-3.5 pt-3 sm:px-4 sm:pt-3.5">
-              <div className="h-6 rounded-sm bg-zinc-100/90 px-2 py-1 text-right font-mono text-[0.6rem] font-semibold tracking-widest text-zinc-800 sm:h-6.5 sm:text-[0.62rem]">
-                827
-              </div>
-              <div className="mt-2 h-6 rounded-sm bg-zinc-800/80 px-2 py-1 text-[0.5rem] leading-tight text-zinc-400 sm:h-7 sm:text-[0.55rem]">
-                Authorized signature
-              </div>
-              <p className="mt-2 text-[0.48rem] leading-relaxed text-zinc-400 sm:text-[0.5rem]">
-                This card is property of OneCard. If found, please return to issuer.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-
-    </motion.div>
+            {stage === "done" ? (
+              <Check className="h-4 w-4 text-emerald-400" strokeWidth={2.5} />
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-4 w-4 text-sky-400" aria-hidden>
+                <path
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  d="M6 12c0-3.3 2.7-6 6-6M3 12c0-4.9 4.1-9 9-9M9 12c0-1.7 1.3-3 3-3"
+                />
+              </svg>
+            )}
+          </motion.span>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function TerminalScreen({ stage, visible }: { stage: TapStage; visible: boolean }) {
-  const status =
-    stage === "idle" || stage === "approach"
-      ? "Present card"
-      : stage === "contact"
-        ? "Hold near reader…"
-        : stage === "reading"
-          ? "Reading card…"
-          : "Card detected";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 10 }}
-      transition={{ duration: 0.6, ease: EASE, delay: visible ? 0.15 : 0 }}
-      className="relative overflow-hidden rounded-lg bg-[#0f172a] px-3.5 py-3.5 text-white ring-1 ring-slate-700/50"
-    >
-      <div className="relative flex items-center justify-between text-[0.5rem] text-white/35">
-        <span className="font-medium tabular-nums">9:41</span>
-        <div className="flex items-center gap-1">
-          <Wifi className="h-2.5 w-2.5" />
-          <span>100%</span>
-        </div>
-      </div>
-      <p className="relative mt-3 text-[0.6rem] font-semibold text-sky-300">Uber Eats</p>
-      <p className="relative mt-0.5 text-[1.65rem] font-bold tabular-nums leading-none">
-        $84.50
-      </p>
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={status}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.25 }}
-          className="relative mt-2.5 min-h-[1rem] text-[0.65rem] text-white/50"
-        >
-          {status}
-        </motion.p>
-      </AnimatePresence>
-      {(stage === "reading" || stage === "done") && (
-        <motion.div
-          initial={{ scaleX: 0, opacity: 0.5 }}
-          animate={{ scaleX: 1, opacity: 1 }}
-          className="relative mt-3 h-0.5 origin-left rounded-full bg-gradient-to-r from-sky-400 to-emerald-400"
-        />
-      )}
-    </motion.div>
-  );
+/** Pivot at bottom (hand). Negative rotateX tips the top up toward the reader above. */
+function phoneTransform(stage: TapStage): {
+  rotateX: number;
+  rotateZ: number;
+  y: number;
+  z: number;
+  scale: number;
+} {
+  switch (stage) {
+    case "idle":
+      return { rotateX: 0, rotateZ: 0, y: 0, z: 0, scale: 1 };
+    case "approach":
+      return { rotateX: -16, rotateZ: 0, y: -8, z: 12, scale: 0.98 };
+    case "contact":
+      return { rotateX: -22, rotateZ: 0, y: -12, z: 18, scale: 0.97 };
+    case "reading":
+      return { rotateX: -24, rotateZ: 0, y: -14, z: 20, scale: 0.96 };
+    case "done":
+      return { rotateX: -20, rotateZ: 0, y: -10, z: 16, scale: 0.97 };
+  }
 }
 
 export function PosTapScene({
-  cardholderName,
   stage,
   contentVisible = true,
+  merchantName = "Loblaws",
+  amount = "$118.40",
 }: {
   cardholderName: string;
   stage: TapStage;
   contentVisible?: boolean;
+  merchantName?: string;
+  amount?: string;
 }) {
-  const pulsing = stage === "idle" || stage === "approach";
-  const flash = stage === "contact" || stage === "reading";
-  const [cardFlipped, setCardFlipped] = useState(false);
+  const showTerminal = stage !== "idle";
+  const approved = stage === "done";
+  const { rotateX, rotateZ, y, z, scale } = phoneTransform(stage);
+  const tapping = stage !== "idle";
 
   return (
-    <div className="relative mx-auto w-full min-w-0 max-w-[21rem] overflow-visible px-1 pb-2 pt-2">
-      {/* Headroom so the card never clips at the top */}
-      <div className="relative mx-auto overflow-visible pt-[5.5rem] sm:pt-[6.75rem]">
-        <PaymentCard
-          name={cardholderName}
-          stage={stage}
-          visible={contentVisible}
-          flipped={cardFlipped}
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: contentVisible ? 1 : 0, y: contentVisible ? 0 : 12 }}
-          transition={{ duration: 0.65, ease: EASE, delay: contentVisible ? 0.2 : 0 }}
-          className="relative mx-auto w-full max-w-[14rem]"
+    <motion.div
+      animate={{ opacity: contentVisible ? 1 : 0 }}
+      className="relative mx-auto w-full min-w-0 max-w-[14rem]"
+    >
+      {/* 3D stage — phone arcs from upright toward terminal */}
+      <div
+        className="relative mx-auto overflow-hidden"
+        style={{
+          height: "21.5rem",
+          perspective: "850px",
+          perspectiveOrigin: "50% 48%",
+        }}
+      >
+        <div
+          className="absolute left-1/2 flex w-full flex-col items-center"
+          style={{
+            top: showTerminal ? TAP_CLUSTER_Y : TAP_IDLE_Y,
+            transform: `translate(-50%, -50%) scale(${TAP_CLUSTER_SCALE})`,
+            transformOrigin: "center center",
+            transformStyle: "preserve-3d",
+          }}
         >
-          <div className="relative z-10 mx-auto -mb-0.5 flex h-[2.85rem] w-[92%] items-center justify-center rounded-t-[1rem] bg-gradient-to-b from-slate-500 to-slate-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] sm:h-[3.25rem] sm:w-[90%] sm:rounded-t-[1.1rem]">
-            <ContactlessIcon pulsing={pulsing} />
-            <AnimatePresence>
-              {flash && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 0.35, 0] }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 rounded-t-[1.1rem] bg-sky-300/50"
-                />
-              )}
-            </AnimatePresence>
-          </div>
+          <AnimatePresence>
+            {showTerminal && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: EASE }}
+                className={`relative z-30 w-full shrink-0 ${READER_ABOVE_PHONE}`}
+              >
+                <PosTerminal stage={stage} merchantName={merchantName} amount={amount} />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="relative rounded-b-[1.1rem] bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800 p-2.5 pb-3 shadow-[0_16px_32px_rgba(14,116,144,0.15)] ring-1 ring-slate-600/40">
-            <div className="mx-auto mb-2.5 h-1 w-10 rounded-full bg-slate-500/90" aria-hidden />
-            <TerminalScreen stage={stage} visible={contentVisible} />
-            <div className="mt-2.5 flex justify-center gap-1" aria-hidden>
-              <span
-                className={`h-1 w-1 rounded-full ${flash ? "bg-sky-400" : "bg-emerald-400/80"}`}
-              />
-              <span className="h-1 w-1 rounded-full bg-slate-500" />
+          <motion.div
+            className="relative z-20 w-full shrink-0"
+            style={{
+              transformStyle: "preserve-3d",
+              transformOrigin: "50% 100%",
+            }}
+            animate={{
+              rotateX,
+              rotateZ,
+              y,
+              z,
+              scale,
+            }}
+            transition={{ duration: 0.85, ease: EASE }}
+          >
+            <div
+              className="pointer-events-none absolute -bottom-3 left-1/2 h-4 w-[70%] -translate-x-1/2 rounded-[100%] bg-black/15 blur-md"
+              style={{
+                opacity: tapping ? 0.5 : 0.25,
+                transform: "translateZ(-20px)",
+              }}
+              aria-hidden
+            />
+            <div className="relative">
+              <DemoPhoneShell className="!overflow-hidden !px-2">
+                <div className="relative min-h-[17.5rem] flex-1">
+                  <WalletHome stage={stage} />
+                </div>
+              </DemoPhoneShell>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setCardFlipped((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-white px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:bg-sky-50"
-        >
-          <RotateCw className="h-3.5 w-3.5" aria-hidden />
-          {cardFlipped ? "Show front" : "Rotate card"}
-        </button>
-        <motion.p
-          animate={{ opacity: contentVisible ? 1 : 0 }}
-          className="text-center text-[0.6rem] font-medium tracking-wide text-sky-600/70 sm:text-[0.65rem]"
-        >
-          Contactless tap
-        </motion.p>
-      </div>
-    </div>
+      <motion.p
+        animate={{ opacity: contentVisible ? 1 : 0 }}
+        className="mt-2 text-center text-[0.5625rem] font-medium text-brand-muted"
+      >
+        {approved
+          ? "Payment complete"
+          : stage === "reading"
+            ? "Reading card…"
+            : stage === "idle"
+              ? "Wallet · OneCard"
+              : "Tap with top of iPhone"}
+      </motion.p>
+    </motion.div>
   );
 }

@@ -15,6 +15,12 @@ export function useCardImage(cardId: string) {
   );
 
   useEffect(() => {
+    if (!cardId) {
+      setImageUrl(null);
+      setLoaded(true);
+      return;
+    }
+
     let cancelled = false;
 
     fetchCardImage(cardId).then((url) => {

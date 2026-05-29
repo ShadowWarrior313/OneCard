@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Maximize2, Minimize2, Pause, Play, Sparkles } from "lucide-react";
+import { Maximize2, Minimize2, Pause, Play } from "lucide-react";
 import Image from "next/image";
 import {
   useCallback,
@@ -12,35 +12,44 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import { DemoPhoneCanvas, type DemoPhoneScreen } from "@/components/demo/DemoPhoneCanvas";
+import { type SlideDirection } from "@/components/demo/DemoPhoneSlide";
 import { PosTapScene, tapStageAtProgress, type TapStage } from "./PosTapScene";
 import { useUserProfile } from "@/context/UserProfileContext";
 
-type Phase = "tap" | "analyze" | "route" | "complete";
-type StepTab = "Tap" | "Route" | "Earn";
+type Phase = "tap" | "routing" | "wallet" | "spend" | "bills";
+type StepTab = "Tap" | "Route" | "Spend" | "Bills";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+const SLIDE_SPRING = { type: "spring" as const, stiffness: 420, damping: 38 };
 
-const PHASE_ORDER: Phase[] = ["tap", "analyze", "route", "complete"];
+const PHASE_ORDER: Phase[] = ["tap", "routing", "wallet", "spend", "bills"];
 
 const PHASE_MS: Record<Phase, number> = {
-  tap: 6800,
-  analyze: 2800,
-  route: 2600,
-  complete: 3200,
+  tap: 8500,
+  routing: 7000,
+  wallet: 2800,
+  spend: 9500,
+  bills: 7000,
 };
 
 const TOTAL_MS = PHASE_ORDER.reduce((sum, p) => sum + PHASE_MS[p], 0);
-/** Logo wipe + hold before tap scene appears */
+/** Logo wipe at the start of the film */
 const INTRO_MS = 2800;
-/** Extra beat after logo fades before card/terminal animate in */
+/** Beat after logo before scene content appears */
 const CONTENT_REVEAL_DELAY_MS = 400;
+const FILM_CONTENT_START_MS = INTRO_MS + CONTENT_REVEAL_DELAY_MS;
 
 const PHASE_START: Record<Phase, number> = {
   tap: 0,
-  analyze: PHASE_MS.tap,
-  route: PHASE_MS.tap + PHASE_MS.analyze,
-  complete: PHASE_MS.tap + PHASE_MS.analyze + PHASE_MS.route,
+  routing: PHASE_MS.tap,
+  wallet: PHASE_MS.tap + PHASE_MS.routing,
+  spend: PHASE_MS.tap + PHASE_MS.routing + PHASE_MS.wallet,
+  bills: PHASE_MS.tap + PHASE_MS.routing + PHASE_MS.wallet + PHASE_MS.spend,
 };
+
+const DEMO_MERCHANT = "Loblaws";
+const DEMO_AMOUNT = "$118.40";
 
 const PHASE_COPY: Record<
   Phase,
@@ -48,37 +57,37 @@ const PHASE_COPY: Record<
 > = {
   tap: {
     eyebrow: "Checkout",
-    title: "Tap once with OneCard",
-    subtitle: "Same card at every merchant — contactless at any terminal.",
+    title: "Pay with Wallet & Face ID",
+    subtitle: `Hold your iPhone near the reader — OneCard routes at ${DEMO_MERCHANT}.`,
     tab: "Tap",
   },
-  analyze: {
+  routing: {
     eyebrow: "Routing engine",
-    title: "We scan your wallet",
-    subtitle: "Merchant category matched against earn rates and bonus caps.",
+    title: "Amex Cobalt wins groceries",
+    subtitle: "One scroll through your wallet — best card selected once.",
     tab: "Route",
   },
-  route: {
-    eyebrow: "Best card selected",
-    title: "Amex Cobalt wins this purchase",
-    subtitle: "5× dining at Uber Eats · MCC 5812",
-    tab: "Route",
+  wallet: {
+    eyebrow: "Your wallet",
+    title: "Open My Spend",
+    subtitle: "Tap through the app — same wallet you use every day.",
+    tab: "Spend",
   },
-  complete: {
-    eyebrow: "Payment complete",
-    title: "+$7.29 vs your default card",
-    subtitle: "Rewards post to your existing Amex account.",
-    tab: "Earn",
+  spend: {
+    eyebrow: "My Spend",
+    title: "Tap a card in your wallet",
+    subtitle: "See spend for the card that earned on your last trip — same wallet as the app.",
+    tab: "Spend",
+  },
+  bills: {
+    eyebrow: "Bill pay",
+    title: "Pay statements in one place",
+    subtitle: "Due dates, balances, and payments without opening each issuer app.",
+    tab: "Bills",
   },
 };
 
-const WALLET_CARDS = [
-  { name: "Amex Cobalt", rate: "5.0× dining", reward: "$8.47", winner: true },
-  { name: "RBC Ion Visa", rate: "1.0× dining", reward: "$1.19", winner: false },
-  { name: "CIBC Dividend", rate: "1.0× dining", reward: "$0.84", winner: false },
-] as const;
-
-const TABS: StepTab[] = ["Tap", "Route", "Earn"];
+const TABS: StepTab[] = ["Tap", "Route", "Spend", "Bills"];
 
 type FullscreenElement = HTMLElement & {
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -172,36 +181,68 @@ function useDemoFullscreen(containerRef: RefObject<HTMLElement | null>) {
   return { fullscreen, toggleFullscreen, exitFullscreen };
 }
 
+function normalizeMs(ms: number): number {
+  return ((ms % TOTAL_MS) + TOTAL_MS) % TOTAL_MS;
+}
+
 function msToPhase(ms: number): Phase {
-  const t = ((ms % TOTAL_MS) + TOTAL_MS) % TOTAL_MS;
-  if (t < PHASE_START.analyze) return "tap";
-  if (t < PHASE_START.route) return "analyze";
-  if (t < PHASE_START.complete) return "route";
-  return "complete";
+  const t = normalizeMs(ms);
+  for (let i = PHASE_ORDER.length - 1; i >= 0; i--) {
+    const phase = PHASE_ORDER[i]!;
+    if (t >= PHASE_START[phase]) return phase;
+  }
+  return "tap";
 }
 
 function phaseToTab(phase: Phase): StepTab {
   return PHASE_COPY[phase].tab;
 }
 
-function tapProgressInPhase(ms: number): number {
-  const t = ((ms % TOTAL_MS) + TOTAL_MS) % TOTAL_MS;
-  const local = t - PHASE_START.tap;
-  const tapAnimStart = INTRO_MS + CONTENT_REVEAL_DELAY_MS;
-  if (local < tapAnimStart) return 0;
-  return (local - tapAnimStart) / (PHASE_MS.tap - tapAnimStart);
+function phaseToPhoneScreen(phase: Phase): DemoPhoneScreen | null {
+  if (phase === "tap") return null;
+  return phase;
+}
+
+const PHONE_PHASES: DemoPhoneScreen[] = ["routing", "wallet", "spend", "bills"];
+
+function phoneSlideDirection(from: Phase, to: Phase): SlideDirection {
+  const a = PHONE_PHASES.indexOf(from as DemoPhoneScreen);
+  const b = PHONE_PHASES.indexOf(to as DemoPhoneScreen);
+  if (a < 0 || b < 0) return "forward";
+  return b >= a ? "forward" : "back";
+}
+
+function localPhaseMs(ms: number): number {
+  const t = normalizeMs(ms);
+  const phase = msToPhase(ms);
+  return t - PHASE_START[phase];
+}
+
+function phaseProgress(ms: number): number {
+  const phase = msToPhase(ms);
+  const local = localPhaseMs(ms);
+  const duration = PHASE_MS[phase];
+  if (phase === "tap" && local < FILM_CONTENT_START_MS) return 0;
+  if (phase === "tap") {
+    return Math.min(1, (local - FILM_CONTENT_START_MS) / (duration - FILM_CONTENT_START_MS));
+  }
+  return Math.min(1, local / duration);
 }
 
 function introProgress(ms: number): number {
-  const t = ((ms % TOTAL_MS) + TOTAL_MS) % TOTAL_MS;
-  if (t >= PHASE_START.analyze) return 0;
+  const t = normalizeMs(ms);
   return Math.min(1, t / INTRO_MS);
 }
 
-function tapContentVisibleAt(ms: number): boolean {
-  const t = ((ms % TOTAL_MS) + TOTAL_MS) % TOTAL_MS;
-  if (t >= PHASE_START.analyze) return true;
-  return t - PHASE_START.tap >= INTRO_MS + CONTENT_REVEAL_DELAY_MS;
+function sceneContentVisibleAt(ms: number): boolean {
+  return normalizeMs(ms) >= FILM_CONTENT_START_MS;
+}
+
+function tapProgressInPhase(ms: number): number {
+  if (msToPhase(ms) !== "tap") return 0;
+  const local = localPhaseMs(ms);
+  if (local < FILM_CONTENT_START_MS) return 0;
+  return Math.min(1, (local - FILM_CONTENT_START_MS) / (PHASE_MS.tap - FILM_CONTENT_START_MS));
 }
 
 /** Scales stage content to fill available viewport in fullscreen */
@@ -301,7 +342,7 @@ function DemoDeviceCanvas({
       className={`group/canvas relative w-full min-w-0 text-left ${
         fullscreen
           ? "flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-none bg-gradient-to-br from-sky-200/70 via-sky-100 to-blue-100 p-1.5 sm:p-2"
-          : "min-h-[20rem] overflow-visible rounded-2xl bg-gradient-to-br from-sky-200/70 via-sky-100 to-blue-100 p-2.5 sm:min-h-[24rem] sm:p-4 md:p-5"
+          : "min-h-[26rem] overflow-visible rounded-2xl bg-gradient-to-br from-sky-200/70 via-sky-100 to-blue-100 p-2.5 sm:min-h-[28rem] sm:p-4 md:p-5"
       }`}
     >
       <div
@@ -366,7 +407,7 @@ function DemoDeviceCanvas({
             children
           ) : (
             <div
-              className={fullscreen ? "min-h-[18rem]" : "min-h-[14rem] sm:min-h-[16rem]"}
+              className={fullscreen ? "min-h-[20rem]" : "min-h-[24rem] sm:min-h-[26rem]"}
               aria-hidden
             />
           )}
@@ -457,92 +498,73 @@ function StepTabs({ active }: { active: StepTab }) {
   );
 }
 
-function AppRoutingView({ phase }: { phase: Phase }) {
+const TAP_SLIDE = {
+  enter: { x: "100%", opacity: 1 },
+  center: { x: 0, opacity: 1 },
+  exit: { x: "-28%", opacity: 1 },
+};
+
+function DemoPhoneStage({
+  phase,
+  phaseProgress,
+  sceneVisible,
+  cardholderName,
+  tapStage,
+  merchant,
+  amount,
+}: {
+  phase: Phase;
+  phaseProgress: number;
+  sceneVisible: boolean;
+  cardholderName: string;
+  tapStage: TapStage;
+  merchant: string;
+  amount: string;
+}) {
+  const prevPhase = useRef(phase);
+  const phoneScreen = phaseToPhoneScreen(phase);
+  const tapDir: SlideDirection =
+    phase === "tap" || prevPhase.current === "tap" ? "forward" : phoneSlideDirection(prevPhase.current, phase);
+
+  useEffect(() => {
+    prevPhase.current = phase;
+  }, [phase]);
+
+  if (phase === "tap") {
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="tap"
+          variants={TAP_SLIDE}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={SLIDE_SPRING}
+          className="min-w-0 overflow-visible"
+          style={{ opacity: sceneVisible ? 1 : 0 }}
+        >
+          <PosTapScene
+            cardholderName={cardholderName}
+            stage={tapStage}
+            contentVisible={sceneVisible}
+            merchantName={merchant}
+            amount={amount}
+          />
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  if (!phoneScreen) return null;
+
   return (
-    <div className="min-w-0 space-y-2.5 pb-1 sm:space-y-3">
-      <div className="flex items-center justify-between gap-2 border-b border-zinc-100 pb-2.5 sm:pb-3">
-        <div className="min-w-0">
-          <p className="text-[0.6rem] font-semibold uppercase tracking-wider text-brand-muted sm:text-[0.65rem]">
-            Purchase
-          </p>
-          <p className="truncate text-sm font-semibold text-brand-ink sm:text-base">Uber Eats</p>
-        </div>
-        <p className="shrink-0 text-lg font-bold tabular-nums text-brand-ink sm:text-xl">$84.50</p>
-      </div>
-
-      <div className="rounded-lg bg-sky-50/80 px-3 py-2.5 ring-1 ring-sky-100">
-        {phase === "analyze" && (
-          <p className="text-xs text-brand-muted">Reading merchant category…</p>
-        )}
-        {phase === "route" && (
-          <p className="text-xs font-medium text-brand-ink">
-            Routing to <span className="font-semibold">Amex Cobalt</span>
-          </p>
-        )}
-        {phase === "complete" && (
-          <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-            <Check className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
-            Approved · 5× dining applied
-          </p>
-        )}
-      </div>
-
-      <div>
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-brand-muted">
-            Wallet analysis
-          </p>
-          {phase === "analyze" && (
-            <span className="text-[0.65rem] font-medium text-sky-600">Scanning…</span>
-          )}
-        </div>
-
-        <ul className="space-y-2">
-          {WALLET_CARDS.map((card, i) => {
-            const highlighted = card.winner && (phase === "route" || phase === "complete");
-            const visible = phase === "analyze" ? i <= 1 : true;
-
-            return (
-              <li
-                key={card.name}
-                className={`flex min-w-0 items-center justify-between gap-2 rounded-lg px-3 py-2.5 transition ${
-                  highlighted
-                    ? "bg-emerald-50 ring-1 ring-emerald-200/80"
-                    : "bg-zinc-50/80 ring-1 ring-zinc-100"
-                } ${visible ? "opacity-100" : "opacity-35"}`}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-brand-ink">{card.name}</p>
-                    {highlighted && (
-                      <span className="shrink-0 rounded bg-brand-ink px-1.5 py-0.5 text-[0.55rem] font-bold uppercase text-white">
-                        Best
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-0.5 truncate text-xs text-brand-muted">{card.rate}</p>
-                </div>
-                <p
-                  className={`shrink-0 text-sm font-bold tabular-nums ${
-                    highlighted ? "text-emerald-700" : "text-brand-muted"
-                  }`}
-                >
-                  {card.reward}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-
-      {phase === "complete" && (
-        <div className="flex items-start gap-2 rounded-lg bg-emerald-50/80 px-3 py-2.5 ring-1 ring-emerald-100">
-          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-          <p className="min-w-0 break-words text-xs leading-relaxed text-emerald-900">
-            Charged to Amex Cobalt — rewards post on your existing account.
-          </p>
-        </div>
-      )}
+    <div style={{ opacity: sceneVisible ? 1 : 0 }}>
+      <DemoPhoneCanvas
+        screen={phoneScreen}
+        progress={phaseProgress}
+        merchant={merchant}
+        amount={amount}
+      />
     </div>
   );
 }
@@ -634,7 +656,8 @@ export function OneCardDemoFilm() {
   const copy = PHASE_COPY[phase];
   const progress = (elapsedMs % TOTAL_MS) / TOTAL_MS;
   const introP = introProgress(elapsedMs);
-  const tapContentVisible = tapContentVisibleAt(elapsedMs);
+  const sceneVisible = sceneContentVisibleAt(elapsedMs);
+  const phaseProgress01 = phaseProgress(elapsedMs);
   const tapStage: TapStage =
     phase === "tap" ? tapStageAtProgress(tapProgressInPhase(elapsedMs)) : "idle";
 
@@ -704,34 +727,25 @@ export function OneCardDemoFilm() {
             fullscreen ? "hidden landscape:block landscape:px-4 landscape:py-3" : ""
           }`}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={phase}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.35, ease: EASE }}
-              className="min-w-0"
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-brand-muted">
+              {copy.eyebrow}
+            </p>
+            <p
+              className={`mt-1 break-words font-semibold text-brand-ink ${
+                fullscreen ? "text-sm sm:text-base landscape:text-sm" : "text-base sm:text-lg"
+              }`}
             >
-              <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-brand-muted">
-                {copy.eyebrow}
-              </p>
-              <p
-                className={`mt-1 break-words font-semibold text-brand-ink ${
-                  fullscreen ? "text-sm sm:text-base landscape:text-sm" : "text-base sm:text-lg"
-                }`}
-              >
-                {copy.title}
-              </p>
-              <p
-                className={`mt-1.5 break-words leading-relaxed text-brand-muted ${
-                  fullscreen ? "text-xs landscape:line-clamp-2" : "text-sm"
-                }`}
-              >
-                {copy.subtitle}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+              {copy.title}
+            </p>
+            <p
+              className={`mt-1.5 break-words leading-relaxed text-brand-muted ${
+                fullscreen ? "text-xs landscape:line-clamp-2" : "text-sm"
+              }`}
+            >
+              {copy.subtitle}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -744,29 +758,18 @@ export function OneCardDemoFilm() {
           introProgress={introP}
           paused={paused}
           onTogglePause={togglePause}
-          showTapContent={phase !== "tap" || tapContentVisible}
+          showTapContent={sceneVisible}
           fullscreen={fullscreen}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={phase === "tap" ? "tap" : "app"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              className="min-w-0 overflow-visible"
-            >
-              {phase === "tap" ? (
-                <PosTapScene
-                  cardholderName={cardholderName}
-                  stage={tapStage}
-                  contentVisible={tapContentVisible}
-                />
-              ) : (
-                <AppRoutingView phase={phase} />
-              )}
-            </motion.div>
-          </AnimatePresence>
+          <DemoPhoneStage
+            phase={phase}
+            phaseProgress={phaseProgress01}
+            sceneVisible={sceneVisible}
+            cardholderName={cardholderName}
+            tapStage={tapStage}
+            merchant={DEMO_MERCHANT}
+            amount={DEMO_AMOUNT}
+          />
         </DemoDeviceCanvas>
 
         <footer

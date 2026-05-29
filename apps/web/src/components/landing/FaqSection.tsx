@@ -57,7 +57,7 @@ export function FaqSection() {
   return (
     <div className="min-w-0 max-w-full rounded-2xl border border-zinc-200/80 bg-[#f4f3f0] p-5 sm:rounded-3xl sm:p-8">
       <h2 className="text-xl font-bold tracking-tight text-brand-ink sm:text-2xl">
-        Frequently asked questions
+        Questions, answered.
       </h2>
 
       <ul className="mt-5 divide-y divide-zinc-300/70 sm:mt-6">

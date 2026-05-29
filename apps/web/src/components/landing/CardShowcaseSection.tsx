@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, Maximize2, RotateCw, Wallet } from "lucide-react";
 import { FlippableOneCard } from "@/components/landing/FlippableOneCard";
 import { TapOnceExpandModal } from "@/components/landing/TapOnceExpandModal";
@@ -9,18 +9,25 @@ import Link from "next/link";
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
 } from "react";
 import { useWallet } from "@/context/WalletContext";
+import { getCardById } from "@/data/cards";
+import { getCardAppearance } from "@/data/cardAppearances";
 import { merchantById } from "@/data/merchants";
+import { cardBackgroundStyle, cardTextClass } from "@/lib/cardBackground";
 import {
   buildRoutingRowsForScenario,
+  buildShowcaseCategoryRows,
   formatCad,
+  SHOWCASE_CATEGORIES,
   TAP_DEMO_SCENARIOS,
   type RoutingRow,
+  type ShowcaseCategoryId,
 } from "@/lib/tapDemoScenarios";
 import type { CardProduct } from "@onecard/shared-types";
 
@@ -43,14 +50,13 @@ function usePointerTilt(disabled: boolean) {
 
   const onMove = useCallback(
     (e: ReactMouseEvent) => {
-      if (disabled) return;
       const el = ref.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
       mx.set((e.clientX - r.left) / r.width - 0.5);
       my.set((e.clientY - r.top) / r.height - 0.5);
     },
-    [disabled, mx, my],
+    [mx, my],
   );
 
   const onLeave = useCallback(() => {
@@ -61,19 +67,125 @@ function usePointerTilt(disabled: boolean) {
   return { ref, rotateX, rotateY, glowX, glowY, onMove, onLeave };
 }
 
+const SHOWCASE_PANEL_CLASS =
+  "relative mx-3 mb-3 mt-1 flex min-h-[16.5rem] flex-1 flex-col overflow-hidden rounded-xl sm:mx-4 sm:mb-4 sm:min-h-[18rem] sm:rounded-2xl";
+
+function InteractiveShowcasePanel({
+  gradient,
+  glowPrimary,
+  glowSecondary,
+  overlays,
+  children,
+  innerClassName = "relative flex flex-1 flex-col items-center justify-center px-4 py-4",
+  disableTilt = false,
+}: {
+  gradient: string;
+  glowPrimary: string;
+  glowSecondary: string;
+  overlays?: (active: boolean) => ReactNode;
+  children:
+    | ReactNode
+    | ((tilt: {
+        rotateX: ReturnType<typeof usePointerTilt>["rotateX"];
+        rotateY: ReturnType<typeof usePointerTilt>["rotateY"];
+      }) => ReactNode);
+  innerClassName?: string;
+  disableTilt?: boolean;
+}) {
+  const [compact, setCompact] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const { ref, rotateX, rotateY, glowX, glowY, onMove, onLeave } = usePointerTilt(compact || disableTilt);
+  const glowX2 = useTransform(glowX, (v) => -v * 0.6);
+  const glowY2 = useTransform(glowY, (v) => -v * 0.5);
+  const active = hovered || compact;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const update = () => setCompact(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return (
+    <div className={SHOWCASE_PANEL_CLASS} style={{ background: gradient }}>
+      <div
+        ref={ref}
+        className={innerClassName}
+        onMouseMove={onMove}
+        onMouseLeave={() => {
+          onLeave();
+          setHovered(false);
+        }}
+        onMouseEnter={() => setHovered(true)}
+      >
+        {overlays?.(active)}
+
+        <motion.div
+          className={`pointer-events-none absolute h-40 w-40 rounded-full blur-3xl ${glowPrimary}`}
+          style={{ x: glowX, y: glowY }}
+          aria-hidden
+        />
+        <motion.div
+          className={`pointer-events-none absolute h-32 w-32 rounded-full blur-3xl ${glowSecondary}`}
+          style={{ x: glowX2, y: glowY2 }}
+          aria-hidden
+        />
+
+        {typeof children === "function" ? children({ rotateX, rotateY }) : children}
+      </div>
+    </div>
+  );
+}
+
+function FloatingWalletChips({ active }: { active: boolean }) {
+  return (
+    <>
+      <motion.div
+        className="pointer-events-none absolute left-3 top-12 z-0 max-w-[8rem] rounded-xl border border-white/70 bg-white/90 px-2.5 py-2 shadow-md backdrop-blur-sm sm:left-4 sm:top-14"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.55, y: active ? 0 : 6, scale: active ? 1 : 0.96 }}
+        transition={{ duration: 0.35, ease: EASE }}
+      >
+        <p className="text-xs font-semibold text-brand-ink">any issuer</p>
+      </motion.div>
+
+      <motion.div
+        className="pointer-events-none absolute right-2 top-[4.5rem] z-0 rounded-xl border border-white/70 bg-white/90 px-2.5 py-1.5 shadow-md backdrop-blur-sm sm:right-3"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.5, x: active ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: EASE, delay: 0.04 }}
+      >
+        <p className="text-[0.65rem] font-semibold text-brand-ink">Any card linked</p>
+      </motion.div>
+
+      <motion.div
+        className="pointer-events-none absolute bottom-16 left-4 z-0 rounded-xl border border-amber-200/80 bg-amber-50/95 px-2.5 py-1.5 shadow-sm sm:bottom-[4.5rem]"
+        initial={false}
+        animate={{ opacity: active ? 1 : 0.45, y: active ? 0 : 8 }}
+        transition={{ duration: 0.35, ease: EASE, delay: 0.08 }}
+      >
+        <p className="text-[0.65rem] font-semibold text-amber-900">Link once · route every tap</p>
+      </motion.div>
+    </>
+  );
+}
+
 function FloatingRouteChips({
   rows,
   active,
   merchantName,
   amountLabel,
+  merchantId,
 }: {
   rows: RoutingRow[];
   active: boolean;
   merchantName: string;
   amountLabel: string;
+  merchantId: string;
 }) {
   const winner = rows.find((r) => r.win) ?? rows[0];
-  const merchant = merchantById(SHOWCASE_SCENARIO.merchantId);
+  const merchant = merchantById(merchantId);
 
   return (
     <>
@@ -126,138 +238,372 @@ function InteractiveOneCard({
   merchantName: string;
   amountLabel: string;
 }) {
-  const [compact, setCompact] = useState(false);
   const [flipped, setFlipped] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const { ref, rotateX, rotateY, glowX, glowY, onMove, onLeave } = usePointerTilt(compact);
-  const glowX2 = useTransform(glowX, (v) => -v * 0.6);
-  const glowY2 = useTransform(glowY, (v) => -v * 0.5);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const update = () => setCompact(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
+  return (
+    <InteractiveShowcasePanel
+      gradient="radial-gradient(ellipse 90% 70% at 20% 10%, rgba(196,181,253,0.55), transparent 55%), radial-gradient(ellipse 80% 60% at 90% 90%, rgba(253,186,140,0.45), transparent 50%), linear-gradient(160deg, #f5f3ff 0%, #eff6ff 45%, #fff7ed 100%)"
+      glowPrimary="bg-sky-400/20"
+      glowSecondary="bg-violet-400/15"
+      innerClassName="relative flex flex-1 flex-col items-center justify-center px-4 py-4 pb-3"
+      overlays={(active) => (
+        <FloatingRouteChips
+          rows={routingRows}
+          active={active}
+          merchantName={merchantName}
+          amountLabel={amountLabel}
+          merchantId={SHOWCASE_SCENARIO.merchantId}
+        />
+      )}
+    >
+      {({ rotateX, rotateY }) => (
+        <>
+          <motion.div
+            className="relative z-10 w-[min(100%,13.75rem)] sm:w-[15.25rem]"
+            style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1400 }}
+          >
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <FlippableOneCard flipped={flipped} />
+            </motion.div>
+          </motion.div>
+
+          <button
+            type="button"
+            onClick={() => setFlipped((v) => !v)}
+            aria-label={flipped ? "Show front" : "Rotate card"}
+            className="relative z-10 mt-3 inline-flex items-center justify-center rounded-full border border-white/80 bg-white/95 p-2.5 text-brand-ink shadow-sm transition hover:border-sky-200 hover:bg-white"
+          >
+            <RotateCw className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        </>
+      )}
+    </InteractiveShowcasePanel>
+  );
+}
+
+const SHOWCASE_WALLET_SLOT_IDS = [
+  "rbc_ion",
+  "amex_cobalt",
+  "cibc_dividend_infinite",
+  "scotia_momentum",
+  "td_cashback",
+  "bmo_eclipse",
+] as const;
+
+function useShowcaseWalletSlots(): CardProduct[] {
+  const { cards } = useWallet();
+  return useMemo(() => {
+    const merged: CardProduct[] = [...cards];
+    for (const id of SHOWCASE_WALLET_SLOT_IDS) {
+      if (merged.length >= 6) break;
+      const card = getCardById(id);
+      if (card && !merged.some((c) => c.cardId === card.cardId)) merged.push(card);
+    }
+    while (merged.length < 6) {
+      const fallback = getCardById(
+        SHOWCASE_WALLET_SLOT_IDS[merged.length % SHOWCASE_WALLET_SLOT_IDS.length]!,
+      );
+      if (fallback) merged.push(fallback);
+      else break;
+    }
+    return merged.slice(0, 6);
+  }, [cards]);
+}
+
+function ShowcaseSlotCard({ card }: { card: CardProduct }) {
+  const appearance = getCardAppearance(card.cardId, card.issuer);
+  const bg = cardBackgroundStyle(appearance);
+  const text = cardTextClass(appearance);
+  const label =
+    appearance.faceLabel ??
+    (card.displayName.split(" ").length > 2
+      ? card.displayName.split(" ").slice(-2).join(" ")
+      : card.displayName);
 
   return (
     <div
-      className="relative mx-3 mb-3 mt-1 flex min-h-[16.5rem] flex-1 flex-col overflow-hidden rounded-xl sm:mx-4 sm:mb-4 sm:min-h-[18rem] sm:rounded-2xl"
-      style={{
-        background:
-          "radial-gradient(ellipse 90% 70% at 20% 10%, rgba(196,181,253,0.55), transparent 55%), radial-gradient(ellipse 80% 60% at 90% 90%, rgba(253,186,140,0.45), transparent 50%), linear-gradient(160deg, #f5f3ff 0%, #eff6ff 45%, #fff7ed 100%)",
-      }}
+      className={`relative h-[1.55rem] w-full overflow-hidden rounded-[0.45rem] shadow-sm ring-1 ring-black/15 ${text}`}
+      style={bg}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
+      <div className="relative flex h-full items-center px-1.5">
+        <span className="truncate text-[0.48rem] font-bold uppercase tracking-wide">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+function ShowcaseWalletPanel({
+  side,
+  cards,
+}: {
+  side: "left" | "right";
+  cards: CardProduct[];
+}) {
+  const isLeft = side === "left";
+
+  return (
+    <div
+      className={`phone-leather-wallet relative min-w-0 flex-1 px-2 py-2.5 shadow-[0_12px_28px_rgba(42,24,16,0.32)] ${
+        isLeft ? "rounded-l-[0.85rem] rounded-r-sm" : "rounded-l-sm rounded-r-[0.85rem]"
+      }`}
     >
       <div
-        ref={ref}
-        className="relative flex flex-1 flex-col items-center justify-center px-4 py-4 pb-3"
-        style={{ perspective: 1400 }}
-        onMouseMove={onMove}
-        onMouseLeave={() => {
-          onLeave();
-          setHovered(false);
-        }}
-        onMouseEnter={() => setHovered(true)}
+        className={`absolute inset-x-0 top-0 h-[16%] phone-leather-lip ${
+          isLeft ? "rounded-tl-[0.85rem]" : "rounded-tr-[0.85rem]"
+        }`}
+        aria-hidden
+      />
+      <div className="relative mt-2.5 flex flex-col gap-1.5">
+        {cards.map((card) => (
+          <ShowcaseSlotCard key={card.cardId} card={card} />
+        ))}
+      </div>
+      <div
+        className="pointer-events-none absolute inset-x-2.5 bottom-2.5 border-b border-dashed border-amber-100/12"
+        aria-hidden
+      />
+    </div>
+  );
+}
+
+const SHOWCASE_OPEN_WALLET_CLASS = "w-[min(100%,13.75rem)] sm:w-[15.25rem]";
+const WALLET_FOLD_SPRING = { type: "spring" as const, stiffness: 210, damping: 24 };
+/** Nearly shut — panels face each other; springs to 0° when fully open flat */
+const WALLET_CLOSED_LEFT_Y = -168;
+const WALLET_CLOSED_RIGHT_Y = 168;
+
+function ShowcaseBifoldWallet({ open, cards }: { open: boolean; cards: CardProduct[] }) {
+  const left = cards.slice(0, 3);
+  const right = cards.slice(3, 6);
+
+  return (
+    <div
+      className={`relative flex min-h-[9rem] items-center justify-center overflow-hidden ${SHOWCASE_OPEN_WALLET_CLASS}`}
+      style={{ perspective: 1200 }}
+    >
+      <div
+        className={`flex items-stretch ${SHOWCASE_OPEN_WALLET_CLASS}`}
+        style={{ transformStyle: "preserve-3d" }}
       >
-        <FloatingRouteChips
-          rows={routingRows}
-          active={hovered || compact}
-          merchantName={merchantName}
-          amountLabel={amountLabel}
-        />
-
         <motion.div
-          className="pointer-events-none absolute h-40 w-40 rounded-full bg-sky-400/20 blur-3xl"
-          style={{ x: glowX, y: glowY }}
-          aria-hidden
-        />
-        <motion.div
-          className="pointer-events-none absolute h-32 w-32 rounded-full bg-violet-400/15 blur-3xl"
-          style={{ x: glowX2, y: glowY2 }}
-          aria-hidden
-        />
-
-        <motion.div
-          className="relative z-10 w-[min(100%,13.75rem)] sm:w-[15.25rem]"
-          style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+          className="min-w-0 flex-1"
+          style={{
+            transformOrigin: "right center",
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden",
+          }}
+          initial={false}
+          animate={{ rotateY: open ? 0 : WALLET_CLOSED_LEFT_Y }}
+          transition={WALLET_FOLD_SPRING}
         >
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <FlippableOneCard flipped={flipped} />
-          </motion.div>
+          <ShowcaseWalletPanel side="left" cards={left} />
         </motion.div>
 
-        <button
-          type="button"
-          onClick={() => setFlipped((v) => !v)}
-          className="relative z-10 mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:border-sky-200 hover:bg-white"
+        <motion.div
+          className="relative z-10 w-[3px] shrink-0 self-stretch rounded-full bg-[#1a0f0a] shadow-[inset_0_0_4px_rgba(0,0,0,0.5)]"
+          aria-hidden
+          initial={false}
+          animate={{ opacity: open ? 1 : 0.4, scaleY: open ? 1 : 0.55 }}
+          transition={WALLET_FOLD_SPRING}
+        />
+
+        <motion.div
+          className="min-w-0 flex-1"
+          style={{
+            transformOrigin: "left center",
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden",
+          }}
+          initial={false}
+          animate={{ rotateY: open ? 0 : WALLET_CLOSED_RIGHT_Y }}
+          transition={WALLET_FOLD_SPRING}
         >
-          <RotateCw className="h-3.5 w-3.5" aria-hidden />
-          {flipped ? "Show front" : "Rotate card"}
-        </button>
+          <ShowcaseWalletPanel side="right" cards={right} />
+        </motion.div>
       </div>
+
+      <AnimatePresence>
+        {!open && (
+          <motion.div
+            key="closed-cover"
+            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94 }}
+            transition={{ duration: 0.28, ease: EASE }}
+          >
+            <div className="relative w-[10.5rem]">
+              <div className="phone-leather-wallet relative z-10 aspect-[1.35/1] w-full overflow-hidden rounded-[1.05rem]">
+                <div
+                  className="absolute inset-x-0 top-0 h-[22%] phone-leather-lip rounded-t-[1.05rem]"
+                  aria-hidden
+                />
+                <div className="relative flex h-full flex-col items-center justify-center pt-[8%]">
+                  <Wallet className="h-11 w-11 text-amber-100/30" strokeWidth={1.35} />
+                </div>
+                <div
+                  className="pointer-events-none absolute inset-x-4 bottom-[18%] border-b border-dashed border-amber-100/15"
+                  aria-hidden
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function WalletMiniVisual() {
-  return (
-    <div className="relative mx-auto flex h-full min-h-[240px] w-full items-center justify-center px-6 py-8">
-      <div
-        className="relative w-[10.5rem]"
-        style={{ perspective: 900 }}
-      >
-        {/* Stack edge — gives physical thickness without extra cards */}
-        <div
-          className="absolute inset-x-2 bottom-0 top-2 rounded-[1.05rem] bg-[#1a0f0a] shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]"
-          aria-hidden
-        />
-        <div
-          className="absolute inset-x-1 bottom-0 top-1 rounded-[1.05rem] bg-[#241610]"
-          aria-hidden
-        />
+function InteractiveWalletVisual() {
+  const [open, setOpen] = useState(false);
+  const slotCards = useShowcaseWalletSlots();
 
-        {/* Leather wallet face */}
-        <div className="phone-leather-wallet relative z-10 aspect-[1.35/1] w-full overflow-hidden rounded-[1.05rem] shadow-[0_18px_40px_rgba(42,24,16,0.35)]">
-          <div className="absolute inset-x-0 top-0 h-[22%] phone-leather-lip rounded-t-[1.05rem]" aria-hidden />
-          <div className="relative flex h-full flex-col items-center justify-center pt-[8%]">
-            <Wallet className="h-11 w-11 text-amber-100/30" strokeWidth={1.35} />
-          </div>
-          {/* Stitch line along bottom fold */}
+  return (
+    <InteractiveShowcasePanel
+      gradient="radial-gradient(ellipse 90% 70% at 18% 12%, rgba(251,191,36,0.42), transparent 55%), radial-gradient(ellipse 80% 60% at 88% 88%, rgba(180,83,9,0.28), transparent 50%), linear-gradient(160deg, #fffbeb 0%, #fef3c7 42%, #fff7ed 100%)"
+      glowPrimary="bg-amber-400/25"
+      glowSecondary="bg-orange-400/15"
+      overlays={(active) => <FloatingWalletChips active={active} />}
+    >
+      {({ rotateX, rotateY }) => (
+        <>
+          <motion.div
+            className="relative z-10"
+            style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 900 }}
+          >
+            <motion.div
+              animate={{ y: open ? 0 : [0, -5, 0] }}
+              transition={
+                open
+                  ? { duration: 0.3, ease: EASE }
+                  : { duration: 5, repeat: Infinity, ease: "easeInOut" }
+              }
+            >
+              <ShowcaseBifoldWallet open={open} cards={slotCards} />
+            </motion.div>
+          </motion.div>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close wallet" : "Open wallet"}
+            className="relative z-10 mt-3 inline-flex items-center justify-center rounded-full border border-white/80 bg-white/95 px-3.5 py-2 text-xs font-semibold text-brand-ink shadow-sm transition hover:border-sky-200 hover:bg-white"
+          >
+            {open ? "Close" : "Open"}
+          </button>
+        </>
+      )}
+    </InteractiveShowcasePanel>
+  );
+}
+
+function InteractiveRoutingVisual() {
+  const { cards } = useWallet();
+  const [categoryId, setCategoryId] = useState<ShowcaseCategoryId>("gas");
+  const showcase = useMemo(
+    () => buildShowcaseCategoryRows(categoryId, cards),
+    [categoryId, cards],
+  );
+  const activeScenario =
+    SHOWCASE_CATEGORIES.find((c) => c.id === categoryId)?.scenario ?? SHOWCASE_CATEGORIES[0]!.scenario;
+
+  return (
+    <InteractiveShowcasePanel
+      disableTilt
+      gradient="radial-gradient(ellipse 90% 70% at 82% 12%, rgba(52,211,153,0.45), transparent 55%), radial-gradient(ellipse 80% 60% at 12% 88%, rgba(56,189,248,0.38), transparent 50%), linear-gradient(160deg, #ecfdf5 0%, #f0fdfa 42%, #eff6ff 100%)"
+      glowPrimary="bg-emerald-400/20"
+      glowSecondary="bg-sky-400/15"
+      innerClassName="relative flex flex-1 flex-col items-center justify-center px-4 py-5"
+      overlays={(active) => (
+        <FloatingRouteChips
+          rows={showcase.rows}
+          active={active}
+          merchantName={showcase.merchantName}
+          amountLabel={showcase.amountLabel}
+          merchantId={activeScenario.merchantId}
+        />
+      )}
+    >
+      {() => (
+        <div className="relative z-10 flex w-full max-w-[15rem] flex-col gap-2.5">
           <div
-            className="pointer-events-none absolute inset-x-4 bottom-[18%] border-b border-dashed border-amber-100/15"
-            aria-hidden
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function RoutingMiniVisual({ rows }: { rows: ReturnType<typeof buildRoutingComparison> }) {
-  return (
-    <div className="flex h-full min-h-[240px] w-full flex-col justify-center gap-3 px-5 py-6">
-      {rows.map((row) => (
-        <div
-          key={row.name}
-          className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs ${
-            row.win ? "bg-emerald-50 ring-1 ring-emerald-200/80" : "bg-zinc-50 ring-1 ring-zinc-100"
-          }`}
-        >
-          <div>
-            <p className="font-semibold text-brand-ink">{row.name}</p>
-            <p className="text-brand-muted">{row.rate}</p>
+            className="flex flex-wrap justify-center gap-1.5"
+            role="tablist"
+            aria-label="Spend category"
+          >
+            {SHOWCASE_CATEGORIES.map((category) => {
+              const selected = category.id === categoryId;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setCategoryId(category.id)}
+                  className={`rounded-full px-2.5 py-1 text-[0.65rem] font-semibold transition ${
+                    selected
+                      ? "bg-white text-brand-ink shadow-sm ring-1 ring-emerald-200/80"
+                      : "bg-white/70 text-brand-muted hover:bg-white/90"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              );
+            })}
           </div>
-          <p className={`font-bold tabular-nums ${row.win ? "text-emerald-700" : "text-brand-muted"}`}>
-            {row.reward}
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={categoryId}
+              className="flex flex-col gap-2.5"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: EASE }}
+            >
+              {showcase.rows.map((row, i) => (
+                <motion.div
+                  key={row.name}
+                  initial={false}
+                  animate={{
+                    y: row.win ? [0, -3, 0] : 0,
+                    scale: row.win ? 1 : 0.98,
+                  }}
+                  transition={
+                    row.win
+                      ? { y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.08 } }
+                      : { duration: 0.2 }
+                  }
+                  className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs shadow-sm ${
+                    row.win
+                      ? "bg-emerald-50/95 ring-1 ring-emerald-200/80 backdrop-blur-sm"
+                      : "bg-white/90 ring-1 ring-zinc-100/90 backdrop-blur-sm"
+                  }`}
+                >
+                  <div className="min-w-0 pr-2">
+                    <p className="truncate font-semibold text-brand-ink">{row.name}</p>
+                    <p className="truncate text-brand-muted">{row.rate}</p>
+                  </div>
+                  <p
+                    className={`font-bold tabular-nums ${row.win ? "text-emerald-700" : "text-brand-muted"}`}
+                  >
+                    {row.reward}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+
+          <p className="text-center text-[0.65rem] font-medium text-sky-600">
+            Best card selected at tap
           </p>
         </div>
-      ))}
-      <p className="text-center text-[0.65rem] font-medium text-sky-600">Best card selected at tap</p>
-    </div>
+      )}
+    </InteractiveShowcasePanel>
   );
 }
 
@@ -285,8 +631,8 @@ function ShowcaseTile({
           : "border-zinc-200/90"
       }`}
     >
-      <div className="flex items-start justify-between gap-3 p-5 pb-0 sm:p-6 sm:pb-0">
-        <h3 className="max-w-[14rem] text-lg font-semibold leading-snug tracking-tight text-brand-ink sm:text-xl">
+      <div className="flex items-start justify-between gap-3 p-4 pb-0 sm:p-6 sm:pb-0">
+        <h3 className="min-w-0 flex-1 pr-1 text-base font-semibold leading-snug tracking-tight text-brand-ink sm:text-lg md:text-xl">
           {title}
         </h3>
         {expandHref ? (
@@ -346,7 +692,7 @@ export function CardShowcaseSection() {
               title="Link the cards you already carry"
               onExpand={openWalletModal}
             >
-              <WalletMiniVisual />
+              <InteractiveWalletVisual />
             </ShowcaseTile>
 
             <ShowcaseTile
@@ -365,15 +711,22 @@ export function CardShowcaseSection() {
               title="Earn more on every category"
               expandHref="/simulator"
             >
-              <RoutingMiniVisual rows={routingRows} />
+              <InteractiveRoutingVisual />
             </ShowcaseTile>
           </div>
 
-          <p className="mt-6 text-center text-sm text-brand-muted">
-            Tap{" "}
-            <Maximize2 className="inline h-3.5 w-3.5 align-text-bottom" aria-hidden /> on Link cards or Tap once
-            to expand · use <strong className="font-medium text-brand-body">Rotate card</strong> on the
-            middle tile to flip
+          <p className="mt-6 px-1 text-center text-xs leading-relaxed text-brand-muted sm:px-0 sm:text-sm">
+            <span className="sm:hidden">
+              Tap{" "}
+              <Maximize2 className="inline h-3 w-3 align-text-bottom" aria-hidden /> to expand tiles ·
+              rotate the middle card · pick a category on the right
+            </span>
+            <span className="hidden sm:inline">
+              Tap{" "}
+              <Maximize2 className="inline h-3.5 w-3.5 align-text-bottom" aria-hidden /> on Link cards or
+              Tap once to expand · hover tiles for background motion · tap a category to compare cards ·
+              use the rotate icon on the middle tile to flip
+            </span>
           </p>
         </div>
       </section>
