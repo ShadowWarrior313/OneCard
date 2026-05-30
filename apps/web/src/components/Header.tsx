@@ -10,6 +10,7 @@ import { useUserProfile } from "@/context/UserProfileContext";
 const links = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/wallet", label: "Wallet" },
+  { href: "/wallet/bills", label: "Bill Pay" },
   { href: "/wallet/my-spend", label: "My Spend" },
   { href: "/card-finder", label: "Card Finder" },
 ];
