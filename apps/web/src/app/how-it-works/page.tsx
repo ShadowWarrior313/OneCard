@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { AnnualRewardsStory } from "@/components/how-it-works/AnnualRewardsStory";
 import { RoutingMechanism } from "@/components/how-it-works/RoutingMechanism";
 import { FaqSection } from "@/components/landing/FaqSection";
-import { OneCardDemoFilm } from "@/components/OneCardDemoFilm";
+import { OneCardFilm } from "@/components/how-it-works/film/OneCardFilm";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
@@ -69,7 +69,7 @@ export default function HowItWorksPage() {
             </ol>
 
             <div className="mt-10 min-w-0">
-              <OneCardDemoFilm />
+              <OneCardFilm />
             </div>
 
             <ul className="mt-8 space-y-2.5">

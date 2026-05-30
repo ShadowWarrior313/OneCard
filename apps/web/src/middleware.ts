@@ -52,9 +52,13 @@ export function middleware(request: NextRequest) {
   const { pathname, protocol } = request.nextUrl;
 
   // 1. HTTPS redirect in production (Vercel handles this at the edge too,
-  //    but being explicit avoids any misconfigured reverse-proxy scenario)
+  //    but being explicit avoids any misconfigured reverse-proxy scenario).
+  //    Never redirect localhost — local `next start` runs plain HTTP.
+  const host = request.nextUrl.hostname;
+  const isLocal = host === "localhost" || host === "127.0.0.1";
   if (
     process.env.NODE_ENV === "production" &&
+    !isLocal &&
     protocol === "http:" &&
     !request.headers.get("x-forwarded-proto")?.includes("https")
   ) {
