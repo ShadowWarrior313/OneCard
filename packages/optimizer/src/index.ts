@@ -41,14 +41,9 @@ type SnapshotCard = {
   rewards: RewardRule[];
 };
 
-export type PaymentAutofillProfile = {
-  cardholderName: string;
-  cardNumber: string;
-  expiryMonth: string;
-  expiryYear: string;
-  securityCode: string;
-  postalCode: string;
-};
+// Raw card data (PAN, CVV, expiry) is never stored here.
+// Card entry goes through Stripe Elements → Stripe servers directly.
+// OneCard stores only the resulting PaymentMethod token + safe display metadata.
 
 const DOMAIN_RULES: Array<{
   match: string;
@@ -428,50 +423,6 @@ export const DEFAULT_WALLET_CARD_IDS = [
 
 export const SAMPLE_CARDS = getCardsByIds([...DEFAULT_WALLET_CARD_IDS]);
 
-const AUTOFILL_PROFILES: Record<string, PaymentAutofillProfile> = {
-  amex_cobalt: {
-    cardholderName: "John Smith",
-    cardNumber: "371449635398431",
-    expiryMonth: "07",
-    expiryYear: "2028",
-    securityCode: "1234",
-    postalCode: "M5V 2T6",
-  },
-  amex_gold: {
-    cardholderName: "John Smith",
-    cardNumber: "378282246310005",
-    expiryMonth: "07",
-    expiryYear: "2026",
-    securityCode: "1234",
-    postalCode: "M5V 2T6",
-  },
-  cibc_dividend: {
-    cardholderName: "John Smith",
-    cardNumber: "4111111111111111",
-    expiryMonth: "01",
-    expiryYear: "2028",
-    securityCode: "123",
-    postalCode: "M5V 2T6",
-  },
-  rbc_ion: {
-    cardholderName: "John Smith",
-    cardNumber: "4242424242424242",
-    expiryMonth: "12",
-    expiryYear: "2027",
-    securityCode: "123",
-    postalCode: "M5V 2T6",
-  },
-};
-
-const DEFAULT_AUTOFILL_PROFILE: PaymentAutofillProfile = {
-  cardholderName: "John Smith",
-  cardNumber: "4242424242424242",
-  expiryMonth: "12",
-  expiryYear: "2028",
-  securityCode: "123",
-  postalCode: "M5V 2T6",
-};
-
 export function getCardById(cardId: string): CardProduct | undefined {
   return CARD_CATALOG.find((card) => card.cardId === cardId);
 }
@@ -479,10 +430,6 @@ export function getCardById(cardId: string): CardProduct | undefined {
 export function getCardsByIds(cardIds: string[]): CardProduct[] {
   const wanted = new Set(cardIds);
   return CARD_CATALOG.filter((card) => wanted.has(card.cardId));
-}
-
-export function getAutofillProfile(cardId: string): PaymentAutofillProfile {
-  return AUTOFILL_PROFILES[cardId] ?? DEFAULT_AUTOFILL_PROFILE;
 }
 
 export function recommendCard(input: RecommendationInput): CardRecommendation | null {

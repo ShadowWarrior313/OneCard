@@ -2,8 +2,18 @@ node_modules
 dist
 .next
 .turbo
+
+# secrets — never commit any .env file with real values
 .env
 .env.local
+.env.production
+.env.production.local
+.env.development.local
+.env.test.local
+
 *.log
 coverage
 .DS_Store
+
+# Stripe CLI event logs
+.stripe/

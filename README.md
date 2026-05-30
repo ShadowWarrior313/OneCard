@@ -85,6 +85,77 @@ Scraping issuer reward pages: treat as **enrichment only**; curated JSON in-repo
 3. Dashboard with mock transactions, Sankey, simulator
 4. Postgres schema + API route `POST /route`
 
+## Stripe integration & payment security
+
+> ⚠️ **This is not PCI certification.** This codebase implements a safe tokenized architecture using Stripe, but real-money production use additionally requires: completing Stripe's business onboarding, a PCI SAQ A (or SAQ A-EP) assessment, and independent legal/privacy review for your jurisdiction.
+
+### How card data is handled
+
+Card details (PAN, CVV, expiry) are **never** collected, stored, or transmitted by OneCard's servers. The only path is:
+
+```
+User's browser → Stripe-hosted Payment Element iframe → Stripe servers
+```
+
+OneCard stores only: `paymentMethodId` (Stripe token), `brand`, `last4`, `expMonth`, `expYear`.
+
+### Environment variables
+
+Copy `apps/web/.env.example` to `apps/web/.env.local` and fill in real values. **Never commit `.env.local`.**
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client + Server | Stripe publishable key (`pk_test_...`) |
+| `STRIPE_SECRET_KEY` | **Server only** | Stripe secret key (`sk_test_...`) — never `NEXT_PUBLIC_` |
+| `STRIPE_WEBHOOK_SECRET` | **Server only** | Webhook signing secret (`whsec_...`) |
+| `POSTMARK_SERVER_TOKEN` | **Server only** | Email delivery |
+| `AUTH_SESSION_SECRET` | **Server only** | Session signing — min 32 random bytes |
+| `WAITLIST_WEBHOOK_URL` | Server only | Webhook endpoint for waitlist signups |
+
+### Stripe test cards
+
+Use these in the Payment Element — no real card data, no charges:
+
+| Card number | Brand | Notes |
+|---|---|---|
+| `4242 4242 4242 4242` | Visa | Any future expiry, any 3-digit CVV, any postal code |
+| `4000 0566 5566 5556` | Visa (debit) | |
+| `5555 5555 5555 4444` | Mastercard | |
+| `3782 822463 10005` | Amex | 4-digit CVV |
+| `4000 0025 0000 3155` | Visa | Requires 3D Secure authentication |
+| `4000 0000 0000 9995` | Visa | Always declined |
+
+Full list: https://stripe.com/docs/testing#cards
+
+### Running webhooks locally
+
+```bash
+# Install the Stripe CLI, then:
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+# Copy the whsec_... secret printed to your terminal into .env.local
+```
+
+### Apple Pay domain association (production only)
+
+Apple Pay requires your domain to be verified with Apple via Stripe before the payment sheet appears:
+
+1. Go to Stripe Dashboard → Settings → Payment Methods → Apple Pay.
+2. Add your domain (e.g. `use-onecard.com`).
+3. Download the domain-association file Stripe provides.
+4. Host it at: `https://yourdomain.com/.well-known/apple-developer-merchantid-domain-association`
+   - In Next.js: place the file in `apps/web/public/.well-known/` (create the folder).
+5. Verify in the Stripe dashboard. Apple Pay will then appear in the Payment Element on Safari/iOS.
+
+Full guide: https://stripe.com/docs/stripe-js/elements/payment-request-button#verifying-your-domain-with-apple-pay
+
+### Security baseline
+
+- **CSP** — enforced via `next.config.mjs` `headers()`. Allows Stripe's iframe origins; blocks everything else.
+- **HSTS** — `Strict-Transport-Security: max-age=31536000; includeSubDomains`
+- **Rate limiting** — `/api/stripe/*` and `/api/waitlist` are limited to 5–10 req/IP/min via Edge middleware. Replace the in-memory store with Upstash Redis / Vercel KV for multi-region durability.
+- **Webhook verification** — `stripe.webhooks.constructEvent` validates the `Stripe-Signature` header before any payload is processed.
+- **Log scrubbing** — API routes log only event type + id; raw Stripe errors and payloads are never logged.
+
 ## License
 
 Private — demo / investor use.

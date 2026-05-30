@@ -1,5 +1,4 @@
-import { getAutofillProfile, recommendCard } from "@onecard/optimizer";
-import type { PaymentAutofillProfile } from "@onecard/optimizer";
+import { recommendCard } from "@onecard/optimizer";
 import { getStoredCards } from "../shared/storage";
 
 const OVERLAY_ID = "onecard-checkout-advisor-root";
@@ -417,15 +416,9 @@ function injectOverlay(message: {
   const useCardBtn = wrapper.querySelector<HTMLButtonElement>("[data-onecard-use]");
   const statusEl = wrapper.querySelector<HTMLParagraphElement>(".status");
   useCardBtn?.addEventListener("click", () => {
-    const profile = getAutofillProfile(message.cardId);
-    const filled = autofillPaymentFields(profile);
-    if (filled && statusEl) {
-      statusEl.textContent = "Card details filled in.";
-      useCardBtn.disabled = true;
-      window.setTimeout(() => host.remove(), 1200);
-    } else if (statusEl) {
-      statusEl.textContent = "No payment fields found on this page.";
-    }
+    if (statusEl) statusEl.textContent = "Card selected. Pay using your physical OneCard.";
+    if (useCardBtn) useCardBtn.disabled = true;
+    window.setTimeout(() => host.remove(), 1400);
   });
 
   shadow.append(style, wrapper);
@@ -449,44 +442,9 @@ function escapeHtml(value: string): string {
   });
 }
 
-function fillInput(input: HTMLInputElement, value: string): void {
-  const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
-  nativeSetter?.call(input, value);
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
-function autofillPaymentFields(profile: PaymentAutofillProfile): boolean {
-  const expiry = `${profile.expiryMonth} / ${profile.expiryYear.slice(2)}`;
-  const entries: Array<[string, string]> = [
-    [
-      'input[autocomplete="cc-number"], input[name*="cardnumber" i], input[id*="cardnumber" i], input[placeholder*="card number" i], input[placeholder*="1234" i]',
-      profile.cardNumber,
-    ],
-    [
-      'input[autocomplete="cc-exp"], input[name*="expir" i], input[id*="expir" i], input[placeholder*="MM" i]',
-      expiry,
-    ],
-    [
-      'input[autocomplete="cc-csc"], input[autocomplete="cc-cvc"], input[name*="cvc" i], input[name*="cvv" i], input[name*="csc" i], input[id*="cvc" i], input[id*="cvv" i], input[placeholder*="CVC" i], input[placeholder*="CVV" i]',
-      profile.securityCode,
-    ],
-    [
-      'input[autocomplete="cc-name"], input[name*="cardholder" i], input[id*="cardholder" i], input[placeholder*="name on card" i]',
-      profile.cardholderName,
-    ],
-  ];
-
-  let anyFilled = false;
-  for (const [selector, value] of entries) {
-    const input = document.querySelector<HTMLInputElement>(selector);
-    if (input) {
-      fillInput(input, value);
-      anyFilled = true;
-    }
-  }
-  return anyFilled;
-}
+// Raw card data (PAN, CVV, expiry) is never written to checkout pages.
+// Card payment is completed via the physical OneCard or the OneCard app,
+// which routes through Stripe tokenization — not through this extension.
 
 async function showBestCard(force = false): Promise<{ ok: boolean; reason?: string }> {
   if (!force && !isCheckoutPage()) return { ok: false, reason: "This does not look like a checkout page yet." };

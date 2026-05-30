@@ -12,13 +12,16 @@
   "dependencies": {
     "@onecard/rewards-engine": "workspace:*",
     "@onecard/shared-types": "workspace:*",
+    "@stripe/react-stripe-js": "^6.5.0",
+    "@stripe/stripe-js": "^9.7.0",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
     "next": "^14.2.18",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.6.0",
-    "recharts": "^2.13.3"
+    "recharts": "^2.13.3",
+    "stripe": "^22.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
