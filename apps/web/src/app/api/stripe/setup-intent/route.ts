@@ -9,6 +9,7 @@
  * The client uses this secret to confirm the SetupIntent via Stripe.js.
  */
 import { stripe } from "@/lib/stripe";
+import { assertNoRawCardData, RawCardDataError } from "@/lib/assertNoRawCardData";
 import { NextResponse } from "next/server";
 
 // Simple in-memory rate limit: max 5 SetupIntents per IP per minute.
@@ -33,6 +34,18 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
+  // Defense-in-depth: this route takes no card data; reject any that is sent.
+  try {
+    const raw = await request.text();
+    if (raw.trim()) assertNoRawCardData(JSON.parse(raw));
+  } catch (err) {
+    if (err instanceof RawCardDataError) {
+      console.error("[onecard/setup-intent] rejected request containing raw card field");
+      return NextResponse.json({ error: "Raw card data is not accepted" }, { status: 400 });
+    }
+    // Non-JSON / empty bodies are fine — this route does not require one.
   }
 
   try {

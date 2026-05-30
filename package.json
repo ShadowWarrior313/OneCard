@@ -6,7 +6,8 @@
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "security-check": "node --experimental-strip-types scripts/security-check.ts"
   },
   "devDependencies": {
     "turbo": "^2.3.0",

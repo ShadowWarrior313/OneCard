@@ -17,3 +17,7 @@ coverage
 
 # Stripe CLI event logs
 .stripe/
+
+# Runtime app data (auth users, etc.) — never commit; may contain PII / hashes
+.data/
+**/.data/

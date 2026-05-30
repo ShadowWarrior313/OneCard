@@ -13,6 +13,7 @@
  */
 import { stripe } from "@/lib/stripe";
 import type { StoredCard } from "@/lib/stripe";
+import { assertNoRawCardData, RawCardDataError } from "@/lib/assertNoRawCardData";
 import { NextResponse } from "next/server";
 
 const PM_ID_RE = /^pm_[a-zA-Z0-9_]{8,}$/;
@@ -23,6 +24,17 @@ export async function POST(request: Request): Promise<NextResponse> {
     body = (await request.json()) as { paymentMethodId?: string };
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  // Defense-in-depth: this route accepts only a Stripe token id, never card data.
+  try {
+    assertNoRawCardData(body);
+  } catch (err) {
+    if (err instanceof RawCardDataError) {
+      console.error("[onecard/confirm-card] rejected request containing raw card field");
+      return NextResponse.json({ error: "Raw card data is not accepted" }, { status: 400 });
+    }
+    throw err;
   }
 
   const pmId = body.paymentMethodId?.trim() ?? "";
