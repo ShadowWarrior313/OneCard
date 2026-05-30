@@ -5,6 +5,10 @@
  * All sized in absolute stage pixels (the stage is scaled as a whole).
  */
 import type { ReactNode } from "react";
+import { getCardAppearance } from "@/data/cardAppearances";
+import { cardBackgroundStyle } from "@/lib/cardBackground";
+import { IssuerLogo } from "@/components/IssuerLogo";
+import { PaymentNetworkLogo } from "@/components/PaymentNetworkLogo";
 
 export function BrowserChrome({ url }: { url: string }) {
   return (
@@ -59,4 +63,47 @@ export function Badge({
 
 export function CardChip() {
   return <span className="block h-5 w-7 rounded-[5px] bg-gradient-to-br from-amber-200 to-amber-500" />;
+}
+
+/** Small realistic card matching the wallet's card art (issuer colour, logo, chip, network). */
+export function FilmCardThumb({
+  cardId,
+  issuer,
+  className = "h-[40px] w-[64px]",
+}: {
+  cardId: string;
+  issuer: string;
+  className?: string;
+}) {
+  const a = getCardAppearance(cardId, issuer);
+  return (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-[7px] shadow-sm ring-1 ring-black/15 ${className}`}
+      style={cardBackgroundStyle(a)}
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(255,255,255,0.22),transparent_55%)]" />
+      <div className="absolute left-1.5 top-1.5">
+        <IssuerLogo issuer={issuer} cardId={cardId} size={12} className="rounded-[3px]" />
+      </div>
+      <span className="absolute right-1.5 top-2 h-2 w-3 rounded-[2px] bg-gradient-to-br from-amber-200 to-amber-500" />
+      <div className="absolute bottom-1 right-1.5">
+        <PaymentNetworkLogo network={a.network} size={a.network === "mastercard" ? 15 : 13} style="logo-border" />
+      </div>
+    </div>
+  );
+}
+
+/** OneCard brand mark (the canonical stacked-card logo) — replaces any "1" badge. */
+export function OneCardMark({ size = 24 }: { size?: number }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/brand-mark.png"
+      alt=""
+      width={size}
+      height={Math.round((size * 56) / 88)}
+      className="block object-contain"
+      aria-hidden
+    />
+  );
 }

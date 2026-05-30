@@ -2,36 +2,43 @@
 
 import { memo, useEffect, useRef, useState } from "react";
 import { motion, useTransform, type MotionValue } from "framer-motion";
-import { CLICK_TIMES, CURSOR_KEYS, cursorField, sampleCursor } from "./cursorPath";
+import { CLICK_TIMES, cursorField, sampleCursor } from "./cursorPath";
 
-/** macOS-style arrow — black fill, white outline, hotspot at the tip. */
+/**
+ * Classic solid-black arrow pointer. Hotspot at the tip (~4,2).
+ * A thin white edge keeps it crisp on any background.
+ */
 function ArrowCursor() {
   return (
-    <svg width="22" height="26" viewBox="0 0 22 26" fill="none" aria-hidden style={{ display: "block" }}>
+    <svg width="26" height="30" viewBox="0 0 26 30" fill="none" aria-hidden style={{ display: "block" }}>
       <path
-        d="M3.5 2L3.5 20.8C3.5 21.9 4.7 22.6 5.65 22.0L9.6 19.5L14.2 24.9C14.8 25.6 16.0 25.25 16.1 24.3L16.95 15.2L19.6 13.9C20.5 13.4 20.5 12.2 19.6 11.7L3.5 2Z"
-        fill="#0B0B0F"
-        stroke="white"
-        strokeWidth="2.2"
+        d="M4 2 L4 23.5 L9.9 18 L13.4 25.6 L16.7 24.1 L13.2 16.7 L20.4 16.7 Z"
+        fill="#0b0b0f"
+        stroke="#ffffff"
+        strokeWidth="1.4"
         strokeLinejoin="round"
-        style={{ paintOrder: "stroke fill" } as React.CSSProperties}
       />
     </svg>
   );
 }
 
-/** macOS-style pointing hand for clickable targets. */
+/**
+ * Classic pointing-hand (link) cursor — white fill, black outline,
+ * index finger up. Hotspot at the fingertip (~10,3).
+ */
 function HandCursor() {
   return (
-    <svg width="24" height="26" viewBox="0 0 24 26" fill="none" aria-hidden style={{ display: "block" }}>
+    <svg width="30" height="32" viewBox="0 0 30 32" fill="none" aria-hidden style={{ display: "block" }}>
       <path
-        d="M9 11V4.5a1.6 1.6 0 013.2 0V10m0 0V8.4a1.6 1.6 0 013.2 0V11m0 0V9.6a1.6 1.6 0 013.1 0V15c0 3.6-2.2 7.2-6.4 7.2-2.4 0-3.8-1-5.2-2.8l-3-4.2c-.8-1.1.3-2.6 1.7-2.2l1.6.6V6.2a1.6 1.6 0 013.2 0V11"
-        fill="#0B0B0F"
-        stroke="white"
+        d="M10 12V5.4a2 2 0 0 1 4 0V11.2
+           m0-1.4a2 2 0 0 1 4 0V11.6
+           m0-1a2 2 0 0 1 3.9 0V12.6
+           m0-.6a1.9 1.9 0 0 1 3.8 0V17.6c0 3.7-2.6 6.7-6.7 6.7h-2.6c-2 0-3.2-.9-4.2-2.5l-2.9-4.7c-.6-.9-.3-2.1.7-2.6 1.1-.5 2.4-.1 3 .9L10 17.5"
+        fill="#ffffff"
+        stroke="#0b0b0f"
         strokeWidth="1.7"
-        strokeLinejoin="round"
         strokeLinecap="round"
-        style={{ paintOrder: "stroke fill" } as React.CSSProperties}
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -40,21 +47,21 @@ function HandCursor() {
 function ClickRipple({ timeMs, at }: { timeMs: MotionValue<number>; at: number }) {
   const x = sampleCursor("x", at);
   const y = sampleCursor("y", at);
-  const opacity = useTransform(timeMs, [at - 10, at + 90, at + 380], [0, 0.55, 0], { clamp: true });
-  const scale = useTransform(timeMs, [at - 10, at + 380], [0.3, 1.9], { clamp: true });
+  const opacity = useTransform(timeMs, [at - 10, at + 80, at + 360], [0, 0.6, 0], { clamp: true });
+  const scale = useTransform(timeMs, [at - 10, at + 360], [0.25, 1.9], { clamp: true });
   return (
     <motion.span
       style={{ x, y, opacity, scale }}
-      className="pointer-events-none absolute left-0 top-0 -ml-7 -mt-7 h-14 w-14 rounded-full ring-2 ring-brand-ocean"
+      className="pointer-events-none absolute left-0 top-0 -ml-7 -mt-7 h-14 w-14 rounded-full ring-[3px] ring-brand-ocean"
       aria-hidden
     />
   );
 }
 
 /**
- * Guided OS cursor layer. Lives inside the (scaled) stage so its coordinates are
- * authoring pixels. Transform-only motion. Hides instantly on real mouse input,
- * and is never rendered under reduced motion.
+ * Guided OS cursor layer. Lives in stage coords (not zoomed by the camera).
+ * Transform-only motion. Hides on real mouse input; never rendered under
+ * reduced motion. The path coordinates point at the CENTRE of each target.
  */
 function FilmCursorBase({ timeMs, reducedMotion }: { timeMs: MotionValue<number>; reducedMotion: boolean }) {
   const [xi, xo] = cursorField("x");
@@ -69,7 +76,7 @@ function FilmCursorBase({ timeMs, reducedMotion }: { timeMs: MotionValue<number>
   const press = useTransform(timeMs, pi, po);
 
   const arrowO = useTransform(hand, [0, 1], [1, 0]);
-  const pressScale = useTransform(press, [0, 1], [1, 0.86]);
+  const pressScale = useTransform(press, [0, 1], [1, 0.84]);
 
   const [userMoved, setUserMoved] = useState(false);
   const resetTimer = useRef<number | null>(null);
@@ -97,11 +104,11 @@ function FilmCursorBase({ timeMs, reducedMotion }: { timeMs: MotionValue<number>
       ))}
       <motion.div style={{ x, y, opacity: vis }} className="absolute left-0 top-0">
         <motion.div style={{ scale: pressScale }}>
-          {/* arrow + hand crossfade for the OS pointer-state change */}
-          <motion.div style={{ opacity: arrowO }} className="absolute left-0 top-0">
+          {/* arrow hotspot at (4,2); hand fingertip hotspot at (10,3) */}
+          <motion.div style={{ opacity: arrowO, x: -4, y: -2 }} className="absolute left-0 top-0">
             <ArrowCursor />
           </motion.div>
-          <motion.div style={{ opacity: hand }} className="absolute left-0 top-0">
+          <motion.div style={{ opacity: hand, x: -10, y: -3 }} className="absolute left-0 top-0">
             <HandCursor />
           </motion.div>
         </motion.div>

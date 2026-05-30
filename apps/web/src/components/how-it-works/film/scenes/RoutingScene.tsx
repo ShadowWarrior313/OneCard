@@ -2,17 +2,19 @@
 
 import { memo } from "react";
 import { motion, useTransform, type MotionValue } from "framer-motion";
-import { Badge } from "../ui";
+import { Badge, FilmCardThumb, OneCardMark } from "../ui";
 
 /**
- * Scene 3 — Routing (hero beat). A floating routing panel detects the merchant
- * category, the wallet analysis cascades in, the winning card rises to the top
- * (FLIP-style transform), gets a BEST badge, a connector draws, and the
- * "charged to" confirmation lands.
+ * Scene 3 — Routing (hero beat). Detect category, cascade the wallet analysis,
+ * rise the winner to the top (FLIP-style transform), badge + connector +
+ * "charged to" confirmation. Rows use realistic card art (matching the wallet).
+ *
+ * Winner row centre (after rise) ≈ (500, 252) — kept in sync with cursorPath.ts.
  */
 
 interface CardRow {
   id: string;
+  issuer: string;
   name: string;
   rate: string;
   sub: string;
@@ -21,15 +23,15 @@ interface CardRow {
 }
 
 const CARDS: CardRow[] = [
-  { id: "amex_cobalt", name: "Amex Cobalt", rate: "5×", sub: "Membership Rewards", value: "+$8.47", best: true },
-  { id: "scotia", name: "Scotia Gold Amex", rate: "4×", sub: "Scene+ points", value: "+$6.10" },
-  { id: "td", name: "TD Cash Back", rate: "3%", sub: "Cashback", value: "+$3.55" },
-  { id: "cibc", name: "CIBC Dividend", rate: "2%", sub: "Cashback", value: "+$2.37" },
-  { id: "rbc", name: "RBC Ion", rate: "1.5×", sub: "Avion points", value: "+$1.78" },
+  { id: "amex_cobalt", issuer: "American Express", name: "Amex Cobalt", rate: "5×", sub: "Membership Rewards", value: "+$8.47", best: true },
+  { id: "scotia_gold_amex", issuer: "Scotiabank", name: "Scotia Gold Amex", rate: "4×", sub: "Scene+ points", value: "+$6.10" },
+  { id: "td_cashback_infinite", issuer: "TD", name: "TD Cash Back", rate: "3%", sub: "Cashback", value: "+$3.55" },
+  { id: "cibc_dividend_infinite", issuer: "CIBC", name: "CIBC Dividend", rate: "2%", sub: "Cashback", value: "+$2.37" },
+  { id: "rbc_ion", issuer: "RBC", name: "RBC Ion", rate: "1.5×", sub: "Avion points", value: "+$1.78" },
 ];
 
-const INITIAL_ORDER = ["td", "rbc", "amex_cobalt", "scotia", "cibc"];
-const FINAL_ORDER = ["amex_cobalt", "scotia", "td", "cibc", "rbc"];
+const INITIAL_ORDER = ["td_cashback_infinite", "rbc_ion", "amex_cobalt", "scotia_gold_amex", "cibc_dividend_infinite"];
+const FINAL_ORDER = ["amex_cobalt", "scotia_gold_amex", "td_cashback_infinite", "cibc_dividend_infinite", "rbc_ion"];
 const ROW_H = 58;
 
 function RoutingRow({ timeMs, card }: { timeMs: MotionValue<number>; card: CardRow }) {
@@ -46,14 +48,12 @@ function RoutingRow({ timeMs, card }: { timeMs: MotionValue<number>; card: CardR
   const press = useTransform(timeMs, [25100, 25300, 25600], card.best ? [1, 0.97, 1] : [1, 1, 1], { clamp: true });
 
   return (
-    <motion.div style={{ y, opacity }} className="absolute inset-x-0" >
+    <motion.div style={{ y, opacity }} className="absolute inset-x-0">
       <motion.div
         style={{ x, scale: press }}
-        className="relative mx-0 flex h-[50px] items-center gap-3 rounded-xl bg-white px-3 ring-1 ring-zinc-200"
+        className="relative flex h-[50px] items-center gap-3 rounded-xl bg-white px-3 ring-1 ring-zinc-200"
       >
-        <span className="flex h-7 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-zinc-800 to-zinc-950">
-          <span className="h-2.5 w-3.5 rounded-[2px] bg-gradient-to-br from-amber-200 to-amber-500" />
-        </span>
+        <FilmCardThumb cardId={card.id} issuer={card.issuer} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[14px] font-bold text-zinc-900">{card.name}</p>
           <p className="truncate text-[11px] text-zinc-400">{card.sub}</p>
@@ -89,7 +89,7 @@ function RoutingSceneBase({ timeMs }: { timeMs: MotionValue<number> }) {
       <div className="absolute left-[220px] top-[70px] flex h-[485px] w-[560px] flex-col overflow-hidden rounded-3xl bg-white shadow-[0_40px_90px_-30px_rgba(15,23,42,0.4)] ring-1 ring-zinc-200">
         {/* header */}
         <div className="flex items-center gap-2 border-b border-zinc-100 px-6 py-4">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-ink text-[12px] font-black text-white">1</span>
+          <OneCardMark size={26} />
           <span className="text-[15px] font-bold text-zinc-900">Routing</span>
           <span className="text-[13px] font-medium text-zinc-400">· OneCard</span>
           <span className="ml-auto flex items-center gap-1.5 text-[12px] font-semibold text-emerald-600">

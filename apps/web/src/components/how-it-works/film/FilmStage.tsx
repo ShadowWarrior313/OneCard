@@ -13,10 +13,11 @@ import { WalletScene } from "./scenes/WalletScene";
 import { ClosingScene } from "./scenes/ClosingScene";
 
 // Camera (Ken-Burns) keyframes — shared monotonic time axis.
-const CAM_T = [0, 6800, 7400, 9000, 9900, 14200, 14900, 15800, 16800, 25600, 26300, 28800, 29600, 33400, 34000, 34700, 35600, 39400, DURATION_MS - 1];
-const CAM_S = [1, 1, 1.18, 1.18, 1, 1, 1.16, 1.16, 1, 1, 1.14, 1.14, 1, 1, 1.1, 1.1, 1, 1, 1.06];
-const CAM_FX = [500, 500, 430, 430, 500, 500, 760, 760, 500, 500, 500, 500, 500, 500, 278, 278, 500, 500, 500];
-const CAM_FY = [312, 312, 430, 430, 312, 312, 300, 300, 312, 312, 262, 262, 312, 312, 384, 384, 312, 312, 300];
+// Scene 1 has NO page zoom; it pushes onto the extension popup instead.
+const CAM_T = [0, 4200, 5600, 9000, 9900, 14400, 15000, 16200, 16900, 25600, 26300, 28800, 29600, 33300, 33900, 34600, 35400, 39400, DURATION_MS - 1];
+const CAM_S = [1, 1, 1.2, 1.2, 1, 1, 1.16, 1.16, 1, 1, 1.14, 1.14, 1, 1, 1.12, 1.12, 1, 1, 1.06];
+const CAM_FX = [500, 500, 773, 773, 500, 500, 722, 722, 500, 500, 500, 500, 500, 500, 278, 278, 500, 500, 500];
+const CAM_FY = [312, 312, 300, 300, 312, 312, 320, 320, 312, 312, 280, 280, 312, 312, 370, 370, 312, 312, 300];
 
 function sceneOpacityRange(ch: Chapter, isFirst: boolean, isLast: boolean): [number[], number[]] {
   if (isFirst) return [[ch.start, ch.end, ch.end + CROSSFADE_MS], [1, 1, 0]];
@@ -79,8 +80,18 @@ function FilmStageBase({
   const camScale = useTransform(timeMs, CAM_T, CAM_S, { clamp: true });
   const camFx = useTransform(timeMs, CAM_T, CAM_FX, { clamp: true });
   const camFy = useTransform(timeMs, CAM_T, CAM_FY, { clamp: true });
-  const camX = useTransform(() => STAGE_W / 2 - camFx.get() * camScale.get());
-  const camY = useTransform(() => STAGE_H / 2 - camFy.get() * camScale.get());
+  // Translate to centre the focus point, then clamp so the zoomed content
+  // always fully covers the stage (never exposes a black border).
+  const camX = useTransform(() => {
+    const s = camScale.get();
+    const raw = STAGE_W / 2 - camFx.get() * s;
+    return Math.min(0, Math.max(STAGE_W * (1 - s), raw));
+  });
+  const camY = useTransform(() => {
+    const s = camScale.get();
+    const raw = STAGE_H / 2 - camFy.get() * s;
+    return Math.min(0, Math.max(STAGE_H * (1 - s), raw));
+  });
 
   const cameraStyle = reducedMotion ? {} : { x: camX, y: camY, scale: camScale };
 
@@ -105,7 +116,8 @@ function FilmStageBase({
             top: fitMode === "contain" ? undefined : 0,
           }}
         >
-          {/* Camera layer (zoom) wraps the scenes only */}
+          {/* Camera layer (zoom) wraps the scenes AND the cursor, so the
+              guided pointer stays aligned with targets through every zoom. */}
           <motion.div style={cameraStyle} className="absolute inset-0 origin-top-left">
             <div className="pointer-events-none absolute inset-0">
               {CHAPTERS.map((ch, i) => (
@@ -118,10 +130,8 @@ function FilmStageBase({
                 />
               ))}
             </div>
+            <FilmCursor timeMs={timeMs} reducedMotion={reducedMotion} />
           </motion.div>
-
-          {/* Guided cursor — in stage coords, above scenes, not zoomed */}
-          <FilmCursor timeMs={timeMs} reducedMotion={reducedMotion} />
         </div>
       </div>
 

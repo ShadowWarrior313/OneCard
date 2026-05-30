@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { motion, useTransform, type MotionValue } from "framer-motion";
+import { FilmCardThumb } from "../ui";
 
 /**
  * Scene 4 — Wallet management + bills. A clean linked-cards view (the user adds
@@ -9,9 +10,9 @@ import { motion, useTransform, type MotionValue } from "framer-motion";
  */
 
 const WALLET_CARDS = [
-  { name: "Amex Cobalt", meta: "Amex · MR points" },
-  { name: "CIBC Dividend", meta: "Visa · Cashback" },
-  { name: "RBC Ion", meta: "Visa · Avion" },
+  { id: "amex_cobalt", issuer: "American Express", name: "Amex Cobalt", meta: "Amex · MR points" },
+  { id: "cibc_dividend_infinite", issuer: "CIBC", name: "CIBC Dividend", meta: "Visa · Cashback" },
+  { id: "rbc_ion", issuer: "RBC", name: "RBC Ion", meta: "Visa · Avion" },
 ];
 
 const BILLS = [
@@ -20,15 +21,27 @@ const BILLS = [
   { name: "Phone plan", amount: "$60.00", route: "Amex Cobalt", tone: "2× recurring" },
 ];
 
-function WalletRow({ timeMs, name, meta, index }: { timeMs: MotionValue<number>; name: string; meta: string; index: number }) {
+function WalletRow({
+  timeMs,
+  id,
+  issuer,
+  name,
+  meta,
+  index,
+}: {
+  timeMs: MotionValue<number>;
+  id: string;
+  issuer: string;
+  name: string;
+  meta: string;
+  index: number;
+}) {
   const inAt = 31300 + index * 200;
   const o = useTransform(timeMs, [inAt, inAt + 360], [0, 1], { clamp: true });
   const x = useTransform(timeMs, [inAt, inAt + 360], [-16, 0], { clamp: true });
   return (
     <motion.div style={{ opacity: o, x }} className="flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 ring-1 ring-zinc-200">
-      <span className="flex h-7 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-zinc-800 to-zinc-950">
-        <span className="h-2.5 w-3.5 rounded-[2px] bg-gradient-to-br from-amber-200 to-amber-500" />
-      </span>
+      <FilmCardThumb cardId={id} issuer={issuer} className="h-8 w-[52px]" />
       <div className="min-w-0">
         <p className="truncate text-[14px] font-bold text-zinc-900">{name}</p>
         <p className="truncate text-[11px] text-zinc-400">{meta}</p>
@@ -66,8 +79,8 @@ function BillRow({ timeMs, bill, index }: { timeMs: MotionValue<number>; bill: (
 }
 
 function WalletSceneBase({ timeMs }: { timeMs: MotionValue<number> }) {
-  // "Add a card" toggles into a real linked card on click.
-  const addPress = useTransform(timeMs, [33500, 33700, 33950], [1, 0.97, 1], { clamp: true });
+  // "Add a card" toggles into a real linked card on click (aligned to 33600).
+  const addPress = useTransform(timeMs, [33450, 33650, 33900], [1, 0.97, 1], { clamp: true });
   const addDashO = useTransform(timeMs, [33700, 34050], [1, 0], { clamp: true });
   const addedO = useTransform(timeMs, [33800, 34250], [0, 1], { clamp: true });
   const addedX = useTransform(timeMs, [33800, 34250], [-14, 0], { clamp: true });
@@ -82,7 +95,7 @@ function WalletSceneBase({ timeMs }: { timeMs: MotionValue<number> }) {
         </div>
         <div className="flex-1 space-y-2.5 px-5 py-4">
           {WALLET_CARDS.map((c, i) => (
-            <WalletRow key={c.name} timeMs={timeMs} name={c.name} meta={c.meta} index={i} />
+            <WalletRow key={c.name} timeMs={timeMs} id={c.id} issuer={c.issuer} name={c.name} meta={c.meta} index={i} />
           ))}
 
           {/* Add-a-card row that toggles to a real card */}
@@ -97,9 +110,7 @@ function WalletSceneBase({ timeMs }: { timeMs: MotionValue<number> }) {
               style={{ opacity: addedO, x: addedX }}
               className="absolute inset-0 flex items-center gap-3 rounded-xl bg-white px-3 ring-1 ring-zinc-200"
             >
-              <span className="flex h-7 w-10 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-violet-600 to-violet-800">
-                <span className="h-2.5 w-3.5 rounded-[2px] bg-gradient-to-br from-amber-200 to-amber-500" />
-              </span>
+              <FilmCardThumb cardId="bmo_cashback_we" issuer="BMO" className="h-8 w-[52px]" />
               <div className="min-w-0">
                 <p className="truncate text-[14px] font-bold text-zinc-900">BMO CashBack</p>
                 <p className="truncate text-[11px] text-zinc-400">Mastercard · Cashback</p>
