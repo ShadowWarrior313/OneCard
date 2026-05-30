@@ -32,6 +32,7 @@ export interface PeriodRange {
 const CATEGORY_LABELS: Record<RewardCategory, string> = {
   groceries: "Groceries",
   dining: "Dining",
+  fine_dining: "Fine Dining",
   gas: "Gas",
   travel: "Travel",
   streaming: "Streaming",
@@ -39,6 +40,15 @@ const CATEGORY_LABELS: Record<RewardCategory, string> = {
   entertainment: "Entertainment",
   transportation: "Transportation",
   drugstore: "Drugstore",
+  electronics: "Electronics",
+  retail: "Retail",
+  adventure: "Adventure",
+  fitness: "Fitness",
+  education: "Education",
+  beauty: "Beauty",
+  home_improvement: "Home Improvement",
+  clothing: "Clothing",
+  pets: "Pets",
   other: "Other",
 };
 
