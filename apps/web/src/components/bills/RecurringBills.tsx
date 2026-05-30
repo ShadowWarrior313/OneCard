@@ -246,22 +246,7 @@ export function RecurringBills() {
               </div>
 
               {/* autopay toggle */}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={bill.autopay}
-                aria-label={`Auto-pay for ${bill.name}`}
-                onClick={() => toggleAutopay(bill.id)}
-                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-                  bill.autopay ? "bg-emerald-500" : "bg-zinc-300"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                    bill.autopay ? "translate-x-[22px]" : "translate-x-0.5"
-                  }`}
-                />
-              </button>
+              <Toggle on={bill.autopay} onChange={() => toggleAutopay(bill.id)} label={`Auto-pay for ${bill.name}`} />
 
               <div className="flex items-center gap-1">
                 <button
@@ -291,6 +276,27 @@ export function RecurringBills() {
         Demo only — no real payments are scheduled or sent.
       </p>
     </div>
+  );
+}
+
+function Toggle({ on, onChange, label }: { on: boolean; onChange: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onChange}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink focus-visible:ring-offset-2 ${
+        on ? "bg-emerald-500" : "bg-zinc-300"
+      }`}
+    >
+      {/* inline transform — avoids the Tailwind arbitrary-translate quirk */}
+      <span
+        className="h-5 w-5 rounded-full bg-white shadow transition-transform duration-200"
+        style={{ transform: on ? "translateX(22px)" : "translateX(2px)" }}
+      />
+    </button>
   );
 }
 
@@ -400,22 +406,14 @@ function BillForm({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-brand-body">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={form.autopay}
-            onClick={() => setForm({ ...form, autopay: !form.autopay })}
-            className={`relative h-6 w-11 rounded-full transition-colors ${form.autopay ? "bg-emerald-500" : "bg-zinc-300"}`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                form.autopay ? "translate-x-[22px]" : "translate-x-0.5"
-              }`}
-            />
-          </button>
+        <div className="inline-flex items-center gap-2 text-sm font-medium text-brand-body">
+          <Toggle
+            on={form.autopay}
+            onChange={() => setForm({ ...form, autopay: !form.autopay })}
+            label="Auto-pay on the due date"
+          />
           Auto-pay on the due date
-        </label>
+        </div>
         <div className="flex gap-2">
           <button
             type="button"
