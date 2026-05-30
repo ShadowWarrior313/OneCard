@@ -5,6 +5,7 @@
 export type RewardCategory =
   | "groceries"
   | "dining"
+  | "fine_dining"
   | "gas"
   | "travel"
   | "streaming"
@@ -12,6 +13,15 @@ export type RewardCategory =
   | "entertainment"
   | "transportation"
   | "drugstore"
+  | "electronics"
+  | "retail"
+  | "adventure"
+  | "fitness"
+  | "education"
+  | "beauty"
+  | "home_improvement"
+  | "clothing"
+  | "pets"
   | "other";
 
 /**

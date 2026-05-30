@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ArrowRight, Maximize2, RotateCw, Wallet } from "lucide-react";
 import { FlippableOneCard } from "@/components/landing/FlippableOneCard";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import { TapOnceExpandModal } from "@/components/landing/TapOnceExpandModal";
 import { WalletLinkExpandModal } from "@/components/landing/WalletLinkExpandModal";
 import Link from "next/link";
@@ -516,6 +517,9 @@ export function CardShowcaseSection() {
               Link your wallet once, carry OneCard, and let routing pick the best earn rate at
               every tap — same feel as a premium issuing programme, built for everyday spend.
             </p>
+            <div className="mt-6 max-w-md">
+              <WaitlistForm source="card-section" />
+            </div>
           </div>
 
           <div className="mt-10 grid gap-4 sm:gap-5 lg:grid-cols-3">

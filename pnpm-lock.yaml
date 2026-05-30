@@ -55,6 +55,22 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
+  apps/extension:
+    dependencies:
+      '@onecard/optimizer':
+        specifier: workspace:*
+        version: link:../../packages/optimizer
+      '@onecard/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+    devDependencies:
+      esbuild:
+        specifier: ^0.21.5
+        version: 0.21.5
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@onecard/rewards-engine':
@@ -103,6 +119,19 @@ importers:
       tailwindcss:
         specifier: ^3.4.15
         version: 3.4.19
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
+  packages/optimizer:
+    dependencies:
+      '@onecard/rewards-engine':
+        specifier: workspace:*
+        version: link:../rewards-engine
+      '@onecard/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "OneCard — Your entire wallet. One card.",
   description:
     "One physical card routes every purchase to the credit card that earns the most. Link your wallet once, tap once, earn more.",
-  icons: { icon: "/icon.svg" },
+  icons: { icon: "/favicon.png" },
   openGraph: {
     title: "OneCard — Your entire wallet. One card.",
     description:

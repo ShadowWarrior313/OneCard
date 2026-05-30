@@ -61,6 +61,7 @@ Each app has its own `vercel.json` with monorepo install/build commands. The web
 
 - `BRANDFETCH_KEY` — merchant/issuer logos
 - `REWARDS_CC_RAPIDAPI_KEY` — wallet card art (optional)
+- `WAITLIST_WEBHOOK_URL` — HTTPS endpoint that accepts `POST` JSON (`email`, `source`, `timestamp`, optional `name`). Used by `apps/web/src/app/api/waitlist/route.ts` (Zapier/Make/n8n/Airtable automation, etc.). If unset, waitlist forms show “Waitlist opening soon” and the site still builds.
 
 After changing Root Directory or env vars, redeploy **one-card-web** (Deployments → … → Redeploy, optionally clear cache).
 
@@ -87,4 +88,3 @@ Scraping issuer reward pages: treat as **enrichment only**; curated JSON in-repo
 ## License
 
 Private — demo / investor use.
-# OneCard

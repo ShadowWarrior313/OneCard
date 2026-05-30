@@ -1,0 +1,18 @@
+{
+  "name": "@onecard/extension",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@onecard/optimizer": "workspace:*",
+    "@onecard/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.5",
+    "typescript": "^5.6.3"
+  }
+}

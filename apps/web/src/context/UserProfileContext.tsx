@@ -41,7 +41,10 @@ interface UserProfileContextValue {
 
 const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 
-async function saveProfile(input: { name: string; email: string }): Promise<UserProfile> {
+async function saveProfile(
+  input: { name: string; email: string },
+  source = "get-started",
+): Promise<UserProfile> {
   const name = normalizeProfileName(input.name);
   const email = input.email.trim().toLowerCase();
 
@@ -55,8 +58,12 @@ async function saveProfile(input: { name: string; email: string }): Promise<User
   const res = await fetch("/api/waitlist", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email }),
+    body: JSON.stringify({ name, email, source }),
   });
+
+  if (res.status === 503) {
+    throw new Error("Waitlist opening soon");
+  }
 
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as { error?: string };

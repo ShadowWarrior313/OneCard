@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:site_name" content="Walmart" />
+    <title>Walmart checkout test</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Order",
+        "seller": { "@type": "Organization", "name": "Walmart" },
+        "totalPrice": "84.36",
+        "orderedItem": [
+          { "@type": "Product", "name": "Gillette razor cartridges", "price": "28.97" },
+          { "@type": "Product", "name": "Fluoride toothpaste", "price": "4.49" },
+          { "@type": "Product", "name": "Laundry detergent household pack", "price": "18.99" }
+        ]
+      }
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: #f4f7fb;
+        color: #111318;
+      }
+
+      header {
+        background: #0071dc;
+        color: #fff;
+        padding: 18px 48px;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        gap: 28px;
+        max-width: 1160px;
+        margin: 44px auto;
+        padding: 0 28px;
+      }
+
+      section,
+      aside {
+        background: #fff;
+        border: 1px solid #dde4ef;
+        border-radius: 18px;
+        box-shadow: 0 16px 44px rgba(35, 45, 65, 0.08);
+      }
+
+      section {
+        padding: 28px;
+      }
+
+      aside {
+        align-self: start;
+        padding: 24px;
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 18px;
+      }
+
+      .item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        padding: 18px 0;
+        border-top: 1px solid #edf1f6;
+      }
+
+      .item:first-of-type {
+        border-top: 0;
+      }
+
+      .name {
+        font-weight: 750;
+      }
+
+      .muted {
+        color: #68717f;
+      }
+
+      .total {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #d9e1ec;
+        margin-top: 18px;
+        padding-top: 18px;
+        font-size: 24px;
+        font-weight: 850;
+      }
+
+      label {
+        display: grid;
+        gap: 8px;
+        margin: 14px 0;
+        color: #555f6e;
+        font-weight: 700;
+      }
+
+      input {
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        font: inherit;
+        padding: 14px 16px;
+      }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        background: #111318;
+        color: #fff;
+        font: inherit;
+        font-weight: 850;
+        margin-top: 16px;
+        padding: 16px;
+      }
+    </style>
+  </head>
+  <body data-onecard-merchant="walmart" data-onecard-merchant-name="Walmart">
+    <header>Walmart checkout</header>
+    <main>
+      <section aria-label="Cart">
+        <h1>Review your cart</h1>
+        <div class="item" data-cart-item>
+          <div>
+            <div class="name" data-item-name>Gillette razor cartridges</div>
+            <div class="muted">Health and personal care</div>
+            <span hidden data-item-qty>1</span>
+          </div>
+          <strong data-item-price>$28.97</strong>
+        </div>
+        <div class="item" data-cart-item>
+          <div>
+            <div class="name" data-item-name>Fluoride toothpaste</div>
+            <div class="muted">Drugstore</div>
+            <span hidden data-item-qty>1</span>
+          </div>
+          <strong data-item-price>$4.49</strong>
+        </div>
+        <div class="item" data-cart-item>
+          <div>
+            <div class="name" data-item-name>Laundry detergent household pack</div>
+            <div class="muted">Household essentials</div>
+            <span hidden data-item-qty>1</span>
+          </div>
+          <strong data-item-price>$18.99</strong>
+        </div>
+        <p class="muted">This page intentionally looks like a mixed cart so OneCard can explain the MCC/cart mismatch.</p>
+      </section>
+
+      <aside aria-label="Payment">
+        <h2>Payment</h2>
+        <label>
+          Card number
+          <input autocomplete="cc-number" inputmode="numeric" placeholder="1234 1234 1234 1234" />
+        </label>
+        <label>
+          Expiry
+          <input autocomplete="cc-exp" placeholder="MM / YY" />
+        </label>
+        <label>
+          CVC
+          <input autocomplete="cc-csc" placeholder="CVC" />
+        </label>
+        <div class="total">
+          <span>Total</span>
+          <span data-order-total>$84.36</span>
+        </div>
+        <button type="button">Place order</button>
+      </aside>
+    </main>
+  </body>
+</html>

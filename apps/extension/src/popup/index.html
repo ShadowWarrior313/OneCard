@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OneCard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #0b0b0f;
+        --muted: #626773;
+        --line: #e4e4e7;
+        --surface: #f7f7f5;
+        --accent: #0284c7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        width: 360px;
+        margin: 0;
+        background:
+          radial-gradient(circle at 86% -20%, rgba(125, 211, 252, 0.24), transparent 34%),
+          #ffffff;
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      header {
+        border-bottom: 1px solid var(--line);
+        padding: 18px 18px 16px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.2;
+        letter-spacing: -0.04em;
+      }
+      p {
+        margin: 0;
+      }
+      .sub {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      main {
+        max-height: 520px;
+        overflow: auto;
+        padding: 14px;
+      }
+      .wallet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .wallet-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .wallet-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+      .add-cards,
+      .use-best {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #0b0b0f;
+        color: white;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 8px 12px;
+      }
+      .use-best {
+        border-color: rgba(2, 132, 199, 0.22);
+        background: #0284c7;
+        cursor: pointer;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .card-list {
+        display: grid;
+        gap: 10px;
+      }
+      .card-row {
+        display: grid;
+        grid-template-columns: 50px 1fr;
+        gap: 12px;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(247, 247, 245, 0.8);
+        padding: 12px;
+      }
+      .card-thumb {
+        position: relative;
+        display: block;
+        width: 50px;
+        height: 32px;
+        border-radius: 7px;
+        background: linear-gradient(145deg, #1a1a1c 0%, #0a0a0b 48%, #18181b 100%);
+        box-shadow: 0 10px 22px rgba(14, 116, 144, 0.16);
+      }
+      .card-chip {
+        position: absolute;
+        top: 7px;
+        left: 7px;
+        width: 12px;
+        height: 9px;
+        border-radius: 2px;
+        background: linear-gradient(135deg, #fde68a, #f59e0b);
+      }
+      .card-lines {
+        position: absolute;
+        right: 7px;
+        bottom: 8px;
+        width: 18px;
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .card-copy {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
+      }
+      .card-title {
+        font-size: 13.5px;
+        font-weight: 750;
+        color: var(--ink);
+        line-height: 1.22;
+      }
+      .card-meta,
+      .card-rewards {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+      .card-rewards {
+        color: var(--accent);
+        font-weight: 650;
+      }
+      .status {
+        min-height: 18px;
+        margin-top: 10px;
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .empty-state {
+        border: 1px dashed var(--line);
+        border-radius: 14px;
+        background: rgba(248, 250, 252, 0.86);
+        padding: 16px;
+      }
+      .empty-title {
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .empty-copy {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Your wallet</h1>
+      <p class="sub">These are the cards OneCard will compare at checkout.</p>
+    </header>
+    <main>
+      <div class="wallet-head">
+        <p class="wallet-label">Cards you own</p>
+        <div class="wallet-actions">
+          <button id="use-best-card" class="use-best" type="button">Use best card</button>
+          <a id="add-cards" class="add-cards" href="https://www.use-onecard.com/wallet" target="_blank" rel="noreferrer">Add cards</a>
+        </div>
+      </div>
+      <div id="card-list" class="card-list"></div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </main>
+    <script src="./popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "OneCard Checkout Recommender",
+  "version": "0.1.0",
+  "description": "Recommends the best card to use at checkout based on merchant category codes.",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "http://localhost/*",
+    "https://*.walmart.com/*",
+    "https://*.walmart.ca/*",
+    "https://*.amazon.com/*",
+    "https://*.amazon.ca/*",
+    "https://checkout.stripe.com/*"
+  ],
+  "background": {
+    "service_worker": "dist/background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "OneCard",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost/*",
+        "https://*.walmart.com/*",
+        "https://*.walmart.ca/*",
+        "https://*.amazon.com/*",
+        "https://*.amazon.ca/*",
+        "https://checkout.stripe.com/*"
+      ],
+      "js": ["dist/content/detect.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

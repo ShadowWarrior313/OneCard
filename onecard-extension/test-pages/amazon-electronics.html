@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:site_name" content="Amazon" />
+    <title>Amazon payment test</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Order",
+        "seller": { "@type": "Organization", "name": "Amazon" },
+        "totalPrice": "649.99",
+        "orderedItem": [
+          { "@type": "Product", "name": "Noise cancelling headphones", "price": "399.99" },
+          { "@type": "Product", "name": "Mechanical keyboard", "price": "149.99" }
+        ]
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        background: #eef2f7;
+        color: #171a1f;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .topbar {
+        background: #131921;
+        color: #fff;
+        padding: 18px 48px;
+        font-size: 22px;
+        font-weight: 850;
+      }
+
+      main {
+        max-width: 1080px;
+        margin: 44px auto;
+        padding: 0 24px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+      }
+
+      .panel {
+        background: #fff;
+        border: 1px solid #dce3ee;
+        border-radius: 16px;
+        padding: 26px;
+      }
+
+      h1,
+      h2 {
+        margin: 0 0 20px;
+      }
+
+      .line-item {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #edf1f7;
+        padding: 18px 0;
+      }
+
+      .line-item:first-of-type {
+        border-top: 0;
+      }
+
+      .name {
+        font-weight: 800;
+      }
+
+      .small {
+        color: #6b7280;
+      }
+
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        border-top: 1px solid #d8e0ec;
+        margin-top: 16px;
+        padding-top: 18px;
+        font-size: 24px;
+        font-weight: 900;
+      }
+
+      input {
+        box-sizing: border-box;
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font: inherit;
+        margin: 8px 0 14px;
+        padding: 13px 14px;
+      }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        background: #ffd814;
+        color: #111827;
+        font: inherit;
+        font-weight: 850;
+        padding: 15px;
+      }
+    </style>
+  </head>
+  <body data-onecard-merchant="amazon" data-onecard-merchant-name="Amazon">
+    <div class="topbar">Amazon checkout</div>
+    <main>
+      <div class="layout">
+        <section class="panel">
+          <h1>Review items and shipping</h1>
+          <div class="line-item" data-cart-item>
+            <div>
+              <div class="name" data-item-name>Noise cancelling headphones</div>
+              <div class="small">Electronics</div>
+            </div>
+            <strong data-item-price>$399.99</strong>
+          </div>
+          <div class="line-item" data-cart-item>
+            <div>
+              <div class="name" data-item-name>Mechanical keyboard</div>
+              <div class="small">Computer accessories</div>
+            </div>
+            <strong data-item-price>$149.99</strong>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <h2>Payment method</h2>
+          <label>Card number</label>
+          <input autocomplete="cc-number" placeholder="Card number" />
+          <label>Name on card</label>
+          <input autocomplete="cc-name" placeholder="Name" />
+          <div class="total-row">
+            <span>Order total</span>
+            <span data-order-total>$649.99</span>
+          </div>
+          <button type="button">Place your order</button>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

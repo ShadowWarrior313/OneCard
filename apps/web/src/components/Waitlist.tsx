@@ -1,38 +1,23 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Mail, Shield, User } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { CheckCircle2, User } from "lucide-react";
+import { useEffect, useState } from "react";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import { useUserProfile } from "@/context/UserProfileContext";
 
 export function Waitlist() {
-  const { profile, joinWaitlist, displayName } = useUserProfile();
-  const [email, setEmail] = useState("");
+  const { profile, displayName, joinWaitlist } = useUserProfile();
   const [name, setName] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [successEmail, setSuccessEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
       setName(profile.name);
-      setEmail(profile.email);
-      setSubmitted(true);
+      setSuccessEmail(profile.email);
     }
   }, [profile]);
 
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSubmitting(true);
-    try {
-      await joinWaitlist({ name, email });
-      setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const showSuccess = Boolean(successEmail);
 
   return (
     <section id="waitlist" className="oc-section bg-white">
@@ -41,16 +26,14 @@ export function Waitlist() {
           <div className="grid lg:grid-cols-2">
             <div className="border-b border-zinc-100 p-6 sm:p-8 lg:border-b-0 lg:border-r">
               <p className="oc-eyebrow">Waitlist open · Canada first</p>
-              <h2 className="oc-heading mt-4 text-3xl sm:text-4xl">
-                Get your OneCard
-              </h2>
-              <p className="mt-4 text-brand-muted leading-relaxed">
-                Join for launch updates. One card for every purchase.
+              <h2 className="oc-heading mt-4 text-3xl sm:text-4xl">Get your OneCard</h2>
+              <p className="mt-4 leading-relaxed text-brand-muted">
+                Join for launch updates. Start with the browser extension — the card comes next.
               </p>
               <ul className="mt-8 space-y-4 text-sm text-brand-body">
                 {[
                   "Connect every reward card you already own",
-                  "Your name on your OneCard across the site",
+                  "Best card at online checkout today",
                   "Live rewards simulator on this site",
                 ].map((item) => (
                   <li key={item} className="flex gap-3">
@@ -62,31 +45,31 @@ export function Waitlist() {
             </div>
 
             <div className="p-6 sm:p-8">
-              {submitted ? (
+              {showSuccess ? (
                 <div className="flex min-h-[240px] flex-col items-center justify-center text-center">
                   <CheckCircle2 className="h-12 w-12 text-brand-mint" />
                   <h3 className="mt-4 text-xl font-semibold text-brand-ink">
-                    You&apos;re on the list, {displayName.split(" ")[0]}
+                    {profile
+                      ? `You're on the list, ${displayName.split(" ")[0]}`
+                      : "You're on the list"}
                   </h3>
                   <p className="mt-2 text-sm text-brand-muted">
-                    Your name is saved on this device — OneCards across the site now show{" "}
-                    <strong>{displayName}</strong>.
+                    We&apos;ll email you at <strong>{successEmail}</strong> when it&apos;s ready.
                   </p>
                 </div>
               ) : (
-                <form onSubmit={onSubmit} className="space-y-5">
+                <div className="space-y-5">
                   <div>
                     <label
-                      htmlFor="name"
+                      htmlFor="waitlist-name"
                       className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-body"
                     >
                       <User className="h-4 w-4 shrink-0 text-brand-muted" aria-hidden />
-                      Full name
+                      Full name <span className="font-normal text-brand-muted">(optional)</span>
                     </label>
                     <input
-                      id="name"
+                      id="waitlist-name"
                       type="text"
-                      required
                       minLength={2}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -94,37 +77,25 @@ export function Waitlist() {
                       className="oc-input mt-2 bg-brand-surface/50"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="email" className="text-sm font-medium text-brand-body">
-                      Email
-                    </label>
-                    <div className="relative mt-2">
-                      <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-muted" />
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@email.com"
-                        className="oc-input bg-brand-surface/50 py-3 pl-11 pr-4"
-                      />
-                    </div>
-                  </div>
-                  {error && <p className="text-sm text-red-600">{error}</p>}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-ink py-3.5 text-sm font-semibold text-white transition hover:bg-brand-charcoal disabled:opacity-60"
-                  >
-                    {submitting ? "Joining…" : "Join waitlist"}
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                  <p className="flex items-center justify-center gap-2 text-xs text-brand-muted">
-                    <Shield className="h-3.5 w-3.5" />
-                    Saved on this device only — no password or email code
+                  <WaitlistForm
+                    source="get-started"
+                    name={name}
+                    showSuccessInline={false}
+                    onSuccess={async (email) => {
+                      setSuccessEmail(email);
+                      if (name.trim().length >= 2) {
+                        try {
+                          await joinWaitlist({ name: name.trim(), email });
+                        } catch {
+                          /* API success already recorded waitlist signup */
+                        }
+                      }
+                    }}
+                  />
+                  <p className="text-xs text-brand-muted">
+                    Demo only — not a licensed issuer. Verify rewards with your bank.
                   </p>
-                </form>
+                </div>
               )}
             </div>
           </div>

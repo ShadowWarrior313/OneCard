@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Wallet } from "lucide-react";
+import { WaitlistForm } from "@/components/WaitlistForm";
 import { HeroCardStack } from "./HeroCardStack";
 
 export function HeroSection() {
@@ -38,6 +39,10 @@ export function HeroSection() {
               <Wallet className="h-4 w-4" />
               Open wallet
             </Link>
+          </div>
+
+          <div className="mx-auto mt-6 max-w-md lg:mx-0">
+            <WaitlistForm source="hero" variant="dark" />
           </div>
         </div>
 
