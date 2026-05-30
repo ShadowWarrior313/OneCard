@@ -167,6 +167,22 @@
       inset 0 -3px 8px rgba(0, 0, 0, 0.35);
     border-bottom: 1px solid rgba(0, 0, 0, 0.35);
   }
+
+  .phone-demo-screen {
+    height: min(640px, calc(100dvh - 7rem));
+  }
+
+  @media (max-width: 639px) {
+    .phone-demo-screen {
+      height: min(500px, 64dvh);
+    }
+  }
+
+  @media (max-width: 389px) {
+    .phone-demo-screen {
+      height: min(460px, 60dvh);
+    }
+  }
 }
 
 @layer utilities {

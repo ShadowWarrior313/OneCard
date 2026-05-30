@@ -182,11 +182,10 @@ export function InteractivePhoneDemo() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[340px] touch-manipulation">
+    <div className="mx-auto w-full max-w-[286px] touch-manipulation min-[400px]:max-w-[300px] sm:max-w-[340px]">
       <div className="rounded-[2rem] border border-zinc-300 bg-zinc-200 p-1.5 shadow-card sm:rounded-[2.25rem] sm:p-2">
         <div
-          className="relative flex flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-[#f6f5f2] sm:rounded-[1.75rem]"
-          style={{ height: "min(640px, calc(100dvh - 7rem))" }}
+          className="phone-demo-screen relative flex flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-[#f6f5f2] sm:rounded-[1.75rem]"
         >
           <div className="flex shrink-0 items-center justify-between px-4 pb-1 pt-2 text-[0.65rem] font-medium text-brand-muted sm:px-5 sm:pt-2.5">
             <span>9:41</span>
