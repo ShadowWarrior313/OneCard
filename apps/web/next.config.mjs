@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Stripe requires these origins for its hosted Elements / Payment Request.
 const STRIPE_ORIGINS = "https://js.stripe.com https://m.stripe.com https://m.stripe.network";
 const STRIPE_CONNECT = "https://api.stripe.com https://js.stripe.com https://m.stripe.network";
+const DEV_SCRIPT_POLICY = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
 
 /** Security headers applied to every response. */
 const securityHeaders = [
@@ -33,7 +34,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       `default-src 'self'`,
-      `script-src 'self' 'unsafe-inline' ${STRIPE_ORIGINS}`,
+      `script-src 'self' 'unsafe-inline'${DEV_SCRIPT_POLICY} ${STRIPE_ORIGINS}`,
       `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
       `font-src 'self' https://fonts.gstatic.com`,
       `img-src 'self' data: blob: https:`,

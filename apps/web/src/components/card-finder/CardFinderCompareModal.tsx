@@ -145,7 +145,7 @@ export function CardFinderCompareModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] grid place-items-center bg-black/35 p-4 backdrop-blur-sm sm:p-5"
+      className="fixed inset-0 z-[200] grid place-items-center bg-black/35 p-4 backdrop-blur-sm sm:p-5"
       role="dialog"
       aria-modal="true"
       aria-labelledby="card-comparison-title"
