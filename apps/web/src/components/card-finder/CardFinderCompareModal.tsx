@@ -145,7 +145,7 @@ export function CardFinderCompareModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-start justify-center overflow-y-auto bg-black/35 px-3 py-4 backdrop-blur-sm sm:py-5"
+      className="fixed inset-0 z-[70] grid place-items-center bg-black/35 p-4 backdrop-blur-sm sm:p-5"
       role="dialog"
       aria-modal="true"
       aria-labelledby="card-comparison-title"
@@ -153,8 +153,8 @@ export function CardFinderCompareModal({
         if (event.currentTarget === event.target) onClose();
       }}
     >
-      <section className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-7xl overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-[#f4f5f3] shadow-2xl sm:max-h-[calc(100dvh-2.5rem)]">
-        <header className="flex items-start justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-4 sm:px-7">
+      <section className="flex h-[calc(100dvh-2rem)] w-full max-w-7xl flex-col overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-[#f4f5f3] shadow-2xl sm:h-[calc(100dvh-2.5rem)]">
+        <header className="flex shrink-0 items-start justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-4 sm:px-7">
           <div>
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sky-700">OneCard compare</p>
             <h2 id="card-comparison-title" className="mt-1 text-2xl font-semibold tracking-tight text-brand-ink">
@@ -172,7 +172,7 @@ export function CardFinderCompareModal({
           </button>
         </header>
 
-        <div className="max-h-[calc(100dvh-10.5rem)] overflow-auto px-4 py-5 sm:max-h-[calc(100dvh-11rem)] sm:px-7">
+        <div className="min-h-0 flex-1 overflow-auto px-4 py-5 sm:px-7">
           <div className="min-w-[58rem]">
             <div className="grid grid-cols-[11rem_repeat(4,minmax(0,1fr))] gap-3">
               <div className="flex items-end pb-3">
