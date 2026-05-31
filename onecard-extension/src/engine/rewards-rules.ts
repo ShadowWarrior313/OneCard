@@ -12,7 +12,7 @@ export type RewardCategory =
   | "retail"
   | "other";
 
-export type CardNetwork = "visa" | "mastercard" | "amex";
+export type CardNetwork = "visa" | "mastercard" | "amex" | "discover";
 
 export type RewardRule = {
   category: RewardCategory;

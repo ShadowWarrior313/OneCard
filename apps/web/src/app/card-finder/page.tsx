@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CardFinderCompareModal } from "@/components/card-finder/CardFinderCompareModal";
 import { CardFinderOfferCard } from "@/components/card-finder/CardFinderOfferCard";
 import { offerKey } from "@/lib/cardFinderDisplay";
 import type { CreditBand, FinderResponse, Region, RewardFocus } from "@/types/cardFinder";
@@ -26,6 +27,7 @@ export default function CardFinderPage() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<FinderResponse | null>(null);
   const [compareKeys, setCompareKeys] = useState<Set<string>>(() => new Set());
+  const [compareOpen, setCompareOpen] = useState(false);
   const parsedScore = Number(creditScore);
   const validScore =
     Number.isFinite(parsedScore) && parsedScore >= 300 && parsedScore <= 850
@@ -37,6 +39,7 @@ export default function CardFinderPage() {
     setLoading(true);
     setError(null);
     setCompareKeys(new Set());
+    setCompareOpen(false);
     try {
       const params = new URLSearchParams({
         region,
@@ -65,10 +68,14 @@ export default function CardFinderPage() {
   function toggleCompare(key: string, checked: boolean) {
     setCompareKeys((prev) => {
       const next = new Set(prev);
-      if (checked) next.add(key);
-      else next.delete(key);
+      if (checked) {
+        if (next.size < 4 || next.has(key)) next.add(key);
+      } else {
+        next.delete(key);
+      }
       return next;
     });
+    if (checked) setCompareOpen(true);
   }
 
   return (
@@ -215,19 +222,32 @@ export default function CardFinderPage() {
                 )}
 
                 {sortedOffers.length > 0 && (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {sortedOffers.map((offer) => {
-                      const key = offerKey(offer);
-                      return (
-                        <CardFinderOfferCard
-                          key={key}
-                          offer={offer}
-                          compared={compareKeys.has(key)}
-                          onCompareChange={(checked) => toggleCompare(key, checked)}
-                        />
-                      );
-                    })}
-                  </div>
+                  <>
+                    {compareKeys.size > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setCompareOpen(true)}
+                        className="sticky top-24 z-20 ml-auto block rounded-full bg-brand-ink px-4 py-2 text-xs font-semibold text-white shadow-lg transition hover:bg-brand-charcoal"
+                      >
+                        Compare selected ({compareKeys.size}/4)
+                      </button>
+                    )}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {sortedOffers.map((offer) => {
+                        const key = offerKey(offer);
+                        const compared = compareKeys.has(key);
+                        return (
+                          <CardFinderOfferCard
+                            key={key}
+                            offer={offer}
+                            compared={compared}
+                            compareDisabled={!compared && compareKeys.size >= 4}
+                            onCompareChange={(checked) => toggleCompare(key, checked)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
 
                 <div className="rounded-xl border border-zinc-200 bg-white p-4">
@@ -256,7 +276,14 @@ export default function CardFinderPage() {
         </section>
       </main>
       <Footer />
+      {compareOpen && sortedOffers.length > 0 && (
+        <CardFinderCompareModal
+          offers={sortedOffers}
+          selectedKeys={compareKeys}
+          onToggle={toggleCompare}
+          onClose={() => setCompareOpen(false)}
+        />
+      )}
     </>
   );
 }
-

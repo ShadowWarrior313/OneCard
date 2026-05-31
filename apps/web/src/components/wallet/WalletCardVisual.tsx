@@ -1,6 +1,6 @@
 "use client";
 
-import type { CardProduct } from "@onecard/shared-types";
+import type { CardNetwork, CardProduct } from "@onecard/shared-types";
 import { getCardAppearance, tierLabel } from "@/data/cardAppearances";
 import { cardBackgroundStyle, cardTextClass } from "@/lib/cardBackground";
 import { PaymentNetworkLogo } from "@/components/PaymentNetworkLogo";
@@ -20,7 +20,7 @@ function EmvChip() {
   );
 }
 
-function NetworkMark({ network }: { network: "visa" | "mastercard" | "amex" }) {
+function NetworkMark({ network }: { network: CardNetwork }) {
   return (
     <PaymentNetworkLogo
       network={network}

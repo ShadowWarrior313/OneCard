@@ -49,7 +49,7 @@ export interface RewardRule {
   excludedMerchantIds?: string[];
 }
 
-export type CardNetwork = "visa" | "mastercard" | "amex";
+export type CardNetwork = "visa" | "mastercard" | "amex" | "discover";
 
 export interface CardProduct {
   cardId: string;

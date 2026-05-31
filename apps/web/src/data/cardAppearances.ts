@@ -3,7 +3,7 @@
  * Sources listed on each card in cards.ts.
  */
 
-export type CardNetwork = "visa" | "mastercard" | "amex";
+export type CardNetwork = "visa" | "mastercard" | "amex" | "discover";
 export type CardTier =
   | "standard"
   | "gold"
@@ -134,6 +134,94 @@ const ISSUER_DEFAULT: Record<string, Omit<CardAppearance, "faceLabel">> = {
     accent: "#00A758",
     textLight: true,
     network: "visa",
+    tier: "standard",
+  },
+  Desjardins: {
+    colorFrom: "#00874E",
+    colorTo: "#005A36",
+    accent: "#00874E",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  "Rogers Bank": {
+    colorFrom: "#DA291C",
+    colorTo: "#8F1710",
+    accent: "#DA291C",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  MBNA: {
+    colorFrom: "#172B85",
+    colorTo: "#101A4D",
+    accent: "#4665D1",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  "Canadian Tire Bank": {
+    colorFrom: "#D71920",
+    colorTo: "#7F1014",
+    accent: "#D71920",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  Chase: {
+    colorFrom: "#117ACA",
+    colorTo: "#074A84",
+    accent: "#117ACA",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  "Bank of America": {
+    colorFrom: "#E31837",
+    colorTo: "#004481",
+    accent: "#E31837",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  Citi: {
+    colorFrom: "#056DAE",
+    colorTo: "#003B70",
+    accent: "#056DAE",
+    textLight: true,
+    network: "mastercard",
+    tier: "standard",
+  },
+  "Capital One": {
+    colorFrom: "#004977",
+    colorTo: "#002A45",
+    accent: "#D22D2F",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  "Wells Fargo": {
+    colorFrom: "#B31E2D",
+    colorTo: "#74131D",
+    accent: "#F5C242",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  "U.S. Bank": {
+    colorFrom: "#123A70",
+    colorTo: "#071F3F",
+    accent: "#D22630",
+    textLight: true,
+    network: "visa",
+    tier: "standard",
+  },
+  Discover: {
+    colorFrom: "#F58220",
+    colorTo: "#7A3510",
+    accent: "#F58220",
+    textLight: true,
+    network: "discover",
     tier: "standard",
   },
 };

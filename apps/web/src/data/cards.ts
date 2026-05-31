@@ -2,6 +2,7 @@ import type { CardProduct } from "@onecard/shared-types";
 import { FINTECH_CARDS } from "./fintechCards";
 import { enhanceCardCatalog } from "./cardEnhancements";
 import type { CardMeta } from "./cardRewards";
+import catalogAdditions from "./cardCatalogAdditions.json";
 
 /**
  * Curated Canadian credit cards (Amex + Big Six + National Bank + fintech).
@@ -22,7 +23,18 @@ export type CardIssuerGroup =
   | "Neo Financial"
   | "Tangerine"
   | "KOHO"
-  | "Manulife";
+  | "Manulife"
+  | "Desjardins"
+  | "Rogers Bank"
+  | "MBNA"
+  | "Canadian Tire Bank"
+  | "Chase"
+  | "Bank of America"
+  | "Citi"
+  | "Capital One"
+  | "Wells Fargo"
+  | "U.S. Bank"
+  | "Discover";
 
 export const BANK_CARDS: CardMeta[] = [
   { cardId: "amex_cobalt", issuer: "American Express", displayName: "American Express Cobalt Card" },
@@ -76,6 +88,11 @@ export const BANK_CARDS: CardMeta[] = [
 export const CARD_CATALOG: CardProduct[] = enhanceCardCatalog([
   ...BANK_CARDS,
   ...FINTECH_CARDS,
+  ...catalogAdditions.map(({ id, issuer, name }) => ({
+    cardId: id,
+    issuer,
+    displayName: name,
+  })),
 ]);
 
 export const ISSUER_GROUPS: CardIssuerGroup[] = [
@@ -93,6 +110,17 @@ export const ISSUER_GROUPS: CardIssuerGroup[] = [
   "Tangerine",
   "KOHO",
   "Manulife",
+  "Desjardins",
+  "Rogers Bank",
+  "MBNA",
+  "Canadian Tire Bank",
+  "Chase",
+  "Bank of America",
+  "Citi",
+  "Capital One",
+  "Wells Fargo",
+  "U.S. Bank",
+  "Discover",
 ];
 
 export const CARD_COUNT = CARD_CATALOG.length;
@@ -121,4 +149,15 @@ export const ISSUER_CARD_PAGES: Record<CardIssuerGroup, string> = {
   Tangerine: "https://www.tangerine.ca/en/personal/spend/credit-cards",
   KOHO: "https://www.koho.ca/",
   Manulife: "https://www.manulifebank.ca/personal-banking/credit-cards.html",
+  Desjardins: "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
+  "Rogers Bank": "https://www.rogersbank.com/en/credit_cards",
+  MBNA: "https://www.mbna.ca/en/credit-cards",
+  "Canadian Tire Bank": "https://triangle.canadiantire.ca/en/credit-cards.html",
+  Chase: "https://creditcards.chase.com/",
+  "Bank of America": "https://www.bankofamerica.com/credit-cards/",
+  Citi: "https://www.citi.com/credit-cards",
+  "Capital One": "https://www.capitalone.com/credit-cards/",
+  "Wells Fargo": "https://creditcards.wellsfargo.com/",
+  "U.S. Bank": "https://www.usbank.com/credit-cards.html",
+  Discover: "https://www.discover.com/credit-cards/",
 };

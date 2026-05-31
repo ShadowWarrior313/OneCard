@@ -25,6 +25,17 @@ export const ISSUER_DOMAINS: Record<string, IssuerDomainEntry> = {
   Tangerine: { domain: "tangerine.ca" },
   KOHO: { domain: "koho.ca" },
   Manulife: { domain: "manulife.ca" },
+  Desjardins: { domain: "desjardins.com" },
+  "Rogers Bank": { domain: "rogersbank.com" },
+  MBNA: { domain: "mbna.ca" },
+  "Canadian Tire Bank": { domain: "canadiantire.ca" },
+  Chase: { domain: "chase.com" },
+  "Bank of America": { domain: "bankofamerica.com" },
+  Citi: { domain: "citi.com" },
+  "Capital One": { domain: "capitalone.com" },
+  "Wells Fargo": { domain: "wellsfargo.com" },
+  "U.S. Bank": { domain: "usbank.com" },
+  Discover: { domain: "discover.com" },
 };
 
 export function issuerBrandDomains(issuer: string): string[] {

@@ -1,5 +1,7 @@
 import { CARD_FINDER_PROVIDERS, type CardProvider } from "@/data/cardFinderProviders";
+import { getCardById } from "@/data/cards";
 import { bonusesCardsToOffers, fetchCardBonusesFeed } from "@/lib/cardBonusesFeed";
+import { matchFinderOfferToCardId } from "@/lib/cardFinderMatch";
 import type { CreditBand, FinderOffer, FinderProfile, Region, RewardFocus } from "@/types/cardFinder";
 
 const OFFER_KEYWORDS = /(credit|card|cards|student|cash\s?back|cashback|rewards|travel|bonus|welcome|offer|points)/i;
@@ -8,6 +10,9 @@ const STUDENT_KEYWORDS = /(student|beginner|starter|building|secured)/i;
 const PREMIUM_KEYWORDS = /(infinite|reserve|platinum|world\s?elite|premium|preferred)/i;
 const TRAVEL_KEYWORDS = /(travel|miles|aeroplan|hotel|flight|airline)/i;
 const CASHBACK_KEYWORDS = /(cash\s?back|cashback|groceries|gas|dining)/i;
+const CARD_NAME_SIGNAL = /(visa|mastercard|american express|amex|\bcard\b)/i;
+const NON_CARD_TITLE =
+  /^(cash\s?back|rewards?|travel|bonus|special offers?|credit cards?|cards?|compare cards?)(?:\s+cards?)?$|learn (?:more )?about|member offers?|smart account|view all|explore|calculator|manage (?:my |your )?card|credit card finder|credit card rewards|how to|terms and conditions|first canadian credit card/i;
 
 function creditBandFromScore(score: number): CreditBand {
   if (score < 580) return "building";
@@ -131,6 +136,7 @@ function extractOfferCandidates(
     if (!hrefRaw || !label) continue;
     if (hrefRaw.startsWith("#") || hrefRaw.startsWith("mailto:") || hrefRaw.startsWith("tel:")) continue;
     if (!OFFER_KEYWORDS.test(`${hrefRaw} ${label}`)) continue;
+    if (!CARD_NAME_SIGNAL.test(label) || NON_CARD_TITLE.test(label)) continue;
 
     let absoluteUrl: string;
     try {
@@ -146,7 +152,7 @@ function extractOfferCandidates(
     const contextText = stripHtml(contextRaw);
     const details = extractOfferDetails(`${label} ${contextText}`);
     rows.push({ title: label, url: absoluteUrl, details });
-    if (rows.length >= 18) break;
+    if (rows.length >= 100) break;
   }
 
   return rows;
@@ -238,17 +244,23 @@ async function fetchScrapedOffers(profile: FinderProfile): Promise<{
   for (const page of pages) {
     if (!page.html) continue;
     const candidates = extractOfferCandidates(page.html, page.provider.cardsUrl);
+    const matchedCardIds = new Set<string>();
     for (const candidate of candidates) {
-      const { score, reasons } = scoreScrapedOffer(candidate.title, profile);
+      const cardId = matchFinderOfferToCardId(candidate.title, page.provider.name, candidate.url);
+      const card = cardId ? getCardById(cardId) : undefined;
+      if (!card || matchedCardIds.has(card.cardId)) continue;
+      matchedCardIds.add(card.cardId);
+      const { score, reasons } = scoreScrapedOffer(card.displayName, profile);
       offers.push({
         providerId: page.provider.id,
         providerName: page.provider.name,
-        title: candidate.title,
+        title: card.displayName,
         url: candidate.url,
         score,
         reasons,
         source: "scraped",
         details: candidate.details,
+        cardId: card.cardId,
       });
     }
   }

@@ -8,8 +8,12 @@ function normalize(text: string): string {
 }
 
 /** Best-effort link from scraped/structured finder title to our card catalog (for art + rates). */
-export function matchFinderOfferToCardId(title: string, providerName: string): string | undefined {
-  const hay = normalize(`${title} ${providerName}`);
+export function matchFinderOfferToCardId(
+  title: string,
+  providerName: string,
+  supportingText = "",
+): string | undefined {
+  const hay = normalize(`${title} ${providerName} ${supportingText}`);
   let bestId: string | undefined;
   let bestScore = 0;
 

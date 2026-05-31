@@ -6,6 +6,7 @@ import type { CardNetwork, CardProduct, RewardCategory, RewardRule } from "@onec
 import { formatPercent } from "@/lib/formatNumber";
 import { AMEX_GROCERY_EXCLUSIONS } from "./merchantPartners";
 import legacySnapshot from "./cardRewards.snapshot.json";
+import catalogAdditions from "./cardCatalogAdditions.json";
 
 /** Category keys aligned with simulator MCC buckets. */
 export type CardRewardCategoryKey =
@@ -42,7 +43,7 @@ export interface CardRewardConfig {
   id: string;
   issuer: string;
   name: string;
-  annualFee: number;
+  annualFee?: number;
   network: CardNetwork;
   /** Cash value of one point/mile (cashback cards use 0.01 = 1%). */
   pointValueCAD: number;
@@ -372,7 +373,7 @@ type LegacySnapshotEntry = {
   id: string;
   issuer: string;
   name: string;
-  annualFee: number;
+  annualFee?: number;
   network: CardNetwork;
   pointValueCAD: number;
   currency: string;
@@ -400,6 +401,32 @@ function legacyEntryToConfig(entry: LegacySnapshotEntry): CardRewardConfig {
   };
 }
 
+type CatalogAddition = {
+  id: string;
+  issuer: string;
+  name: string;
+  network: CardNetwork;
+  sourceUrl: string;
+  scrapedAt: string;
+};
+
+function catalogAdditionToFallbackConfig(entry: CatalogAddition): CardRewardConfig {
+  return {
+    id: entry.id,
+    issuer: entry.issuer,
+    name: entry.name,
+    network: entry.network,
+    pointValueCAD: 0.01,
+    currency: "issuer rewards",
+    ratesAsOf: entry.scrapedAt,
+    sourceUrl: entry.sourceUrl,
+    categories: {
+      other: { earnRate: 1, note: "Conservative fallback until issuer earn rates are normalized." },
+    },
+    needsVerification: true,
+  };
+}
+
 const SEED_IDS = new Set(WALLET_SEED_CARD_CONFIGS.map((c) => c.id));
 
 function buildCardRewardRegistry(): Record<string, CardRewardConfig> {
@@ -412,6 +439,10 @@ function buildCardRewardRegistry(): Record<string, CardRewardConfig> {
   for (const entry of legacySnapshot as LegacySnapshotEntry[]) {
     if (SEED_IDS.has(entry.id)) continue;
     registry[entry.id] = legacyEntryToConfig(entry);
+  }
+
+  for (const entry of catalogAdditions as CatalogAddition[]) {
+    registry[entry.id] ??= catalogAdditionToFallbackConfig(entry);
   }
 
   return registry;

@@ -18,6 +18,7 @@ const NETWORK_FILE: Record<CardNetwork, string> = {
   visa: "visa",
   mastercard: "mastercard",
   amex: "amex",
+  discover: "discover",
 };
 
 export function paymentNetworkIconUrl(

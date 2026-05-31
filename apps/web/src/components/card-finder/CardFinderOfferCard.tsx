@@ -88,10 +88,12 @@ function StatCell({ label, value, footnote }: { label: string; value: string; fo
 export function CardFinderOfferCard({
   offer,
   compared,
+  compareDisabled = false,
   onCompareChange,
 }: {
   offer: FinderOffer;
   compared: boolean;
+  compareDisabled?: boolean;
   onCompareChange: (checked: boolean) => void;
 }) {
   const cardId = useMemo(
@@ -138,8 +140,9 @@ export function CardFinderOfferCard({
             <input
               type="checkbox"
               checked={compared}
+              disabled={compareDisabled}
               onChange={(e) => onCompareChange(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 text-sky-600 focus:ring-sky-500"
+              className="h-4 w-4 rounded border-zinc-300 text-sky-600 focus:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-50"
             />
             Compare
           </label>
