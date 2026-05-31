@@ -29,6 +29,18 @@
         border-bottom: 1px solid var(--line);
         padding: 18px 18px 16px;
       }
+      .popup-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .popup-logo {
+        display: block;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        object-fit: contain;
+      }
       h1 {
         margin: 0;
         font-size: 24px;
@@ -182,7 +194,10 @@
   </head>
   <body>
     <header>
-      <h1>Your wallet</h1>
+      <div class="popup-brand">
+        <img class="popup-logo" src="../assets/icons/icon-48.png" width="34" height="34" alt="" aria-hidden="true" />
+        <h1>Your wallet</h1>
+      </div>
       <p class="sub">These are the cards OneCard will compare at checkout.</p>
     </header>
     <main>

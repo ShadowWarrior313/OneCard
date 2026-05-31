@@ -39,9 +39,9 @@ export function OneCardLogo({
       <Image
         src="/brand-mark.png"
         alt=""
-        width={88}
+        width={56}
         height={56}
-        className="h-7 w-auto"
+        className="h-8 w-8 rounded-md object-contain"
         priority
       />
       {showWordmark && (

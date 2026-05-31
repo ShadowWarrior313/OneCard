@@ -101,8 +101,8 @@ export function OneCardMark({ size = 24 }: { size?: number }) {
       src="/brand-mark.png"
       alt=""
       width={size}
-      height={Math.round((size * 56) / 88)}
-      className="block object-contain"
+      height={size}
+      className="block rounded-md object-contain"
       aria-hidden
     />
   );

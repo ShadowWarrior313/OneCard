@@ -1,5 +1,6 @@
 declare const chrome: {
   runtime: {
+    getURL(path: string): string;
     sendMessage<TResponse = unknown>(message: unknown): Promise<TResponse>;
     onMessage: {
       addListener(

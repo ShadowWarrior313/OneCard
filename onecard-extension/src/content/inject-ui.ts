@@ -58,16 +58,18 @@ export function injectRecommendation(result: RecommendationResult): void {
     }
     .ocx-logo-mark {
       display: inline-flex;
-      width: 36px;
-      height: 23px;
+      width: 30px;
+      height: 30px;
       align-items: center;
       justify-content: center;
+      border-radius: 7px;
       overflow: hidden;
     }
-    .ocx-logo-mark svg {
+    .ocx-logo-mark img {
       display: block;
-      width: 36px;
-      height: 23px;
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
     }
     button {
       all: unset;
