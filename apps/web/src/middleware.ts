@@ -18,6 +18,7 @@ import type { NextRequest } from "next/server";
 const RATE_LIMITED_ROUTES = [
   "/api/stripe/setup-intent",
   "/api/stripe/confirm-card",
+  "/api/stripe/payment-intent",
   "/api/waitlist",
 ];
 
@@ -26,6 +27,7 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS: Record<string, number> = {
   "/api/stripe/setup-intent": 5,
   "/api/stripe/confirm-card": 10,
+  "/api/stripe/payment-intent": 10,
   "/api/waitlist": 10,
 };
 
