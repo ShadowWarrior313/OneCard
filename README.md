@@ -1,16 +1,20 @@
 # OneCard
 
-One physical/digital **phantom card** that routes each purchase to the underlying credit or debit card that maximizes rewards.
+OneCard is a **recommend-only** wallet assistant: for each purchase it predicts the merchant's likely category (MCC), scores the cards you already hold, and tells you **which card to pay with** to maximize rewards.
+
+> ⚖️ **It never charges, proxies, or funds a transaction.** OneCard is a pure advice layer — it never acts as an issuer or acceptor and never does cross-issuer back-to-back funding (which is **prohibited by Visa/Mastercard US rules**). It stores no card numbers/CVV, only card identity + reward rules. The decision engine lives in [`packages/onecard-engine`](packages/onecard-engine).
 
 ## Monorepo layout
 
 ```
 apps/
-  web/                 # Next.js 14 — investor-facing dashboard
-  api/                 # NestJS — routing API, Plaid/Stripe stubs later
+  web/                 # Next.js 14 — marketing site + dashboard + OneCard's own checkout
+  api/                 # NestJS — recommendation API
 packages/
   shared-types/        # Domain types shared across apps
-  rewards-engine/      # Pure routing brain + unit tests
+  onecard-engine/      # ★ Recommend-only brain: MCC-as-distribution + EV scoring (current direction)
+  rewards-engine/      # Earlier single-MCC routing brain (legacy/exploratory; see note below)
+  optimizer/           # Wallet-level optimization helpers
 ```
 
 **Tooling:** pnpm workspaces + Turborepo. Node 20+.
@@ -20,29 +24,55 @@ packages/
 | Layer | Choice | Why |
 |-------|--------|-----|
 | Frontend | Next.js 14, Tailwind, Framer Motion, Recharts | SSR for demo links, strong React ecosystem for motion/charts |
-| Backend | **NestJS** (Node) | Same language as engine + web types; easy workspace imports of `@onecard/rewards-engine` |
-| DB (later) | Postgres + Redis | Transactional truth + routing-decision cache |
+| Backend | **NestJS** (Node) | Same language as the engine + web types; easy workspace imports of the engine packages |
+| DB (later) | Postgres + Redis | Wallet/profile store + recommendation cache (no card numbers) |
 | Card data | Curated JSON (source of truth) | Issuer scraping is fragile/ToS-sensitive; Playwright enrichment is swappable |
-| Phantom card MVP | Stripe Issuing (stub) | Fastest path to tokenized PAN without owning a bank |
+| Checkout (OneCard's own product) | Stripe Payment Element (test mode) | Collect payment for OneCard itself; card data never touches our servers. **Not** used to charge or proxy user purchases. |
 
-## Routing modes (three architectures)
+## Recommend-only by design (the legal boundary)
 
-| Mode | ID | Summary |
-|------|-----|---------|
-| A | `network_dependent` | Visa/MC rails → processor → push to underlying card |
-| B | `closed_loop` | OneCard captures merchant, async charge to underlying |
-| C | `virtual_provisioning` | Dynamic single-use VCN via Apple/Google Pay tokenization |
+OneCard is a **pure advice layer**. For each purchase the engine:
 
-Mode metadata (latency, settlement risk, acceptance) lives in `packages/rewards-engine/src/modes/`. Card **selection math is mode-agnostic in v1**; modes affect settlement/regulatory metadata only.
+1. **Predicts** the merchant's MCC as a *probability distribution* — we can't see the real network-assigned MCC (that would require proxying the charge), so we never pretend to; we quantify confidence instead.
+2. **Scores** the user's cards by **expected value** across that distribution (so a robust catch-all wins when the merchant is ambiguous, and a category card wins when the category is reliably likely).
+3. **Recommends** the best card, surfacing uncertainty + a one-tap alternative when the merchant is ambiguous.
+
+It **never** charges a card, proxies a payment, or does back-to-back / cross-issuer funding. That last point is legal-critical: cross-issuer "card fronting" is **prohibited by Visa and Mastercard rules in the US**. Staying advice-only is precisely what keeps OneCard out of issuer/acceptor regulation. See [`packages/onecard-engine`](packages/onecard-engine) for the MCC-as-distribution model, ambiguity rules (hotel sundry / gas+QSR / food truck / big-box), confidence gating, and the test fixtures.
+
+> **Legacy note.** `packages/rewards-engine` contains an earlier exploration that modeled three *proxy* settlement architectures (`network_dependent`, `closed_loop`, `virtual_provisioning`) as mode metadata under `src/modes/`. Those describe charge-proxying designs and are **not** the product direction — they're retained only as exploratory context. The current brain is `onecard-engine`, which is recommend-only.
 
 ## Development
 
 ```bash
 pnpm install
 pnpm build
-pnpm test          # rewards-engine unit tests
+pnpm test          # engine unit tests (onecard-engine + rewards-engine)
 pnpm dev           # web :3000, api :3001 (when wired in turbo)
 ```
+
+## Rewards-intelligence hub (backend-first, feature-flagged OFF)
+
+The logged-in `/hub` dashboard is the **consumer rewards-intelligence layer on top of open-banking data** — the decision layer Plaid enables but does not build. It imports account + transaction records through an **abstracted data provider**, predicts each transaction's reward category through `packages/onecard-engine` (it never trusts the provider's generic category), surfaces confidence, estimates rewards earned vs. left on the table, tracks caps / credits / rotations, projects SUB progress, and recommends a next card. It never processes, proxies, or fronts a card transaction, and never moves money. See [STRATEGY-PIVOT.md](STRATEGY-PIVOT.md) for the full positioning + go-live plan.
+
+**The hub UI ships OFF.** With `NEXT_PUBLIC_HUB_UI` unset, the public site is unchanged — no `/hub` page, no nav entry. Set `NEXT_PUBLIC_HUB_UI=1` to turn it on.
+
+### Architecture (why it reflects the strategy)
+
+- **Provider-abstracted data layer** — `apps/web/src/server/data-providers/` defines a neutral `FinancialDataProvider` interface (`linkAccount`, `syncTransactions`, `getAccounts`, `reauth`, `status`, `verifyAndParseWebhook`). The rest of the app **never imports Plaid directly**; the Plaid SDK lives only in `data-providers/plaid/`. A `mock` provider (local fixtures) is the **default**, so the hub runs with zero third-party keys. Choose with `DATA_PROVIDER`.
+- **Reliability layer most teams skip** — `apps/web/src/server/data-providers/` models connection health (`healthy | login_required | error | stale`), a freshness threshold (stale data is shown as last-known, never as live), `ITEM_LOGIN_REQUIRED` → update-mode re-auth, verified **idempotent** webhooks, and rate-limit/PRODUCT_NOT_READY backoff.
+- **Rewards-intelligence core** — `apps/web/src/server/rewards-intel/` (categorize, earned-vs-optimal, insights, rules-data), exposed via internal **authenticated** routes under `/api/hub/*` and consumed by the flagged UI.
+
+### Run it locally (mock provider — no keys)
+
+```bash
+cp apps/web/.env.example apps/web/.env.local
+# Mock is the default. To see the UI, set NEXT_PUBLIC_HUB_UI=1 and AUTH_SESSION_SECRET + HUB_ENCRYPTION_KEY.
+pnpm --filter @onecard/web dev
+```
+
+Open `/hub`, log in with a local demo profile, and **Link a sample account**. To use real Plaid Sandbox instead, set `DATA_PROVIDER=plaid` plus `PLAID_CLIENT_ID` / `PLAID_SECRET`, then link with Plaid's documented Sandbox credentials `user_good` / `pass_good`. Link exchanges the `public_token` server-side, encrypts the resulting access token with AES-256-GCM at rest, and stores only safe account metadata + imported transactions. The browser never receives provider access tokens or provider item/account/transaction IDs. Sync is incremental + idempotent; the provider webhook route (`/api/hub/webhook/<provider>`) verifies the provider's signature and de-duplicates replays before refreshing.
+
+The JSON file store and the local profile→cookie session bridge are for the Sandbox/mock build. Before switching to real (non-Sandbox) data, replace them with reviewed production auth + durable storage and complete the go-live trust/compliance checklist in [STRATEGY-PIVOT.md](STRATEGY-PIVOT.md) (provider approval, privacy policy, encryption review, webhook deployment, data-retention controls, security/legal pass). This build does not by itself authorize production use of real financial data.
 
 ## Deploying (Vercel monorepo)
 
@@ -65,27 +95,30 @@ Each app has its own `vercel.json` with monorepo install/build commands. The web
 
 After changing Root Directory or env vars, redeploy **one-card-web** (Deployments → … → Redeploy, optionally clear cache).
 
-## Regulatory & partnership reality (read before pitching)
+## Regulatory reality (read before pitching)
 
-OneCard is **not** a weekend side project from a compliance perspective:
+As a **recommend-only** advice layer, OneCard avoids the heaviest licensing burdens *by design* — it doesn't issue cards, hold funds, or move money:
 
-1. **Issuing bank partner** — You cannot issue a card without a licensed issuer (sponsor bank). Stripe Issuing/Marqeta sit on top of sponsor banks.
-2. **Network sponsorship** — Scenario A requires Visa/Mastercard membership or a BIN sponsor program.
-3. **Canada (OSFI / FINTRAC)** — If targeting Canadian users: MSB registration, KYC/AML program, PIPEDA privacy, and potentially credit-broker licensing depending on product positioning.
-4. **US** — Money transmitter / state licenses if holding funds; Reg Z if credit is involved.
-5. **PCI** — Never store full PANs; tokenize via network/issuer vaults (design assumption in codebase).
-6. **Rewards accuracy** — MCC assignment at auth time is merchant-dependent; post-settlement category can differ (chargebacks, recoding).
+1. **No issuer/acceptor role** — we recommend cards the user already holds; we never issue or proxy, so the advice product needs no sponsor bank and no Visa/Mastercard network sponsorship.
+2. **No money transmission** — we never hold or move funds, so no MSB / money-transmitter licensing applies to the advice layer.
+3. **PCI** — we collect no PANs/CVV for advice; OneCard's own checkout (below) tokenizes via Stripe so full card data never touches our servers.
+4. **Privacy (PIPEDA / GDPR / US state laws)** — wallet contents and checkout/browsing signals are personal data; handle with consent + data minimization.
+5. **Rewards accuracy** — MCC at auth time is merchant-dependent and the post-settlement category can differ. Because we never see the real MCC, the engine treats it as a **probability** and **discloses uncertainty** instead of guaranteeing a category.
+
+> ⚠️ The moment a design *proxies or fronts* a charge (the legacy `rewards-engine` proxy modes), the full stack returns — sponsor bank, network sponsorship, MSB / money-transmitter, Reg Z — and **cross-issuer back-to-back funding is prohibited by Visa/Mastercard US rules.** That path is **out of scope** for this product.
 
 Scraping issuer reward pages: treat as **enrichment only**; curated JSON in-repo is the legal/commercial source of truth for demos.
 
 ## What ships next
 
-1. Implement `routeTransaction` + full test matrix
-2. Seed 15–20 CA/US cards (`packages/rewards-data` or JSON in engine)
-3. Dashboard with mock transactions, Sankey, simulator
-4. Postgres schema + API route `POST /route`
+1. Wire `@onecard/onecard-engine` `recommend()` into the API (`POST /recommend`) and the dashboard
+2. Seed 15–20 CA/US cards + expand the curated merchant → MCC priors
+3. Dashboard: per-purchase recommendation showing confidence + uncertainty disclosure
+4. Postgres schema for wallets + recommendation logging (card identity only, never PANs)
 
 ## Stripe integration & payment security
+
+> **Scope:** this is OneCard's *own* product checkout (paying OneCard for OneCard), completed inside Stripe's hosted Payment Element. It is **not** used to charge or proxy the user's purchases at other merchants — OneCard never does that (see [Recommend-only by design](#recommend-only-by-design-the-legal-boundary)).
 
 > ⚠️ **This is not PCI certification.** This codebase implements a safe tokenized architecture using Stripe, but real-money production use additionally requires: completing Stripe's business onboarding, a PCI SAQ A (or SAQ A-EP) assessment, and independent legal/privacy review for your jurisdiction.
 

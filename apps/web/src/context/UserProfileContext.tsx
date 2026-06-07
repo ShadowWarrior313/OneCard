@@ -24,6 +24,7 @@ import {
   writeStoredProfile,
   writeStoredSession,
 } from "@/lib/userProfile";
+import { HUB_UI_ENABLED } from "@/flags";
 
 interface UserProfileContextValue {
   profile: UserProfile | null;
@@ -44,6 +45,7 @@ const UserProfileContext = createContext<UserProfileContextValue | null>(null);
 async function saveProfile(
   input: { name: string; email: string },
   source = "get-started",
+  persistWaitlist = true,
 ): Promise<UserProfile> {
   const name = normalizeProfileName(input.name);
   const email = input.email.trim().toLowerCase();
@@ -55,19 +57,21 @@ async function saveProfile(
     throw new Error("Enter a valid email address");
   }
 
-  const res = await fetch("/api/waitlist", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, source }),
-  });
+  if (persistWaitlist) {
+    const res = await fetch("/api/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, source }),
+    });
 
-  if (res.status === 503) {
-    throw new Error("Waitlist opening soon");
-  }
+    if (res.status === 503) {
+      throw new Error("Waitlist opening soon");
+    }
 
-  if (!res.ok) {
-    const data = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(data.error ?? "Could not save your profile");
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(data.error ?? "Could not save your profile");
+    }
   }
 
   const existing = readStoredProfile();
@@ -79,6 +83,17 @@ async function saveProfile(
   appendWaitlistEntry({ name, email, at: joinedAt });
   writeStoredSession({ email, loggedInAt: new Date().toISOString() });
   return next;
+}
+
+// Bridge the local profile into a hub session cookie — but ONLY when the hub UI
+// is enabled. With the flag off, the public site makes no /api/hub/* calls at all.
+async function syncHubSession(profile: UserProfile): Promise<void> {
+  if (!HUB_UI_ENABLED) return;
+  await fetch("/api/hub/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: profile.name, email: profile.email }),
+  });
 }
 
 export function UserProfileProvider({ children }: { children: React.ReactNode }) {
@@ -96,14 +111,20 @@ export function UserProfileProvider({ children }: { children: React.ReactNode })
     setHydrated(true);
   }, []);
 
+  useEffect(() => {
+    if (profile && isLoggedIn) void syncHubSession(profile);
+  }, [isLoggedIn, profile]);
+
   const login = useCallback(async (input: { name: string; email: string }) => {
-    const next = await saveProfile(input);
+    const next = await saveProfile(input, "login", false);
+    await syncHubSession(next);
     setProfile(next);
     setIsLoggedIn(true);
   }, []);
 
   const logout = useCallback(() => {
     clearStoredSession();
+    if (HUB_UI_ENABLED) void fetch("/api/hub/session", { method: "DELETE" });
     setIsLoggedIn(false);
   }, []);
 

@@ -1,0 +1,27 @@
+{
+  "name": "@onecard/onecard-engine",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Recommend-only brain: predicts merchant MCC as a distribution, scores cards by expected value, recommends the best card. Never processes, charges, or proxies a transaction.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

@@ -6,14 +6,24 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { OneCardLogo } from "./OneCardLogo";
 import { useUserProfile } from "@/context/UserProfileContext";
+import { HUB_UI_ENABLED } from "@/flags";
 
-const links = [
+const baseLinks = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/wallet", label: "Wallet" },
   { href: "/wallet/bills", label: "Bill Pay" },
   { href: "/wallet/my-spend", label: "My Spend" },
   { href: "/card-finder", label: "Card Finder" },
 ];
+
+// The "Rewards Hub" entry only appears when the hub UI flag is on. With it off,
+// the public nav is exactly what it was before the hub work began.
+const links = HUB_UI_ENABLED
+  ? [baseLinks[0], { href: "/hub", label: "Rewards Hub" }, ...baseLinks.slice(1)]
+  : baseLinks;
+
+// Logged-in primary CTA: the hub when enabled, otherwise the wallet (original).
+const loggedInCtaHref = HUB_UI_ENABLED ? "/hub" : "/wallet";
 
 function isNavActive(pathname: string, href: string): boolean {
   if (href === "/wallet") return pathname === "/wallet";
@@ -110,7 +120,7 @@ export function Header() {
             </Link>
           )}
           <Link
-            href={isLoggedIn ? "/wallet" : "/get-started"}
+            href={isLoggedIn ? loggedInCtaHref : "/get-started"}
             className={`hidden rounded-lg px-4 py-2 text-sm font-semibold sm:inline-flex ${
               transparent
                 ? "bg-white text-brand-ink hover:bg-zinc-100"
@@ -182,7 +192,7 @@ export function Header() {
             </li>
             <li className="pt-2">
               <Link
-                href={isLoggedIn ? "/wallet" : "/get-started"}
+                href={isLoggedIn ? loggedInCtaHref : "/get-started"}
                 onClick={() => setOpen(false)}
                 className="block rounded-lg bg-brand-ink px-3 py-3 text-center text-sm font-semibold text-white"
               >

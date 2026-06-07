@@ -20,6 +20,12 @@ const RATE_LIMITED_ROUTES = [
   "/api/stripe/confirm-card",
   "/api/stripe/payment-intent",
   "/api/waitlist",
+  "/api/hub/link-token",
+  "/api/hub/link-exchange",
+  "/api/hub/sync",
+  "/api/hub/reauth",
+  "/api/hub/webhook",
+  "/api/hub/manual-transactions",
 ];
 
 // Max requests per IP per window per route (very conservative for payment routes)
@@ -29,6 +35,12 @@ const MAX_REQUESTS: Record<string, number> = {
   "/api/stripe/confirm-card": 10,
   "/api/stripe/payment-intent": 10,
   "/api/waitlist": 10,
+  "/api/hub/link-token": 10,
+  "/api/hub/link-exchange": 10,
+  "/api/hub/sync": 10,
+  "/api/hub/reauth": 10,
+  "/api/hub/webhook": 30,
+  "/api/hub/manual-transactions": 30,
 };
 
 // In-memory store (resets per cold start — replace with KV for durability)
