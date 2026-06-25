@@ -24,6 +24,10 @@ function encryptionKey(): Buffer {
   return key;
 }
 
+export function assertTokenVaultReady(): void {
+  void encryptionKey();
+}
+
 export function encryptAccessToken(token: string): EncryptedSecret {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", encryptionKey(), iv);

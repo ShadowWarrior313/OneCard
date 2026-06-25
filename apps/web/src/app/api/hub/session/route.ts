@@ -1,6 +1,25 @@
 import { clearHubSessionCookie, createHubSession, requireHubUser } from "@/server/auth/session";
 import { getHubServerConfig } from "@/config";
 
+const LOCAL_SANDBOX_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "0.0.0.0"]);
+
+function requestHostname(request: Request): string | undefined {
+  try {
+    return new URL(request.url).hostname.toLowerCase();
+  } catch {
+    const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+    const firstHost = host?.split(",")[0]?.trim().toLowerCase();
+    if (!firstHost) return undefined;
+    if (firstHost.startsWith("[")) return firstHost.slice(1, firstHost.indexOf("]"));
+    return firstHost.split(":")[0];
+  }
+}
+
+function isLocalSandboxRequest(request: Request): boolean {
+  const hostname = requestHostname(request);
+  return Boolean(hostname && LOCAL_SANDBOX_HOSTS.has(hostname));
+}
+
 export async function GET(request: Request): Promise<Response> {
   const user = await requireHubUser(request);
   return user
@@ -13,6 +32,12 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json(
       { error: "Development and production require a verified authentication provider" },
       { status: 501 },
+    );
+  }
+  if (!isLocalSandboxRequest(request)) {
+    return Response.json(
+      { error: "Sandbox profile sessions are only available on localhost" },
+      { status: 403 },
     );
   }
   let body: { email?: string; name?: string };
