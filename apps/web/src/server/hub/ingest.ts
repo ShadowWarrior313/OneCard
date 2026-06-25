@@ -3,7 +3,11 @@ import "server-only";
 import { getDataProvider, ProviderError } from "@/server/data-providers";
 import type { ProviderAccount, ProviderId, ProviderTransaction } from "@/server/data-providers/types";
 import { withRetry } from "@/server/data-providers/retry";
-import { decryptAccessToken, encryptAccessToken } from "@/server/data-providers/token-vault";
+import {
+  assertTokenVaultReady,
+  decryptAccessToken,
+  encryptAccessToken,
+} from "@/server/data-providers/token-vault";
 import { logProviderWarning } from "@/server/log";
 import { categorizeTransaction } from "@/server/rewards-intel/categorize";
 import { createHubId, mutateHubStore, readHubStore } from "@/data/store";
@@ -199,6 +203,7 @@ export async function linkAndSync(input: {
   userId: string;
   publicToken: string;
 }): Promise<void> {
+  assertTokenVaultReady();
   const provider = getDataProvider();
   const link = await provider.linkAccount({ publicToken: input.publicToken });
   const item = await saveLinkedItem({
