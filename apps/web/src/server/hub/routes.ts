@@ -11,6 +11,7 @@ import {
   setItemStatus,
 } from "@/data/store";
 import { logProviderWarning } from "@/server/log";
+import { hubDisabledResponse, isHubApiEnabled } from "./access";
 import { accessTokenForUserItem, linkAndSync, syncLinkedItem, syncUserItems } from "./ingest";
 
 /**
@@ -31,6 +32,7 @@ function providerFailure(cause: unknown, fallback: string): Response {
 
 /** POST /api/hub/link-token — start (or, in update mode, resume) a connection. */
 export async function createLinkToken(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return error("Log in to link an account", 401);
   try {
@@ -46,6 +48,7 @@ export async function createLinkToken(request: Request): Promise<Response> {
 
 /** POST /api/hub/link-exchange — exchange a public token, persist, initial sync. */
 export async function exchangePublicToken(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return error("Log in to link an account", 401);
   let publicToken = "";
@@ -66,6 +69,7 @@ export async function exchangePublicToken(request: Request): Promise<Response> {
 
 /** POST /api/hub/sync — incremental refresh of every linked item for the user. */
 export async function syncTransactions(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return error("Log in to refresh transactions", 401);
   await syncUserItems(user.id);
@@ -74,6 +78,7 @@ export async function syncTransactions(request: Request): Promise<Response> {
 
 /** POST /api/hub/reauth — produce an update-mode link handshake for one item. */
 export async function reauth(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return error("Log in to reconnect an account", 401);
   let itemId = "";
@@ -105,6 +110,7 @@ export async function reauth(request: Request): Promise<Response> {
  * trust comes from the signature, not a cookie.
  */
 export async function handleWebhook(request: Request, providerParam: string): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const provider = getDataProvider();
   if (providerParam !== provider.id) return error("Unknown provider", 404);
 

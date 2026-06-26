@@ -14,7 +14,11 @@ export interface HubServerConfig {
 }
 
 export function getHubServerConfig(): HubServerConfig {
-  const plaidEnv = (process.env.PLAID_ENV?.trim() || "sandbox") as PlaidEnvironment;
+  const configuredPlaidEnv = process.env.PLAID_ENV?.trim();
+  if (!configuredPlaidEnv && process.env.NODE_ENV === "production") {
+    throw new Error("PLAID_ENV is required when hub APIs run in production");
+  }
+  const plaidEnv = (configuredPlaidEnv || "sandbox") as PlaidEnvironment;
   if (!["sandbox", "development", "production"].includes(plaidEnv)) {
     throw new Error("PLAID_ENV must be sandbox, development, or production");
   }
