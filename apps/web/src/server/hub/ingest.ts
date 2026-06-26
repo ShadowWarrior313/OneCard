@@ -18,6 +18,8 @@ import type { HubStore, HubTransaction, LinkedAccount, LinkedItem } from "@/data
  * persist safe records, and (3) drive connection-health transitions + backoff.
  */
 
+const syncQueues = new Map<string, Promise<void>>();
+
 function accountRecord(
   userId: string,
   itemId: string,
@@ -155,19 +157,35 @@ export async function saveLinkedItem(input: {
  * error) WITHOUT discarding last-known data — we never present stale as live.
  */
 export async function syncLinkedItem(itemId: string): Promise<void> {
+  const previous = syncQueues.get(itemId) ?? Promise.resolve();
+  const run = previous.catch(() => undefined).then(() => syncLinkedItemOnce(itemId));
+  const queued = run.finally(() => {
+    if (syncQueues.get(itemId) === queued) syncQueues.delete(itemId);
+  });
+  syncQueues.set(itemId, queued);
+  return run;
+}
+
+async function syncLinkedItemOnce(itemId: string): Promise<void> {
   const store = await readHubStore();
   const item = store.items.find((candidate) => candidate.id === itemId);
   if (!item) return;
   const provider = getDataProvider();
   const accessToken = decryptAccessToken(item.encryptedAccessToken);
+  const syncedFromCursor = item.cursor;
 
   try {
     const result = await withRetry(() =>
-      provider.syncTransactions({ accessToken, cursor: item.cursor }),
+      provider.syncTransactions({ accessToken, cursor: syncedFromCursor }),
     );
+    let staleResult = false;
     await mutateHubStore((nextStore) => {
       const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
       if (!mutable) return;
+      if (mutable.cursor !== syncedFromCursor) {
+        staleResult = true;
+        return;
+      }
       upsertAccounts(nextStore, item.userId, item.id, result.accounts);
       applyTransactions(nextStore, item.userId, result.added, result.modified, result.removedIds);
       mutable.cursor = result.nextCursor;
@@ -175,6 +193,9 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
       mutable.status = "healthy";
       mutable.errorCode = undefined;
     });
+    if (staleResult) {
+      logProviderWarning("Discarded stale transaction sync result", "stale_sync_cursor");
+    }
   } catch (error) {
     const status = error instanceof ProviderError ? error.status : "error";
     const code = error instanceof ProviderError ? error.code : "sync_failed";
@@ -182,6 +203,7 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
     await mutateHubStore((nextStore) => {
       const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
       if (mutable) {
+        if (mutable.cursor !== syncedFromCursor) return;
         mutable.status = status === "login_required" ? "login_required" : "error";
         mutable.errorCode = code;
       }

@@ -1,7 +1,13 @@
 import { clearHubSessionCookie, createHubSession, requireHubUser } from "@/server/auth/session";
 import { getHubServerConfig } from "@/config";
+import {
+  hubDisabledResponse,
+  isHubApiEnabled,
+  isSandboxHubSessionEnabled,
+} from "@/server/hub/access";
 
 export async function GET(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   return user
     ? Response.json({ authenticated: true, user: { name: user.name, email: user.email } })
@@ -9,9 +15,10 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (getHubServerConfig().plaidEnv !== "sandbox") {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
+  if (getHubServerConfig().plaidEnv !== "sandbox" || !isSandboxHubSessionEnabled()) {
     return Response.json(
-      { error: "Development and production require a verified authentication provider" },
+      { error: "Sandbox hub sessions require explicit server-side opt-in" },
       { status: 501 },
     );
   }
@@ -36,6 +43,7 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function DELETE(): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   return Response.json(
     { authenticated: false },
     { headers: { "Set-Cookie": clearHubSessionCookie() } },

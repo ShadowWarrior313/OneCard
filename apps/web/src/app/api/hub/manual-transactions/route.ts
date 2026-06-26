@@ -3,8 +3,10 @@ import { categorizeTransaction } from "@/server/rewards-intel/categorize";
 import { createHubId, dashboardForUser, mutateHubStore } from "@/data/store";
 import { getCardRewardConfig } from "@/data/cardRewards";
 import { requireHubUser } from "@/server/auth/session";
+import { hubDisabledResponse, isHubApiEnabled } from "@/server/hub/access";
 
 export async function POST(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return Response.json({ error: "Log in to add transactions" }, { status: 401 });
 

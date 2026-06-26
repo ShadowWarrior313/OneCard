@@ -1,8 +1,10 @@
 import { getCardRewardConfig } from "@/data/cardRewards";
 import { mapAccountToCard } from "@/data/store";
 import { requireHubUser } from "@/server/auth/session";
+import { hubDisabledResponse, isHubApiEnabled } from "@/server/hub/access";
 
 export async function POST(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return Response.json({ error: "Log in to update your cards" }, { status: 401 });
 
