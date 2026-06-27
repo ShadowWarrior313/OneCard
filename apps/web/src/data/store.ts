@@ -1,7 +1,8 @@
 import "server-only";
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { type FileHandle, mkdir, open, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import {
   deriveStatus,
   freshnessFor,
@@ -19,6 +20,10 @@ import type {
 
 const STORE_PATH =
   process.env.HUB_DATA_PATH ?? path.join(process.cwd(), ".data", "hub-store.json");
+const STORE_DIR = path.dirname(STORE_PATH);
+const LOCK_PATH = `${STORE_PATH}.lock`;
+const LOCK_RETRY_MS = 25;
+const LOCK_STALE_MS = 30_000;
 
 /** Bound the idempotency ledger so it can't grow without limit. */
 const MAX_WEBHOOK_RECEIPTS = 500;
@@ -33,6 +38,37 @@ const EMPTY_STORE: HubStore = {
 };
 
 let mutationQueue: Promise<void> = Promise.resolve();
+
+async function withStoreLock<T>(operation: () => Promise<T>): Promise<T> {
+  await mkdir(STORE_DIR, { recursive: true });
+  let lockHandle: FileHandle | undefined;
+  const startedAt = Date.now();
+
+  while (!lockHandle) {
+    try {
+      lockHandle = await open(LOCK_PATH, "wx", 0o600);
+      await lockHandle.writeFile(
+        JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }),
+        "utf8",
+      );
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+      if (Date.now() - startedAt > LOCK_STALE_MS) {
+        await rm(LOCK_PATH, { force: true });
+        continue;
+      }
+      await delay(LOCK_RETRY_MS);
+    }
+  }
+
+  const handle = lockHandle;
+  try {
+    return await operation();
+  } finally {
+    await handle.close();
+    await rm(LOCK_PATH, { force: true });
+  }
+}
 
 function normalizeStore(raw: Partial<HubStore>): HubStore {
   return {
@@ -57,11 +93,18 @@ export async function readHubStore(): Promise<HubStore> {
 }
 
 async function writeHubStore(store: HubStore): Promise<void> {
-  await mkdir(path.dirname(STORE_PATH), { recursive: true });
-  await writeFile(STORE_PATH, JSON.stringify(store, null, 2), {
-    encoding: "utf8",
-    mode: 0o600,
-  });
+  await mkdir(STORE_DIR, { recursive: true });
+  const tempPath = path.join(STORE_DIR, `.hub-store-${process.pid}-${crypto.randomUUID()}.tmp`);
+  try {
+    await writeFile(tempPath, JSON.stringify(store, null, 2), {
+      encoding: "utf8",
+      mode: 0o600,
+    });
+    await rename(tempPath, STORE_PATH);
+  } catch (error) {
+    await rm(tempPath, { force: true });
+    throw error;
+  }
 }
 
 export async function mutateHubStore<T>(
@@ -76,9 +119,12 @@ export async function mutateHubStore<T>(
 
   mutationQueue = mutationQueue.catch(() => undefined).then(async () => {
     try {
-      const store = await readHubStore();
-      const value = await mutation(store);
-      await writeHubStore(store);
+      const value = await withStoreLock(async () => {
+        const store = await readHubStore();
+        const mutatedValue = await mutation(store);
+        await writeHubStore(store);
+        return mutatedValue;
+      });
       resolveResult(value);
     } catch (error) {
       rejectResult(error);

@@ -6,8 +6,8 @@ import type { NextRequest } from "next/server";
  *
  * Responsibilities:
  *   1. HTTPS redirect (belt-and-suspenders; Vercel also enforces at the CDN)
- *   2. Rate limiting on payment-sensitive API routes
- *   3. Block obviously malformed Stripe webhook payloads early
+ *   2. Server-side hub API feature gate
+ *   3. Rate limiting on payment-sensitive API routes
  */
 
 // ── Rate limit store ────────────────────────────────────────────────────────
@@ -27,6 +27,8 @@ const RATE_LIMITED_ROUTES = [
   "/api/hub/webhook",
   "/api/hub/manual-transactions",
 ];
+
+const HUB_API_PREFIX = "/api/hub";
 
 // Max requests per IP per window per route (very conservative for payment routes)
 const WINDOW_MS = 60_000;
@@ -81,7 +83,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(httpsUrl, 301);
   }
 
-  // 2. Rate limiting on sensitive API routes
+  if (pathname.startsWith(HUB_API_PREFIX) && process.env.HUB_API_ENABLED !== "1") {
+    return NextResponse.json({ error: "Rewards hub is not enabled" }, { status: 404 });
+  }
+
+  // 3. Rate limiting on sensitive API routes
   const isRateLimitedRoute = RATE_LIMITED_ROUTES.some((r) => pathname.startsWith(r));
   if (isRateLimitedRoute) {
     const ip =

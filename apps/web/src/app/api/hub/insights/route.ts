@@ -1,6 +1,7 @@
 import { getCardRewardConfig } from "@/data/cardRewards";
 import { dashboardForUser } from "@/data/store";
 import { requireHubUser } from "@/server/auth/session";
+import { hubDisabledResponse, isHubApiEnabled } from "@/server/hub/access";
 import { computeRewardsSummary } from "@/server/rewards-intel/earned-vs-optimal";
 import { computeInsights } from "@/server/rewards-intel/insights";
 
@@ -13,6 +14,7 @@ import { computeInsights } from "@/server/rewards-intel/insights";
  * SUB progress. Authenticated + per-user isolated.
  */
 export async function POST(request: Request): Promise<Response> {
+  if (!isHubApiEnabled()) return hubDisabledResponse();
   const user = await requireHubUser(request);
   if (!user) return Response.json({ error: "Log in to view insights" }, { status: 401 });
 
