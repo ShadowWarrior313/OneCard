@@ -147,7 +147,7 @@ export function computeRewardsSummary(input: {
     const cardId = actualCardId(transaction, input.accounts);
     const earned = cardId ? expectedReward(transaction, cardId, usage) : 0;
     const best = bestHeldCard(transaction, input.walletCardIds, usage);
-    const optimal = cardId ? Math.max(earned, best.reward) : 0;
+    const optimal = Math.max(earned, best.reward);
     const missed = Math.max(0, optimal - earned);
     if (transaction.date.startsWith(month)) {
       rewarded.push({
