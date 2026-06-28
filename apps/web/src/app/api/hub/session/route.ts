@@ -9,7 +9,7 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (getHubServerConfig().plaidEnv !== "sandbox") {
+  if (process.env.NODE_ENV === "production" || getHubServerConfig().plaidEnv !== "sandbox") {
     return Response.json(
       { error: "Development and production require a verified authentication provider" },
       { status: 501 },
