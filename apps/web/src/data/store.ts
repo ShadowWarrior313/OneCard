@@ -1,6 +1,7 @@
 import "server-only";
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   deriveStatus,
@@ -57,11 +58,23 @@ export async function readHubStore(): Promise<HubStore> {
 }
 
 async function writeHubStore(store: HubStore): Promise<void> {
-  await mkdir(path.dirname(STORE_PATH), { recursive: true });
-  await writeFile(STORE_PATH, JSON.stringify(store, null, 2), {
-    encoding: "utf8",
-    mode: 0o600,
-  });
+  const directory = path.dirname(STORE_PATH);
+  await mkdir(directory, { recursive: true });
+  const tempPath = path.join(
+    directory,
+    `.${path.basename(STORE_PATH)}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`,
+  );
+  try {
+    await writeFile(tempPath, `${JSON.stringify(store, null, 2)}\n`, {
+      encoding: "utf8",
+      mode: 0o600,
+      flag: "wx",
+    });
+    await rename(tempPath, STORE_PATH);
+  } catch (error) {
+    await rm(tempPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
 }
 
 export async function mutateHubStore<T>(
@@ -90,7 +103,7 @@ export async function mutateHubStore<T>(
 }
 
 export function createHubId(prefix: string): string {
-  return `${prefix}_${crypto.randomUUID()}`;
+  return `${prefix}_${randomUUID()}`;
 }
 
 export async function ensureHubUser(input: {

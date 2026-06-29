@@ -56,7 +56,12 @@ function sessionToken(payload: SessionPayload): string {
   return `${encodedPayload}.${sign(encodedPayload)}`;
 }
 
+export function demoHubSessionsEnabled(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
 function readSession(request: Request): SessionPayload | undefined {
+  if (!demoHubSessionsEnabled()) return undefined;
   const token = parseCookies(request)[COOKIE_NAME];
   if (!token) return undefined;
   const [encodedPayload, signature] = token.split(".");
