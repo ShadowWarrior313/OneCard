@@ -1,5 +1,14 @@
-import { clearHubSessionCookie, createHubSession, requireHubUser } from "@/server/auth/session";
+import {
+  clearHubSessionCookie,
+  createHubSession,
+  demoHubSessionsEnabled,
+  requireHubUser,
+} from "@/server/auth/session";
 import { getHubServerConfig } from "@/config";
+
+function demoSessionBridgeEnabled(): boolean {
+  return getHubServerConfig().plaidEnv === "sandbox" && demoHubSessionsEnabled();
+}
 
 export async function GET(request: Request): Promise<Response> {
   const user = await requireHubUser(request);
@@ -9,9 +18,9 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (getHubServerConfig().plaidEnv !== "sandbox") {
+  if (!demoSessionBridgeEnabled()) {
     return Response.json(
-      { error: "Development and production require a verified authentication provider" },
+      { error: "Demo profile login is only available in local sandbox builds" },
       { status: 501 },
     );
   }
