@@ -66,13 +66,14 @@ The logged-in `/hub` dashboard is the **consumer rewards-intelligence layer on t
 
 ```bash
 cp apps/web/.env.example apps/web/.env.local
-# Mock is the default. To see the UI, set NEXT_PUBLIC_HUB_UI=1 and AUTH_SESSION_SECRET + HUB_ENCRYPTION_KEY.
+# Mock is the default. To see the UI locally, set NEXT_PUBLIC_HUB_UI=1,
+# HUB_SANDBOX_EMAIL_AUTH=1, AUTH_SESSION_SECRET, and HUB_ENCRYPTION_KEY.
 pnpm --filter @onecard/web dev
 ```
 
 Open `/hub`, log in with a local demo profile, and **Link a sample account**. To use real Plaid Sandbox instead, set `DATA_PROVIDER=plaid` plus `PLAID_CLIENT_ID` / `PLAID_SECRET`, then link with Plaid's documented Sandbox credentials `user_good` / `pass_good`. Link exchanges the `public_token` server-side, encrypts the resulting access token with AES-256-GCM at rest, and stores only safe account metadata + imported transactions. The browser never receives provider access tokens or provider item/account/transaction IDs. Sync is incremental + idempotent; the provider webhook route (`/api/hub/webhook/<provider>`) verifies the provider's signature and de-duplicates replays before refreshing.
 
-The JSON file store and the local profile→cookie session bridge are for the Sandbox/mock build. Before switching to real (non-Sandbox) data, replace them with reviewed production auth + durable storage and complete the go-live trust/compliance checklist in [STRATEGY-PIVOT.md](STRATEGY-PIVOT.md) (provider approval, privacy policy, encryption review, webhook deployment, data-retention controls, security/legal pass). This build does not by itself authorize production use of real financial data.
+The JSON file store and the local profile-to-cookie session bridge are for local Sandbox/mock development only. `POST /api/hub/session` requires `HUB_SANDBOX_EMAIL_AUTH=1`, `PLAID_ENV=sandbox`, and a non-production Node runtime; production builds must replace it with reviewed, verified auth before hub sessions can be minted. Before switching to real (non-Sandbox) data, also replace the JSON store with durable storage and complete the go-live trust/compliance checklist in [STRATEGY-PIVOT.md](STRATEGY-PIVOT.md) (provider approval, privacy policy, encryption review, webhook deployment, data-retention controls, security/legal pass). This build does not by itself authorize production use of real financial data.
 
 ## Deploying (Vercel monorepo)
 

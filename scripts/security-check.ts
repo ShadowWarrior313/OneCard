@@ -691,6 +691,66 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub sandbox auth bridge is not production-reachable
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuth(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routeFile = files.find((f) => /apps\/web\/src\/app\/api\/hub\/session\/route\.ts$/.test(f));
+  const configFile = files.find((f) => /apps\/web\/src\/config\.ts$/.test(f));
+
+  if (!routeFile) {
+    notes.push("No hub session route found.");
+    return { id: "9", title: "Hub sandbox auth bridge boundary", findings, notes };
+  }
+
+  const route = stripComments(read(routeFile));
+  if (!/sandboxEmailAuthEnabled/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message:
+        "Hub session minting must use the hardened sandboxEmailAuthEnabled config gate, not Plaid environment alone.",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message:
+        "Hub session route appears to authorize email sessions from PLAID_ENV=sandbox alone, enabling email impersonation.",
+    });
+  }
+
+  if (!configFile) {
+    findings.push({
+      severity: "FAIL",
+      file: "apps/web/src/config.ts",
+      message: "Hub server config is missing, so sandbox email auth cannot be safely gated.",
+    });
+    return { id: "9", title: "Hub sandbox auth bridge boundary", findings, notes };
+  }
+
+  const config = stripComments(read(configFile));
+  const hasExplicitFlag = /HUB_SANDBOX_EMAIL_AUTH/.test(config);
+  const rejectsProduction = /NODE_ENV\s*!==\s*["']production["']/.test(config);
+  if (!hasExplicitFlag || !rejectsProduction) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message:
+        "sandboxEmailAuthEnabled must require an explicit HUB_SANDBOX_EMAIL_AUTH flag and reject production runtimes.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Hub email-session bridge requires explicit local sandbox enablement and rejects production runtimes.");
+  }
+  return { id: "9", title: "Hub sandbox auth bridge boundary", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +766,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuth(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

@@ -17,6 +17,7 @@ const COOKIE_NAME = "onecard_hub_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 interface SessionPayload {
+  version: 2;
   userId: string;
   expiresAt: number;
 }
@@ -74,7 +75,7 @@ function readSession(request: Request): SessionPayload | undefined {
     const payload = JSON.parse(
       Buffer.from(encodedPayload, "base64url").toString("utf8"),
     ) as SessionPayload;
-    return payload.expiresAt > Date.now() ? payload : undefined;
+    return payload.version === 2 && payload.expiresAt > Date.now() ? payload : undefined;
   } catch {
     return undefined;
   }
@@ -98,7 +99,7 @@ export async function createHubSession(input: {
   const user = await ensureHubUser({ id: userIdForEmail(email), email, name });
   const cookie = [
     `${COOKIE_NAME}=${encodeURIComponent(
-      sessionToken({ userId: user.id, expiresAt: Date.now() + MAX_AGE_SECONDS * 1000 }),
+      sessionToken({ version: 2, userId: user.id, expiresAt: Date.now() + MAX_AGE_SECONDS * 1000 }),
     )}`,
     "Path=/",
     `Max-Age=${MAX_AGE_SECONDS}`,
