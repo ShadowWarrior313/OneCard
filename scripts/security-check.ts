@@ -691,6 +691,72 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub sandbox email auth cannot become production auth
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuthBoundary(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const configFile = "apps/web/src/config.ts";
+  const sessionRoute = "apps/web/src/app/api/hub/session/route.ts";
+  const config = read(configFile);
+  const route = read(sessionRoute);
+
+  if (!files.includes(configFile) || !files.includes(sessionRoute)) {
+    notes.push("Rewards hub config/session route not present in this checkout.");
+    return { id: "9", title: "Hub sandbox email auth boundary", findings, notes };
+  }
+
+  if (!/\bsandboxEmailAuthEnabled\b/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Hub config must expose an explicit sandboxEmailAuthEnabled gate.",
+    });
+  }
+  if (!/HUB_SANDBOX_EMAIL_AUTH/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Sandbox email auth must require the explicit HUB_SANDBOX_EMAIL_AUTH flag.",
+    });
+  }
+  if (!/NODE_ENV\s*!==\s*["']production["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Sandbox email auth must be disabled when NODE_ENV=production.",
+    });
+  }
+  if (!/plaidEnv\s*===\s*["']sandbox["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Sandbox email auth must only be available with the Plaid sandbox environment.",
+    });
+  }
+  if (!/\bsandboxEmailAuthEnabled\b/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "POST /api/hub/session must use sandboxEmailAuthEnabled, not plaidEnv, to mint sessions.",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "POST /api/hub/session must not treat PLAID_ENV=sandbox as sufficient auth.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Sandbox email login is explicitly flagged and disabled in production.");
+  }
+  return { id: "9", title: "Hub sandbox email auth boundary", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +772,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuthBoundary(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
