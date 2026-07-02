@@ -9,9 +9,9 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (getHubServerConfig().plaidEnv !== "sandbox") {
+  if (!getHubServerConfig().sandboxEmailAuthEnabled) {
     return Response.json(
-      { error: "Development and production require a verified authentication provider" },
+      { error: "Sandbox email login is disabled; configure a verified authentication provider" },
       { status: 501 },
     );
   }
