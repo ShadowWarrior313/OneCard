@@ -691,6 +691,53 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub sandbox auth boundary
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuthBoundary(): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const configFile = "apps/web/src/config.ts";
+  const sessionRoute = "apps/web/src/app/api/hub/session/route.ts";
+  const config = read(configFile);
+  const route = read(sessionRoute);
+
+  if (!/sandboxEmailAuthEnabled/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Hub config does not expose a dedicated sandbox email-auth opt-in",
+    });
+  }
+  if (!/HUB_SANDBOX_EMAIL_AUTH/.test(config) || !/NODE_ENV\s*!==\s*["']production["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Sandbox email auth must require HUB_SANDBOX_EMAIL_AUTH=1 and be disabled in production",
+    });
+  }
+  if (!/sandboxEmailAuthEnabled/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "Hub session POST route must use the dedicated sandboxEmailAuthEnabled guard",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "Hub email login must not be enabled solely by PLAID_ENV=sandbox",
+    });
+  }
+  if (findings.length === 0) {
+    notes.push("Hub email-only session bridge is explicit opt-in and disabled in production.");
+  }
+
+  return { id: "9", title: "Hub sandbox auth boundary", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +753,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuthBoundary(),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

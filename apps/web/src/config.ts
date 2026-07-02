@@ -9,6 +9,12 @@ export type PlaidEnvironment = "sandbox" | "development" | "production";
 
 export interface HubServerConfig {
   plaidEnv: PlaidEnvironment;
+  /**
+   * Enables the email-only sandbox session bridge for local/mock demos.
+   * This is never enabled in production because knowing an email must not be
+   * enough to claim that user's hub data.
+   */
+  sandboxEmailAuthEnabled: boolean;
   /** Public HTTPS endpoint a provider should call back, if configured. */
   webhookUrl?: string;
 }
@@ -21,6 +27,8 @@ export function getHubServerConfig(): HubServerConfig {
   const webhook = (process.env.HUB_WEBHOOK_URL ?? process.env.PLAID_WEBHOOK_URL)?.trim();
   return {
     plaidEnv,
+    sandboxEmailAuthEnabled:
+      process.env.NODE_ENV !== "production" && process.env.HUB_SANDBOX_EMAIL_AUTH === "1",
     webhookUrl: webhook?.startsWith("https://") ? webhook : undefined,
   };
 }
