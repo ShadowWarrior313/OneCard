@@ -691,6 +691,81 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub webhook receipts are recorded after side effects
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubWebhookReceipts(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routeFile = files.find((f) => /server\/hub\/routes\.ts$/.test(f));
+
+  if (!routeFile) {
+    notes.push("Hub routes file not present.");
+    return { id: "9", title: "Hub webhook retry safety", findings, notes };
+  }
+
+  const code = stripComments(read(routeFile));
+  const handlerMatch = /export\s+async\s+function\s+handleWebhook[\s\S]*?\n}/.exec(code);
+  if (!handlerMatch) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler is missing; provider retries cannot be evaluated.",
+    });
+    return { id: "9", title: "Hub webhook retry safety", findings, notes };
+  }
+
+  const handler = handlerMatch[0];
+  if (!/hasWebhookReceipt\s*\(\s*event\.id\s*\)/.test(handler)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler must check completed receipts before handling duplicates.",
+    });
+  }
+
+  const receiptIndex = handler.lastIndexOf("recordWebhookOnce(event.id)");
+  const responseIndex = handler.lastIndexOf("return Response.json({ received: true })");
+  const sideEffectIndexes = [
+    handler.indexOf("syncLinkedItem("),
+    handler.indexOf("setItemStatus("),
+  ].filter((index) => index >= 0);
+
+  if (receiptIndex < 0) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler does not record completed webhook receipts.",
+    });
+  } else {
+    const earliestSideEffect = Math.min(...sideEffectIndexes);
+    if (sideEffectIndexes.length === 0 || receiptIndex < earliestSideEffect) {
+      findings.push({
+        severity: "FAIL",
+        file: routeFile,
+        line: lineOf(code, handlerMatch.index + receiptIndex),
+        message:
+          "Webhook receipt is recorded before sync/status side effects; a crash or failed write would make provider retries permanent no-ops.",
+      });
+    }
+    if (responseIndex >= 0 && receiptIndex > responseIndex) {
+      findings.push({
+        severity: "FAIL",
+        file: routeFile,
+        line: lineOf(code, handlerMatch.index + receiptIndex),
+        message: "Webhook receipt must be recorded before returning success to the provider.",
+      });
+    }
+  }
+
+  if (findings.length === 0) {
+    notes.push("Hub webhook receipts are recorded only after handling side effects.");
+  }
+
+  return { id: "9", title: "Hub webhook retry safety", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +781,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubWebhookReceipts(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

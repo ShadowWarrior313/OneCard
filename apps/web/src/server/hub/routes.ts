@@ -7,6 +7,7 @@ import { requireHubUser } from "@/server/auth/session";
 import {
   dashboardForUser,
   findItemByProviderItemId,
+  hasWebhookReceipt,
   recordWebhookOnce,
   setItemStatus,
 } from "@/data/store";
@@ -119,8 +120,8 @@ export async function handleWebhook(request: Request, providerParam: string): Pr
   }
   if (!event) return error("Invalid webhook signature", 400);
 
-  // Idempotency: act on each verified webhook exactly once.
-  if (!(await recordWebhookOnce(event.id))) {
+  // Idempotency: duplicate completed webhooks are no-ops.
+  if (await hasWebhookReceipt(event.id)) {
     return Response.json({ received: true, duplicate: true });
   }
 
@@ -137,5 +138,6 @@ export async function handleWebhook(request: Request, providerParam: string): Pr
     await setItemStatus(event.providerItemId, "error", event.errorCode);
   }
 
+  await recordWebhookOnce(event.id);
   return Response.json({ received: true });
 }
