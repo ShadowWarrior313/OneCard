@@ -125,10 +125,15 @@ export async function findItemByProviderItemId(
 }
 
 /**
- * Record a verified webhook id exactly once. Returns `true` if it is new (act on
- * it) or `false` if it is a replay (ignore). This is the idempotency guarantee
- * for webhook-driven sync/health transitions.
+ * Check whether a verified webhook id has already completed handling.
+ * Receipts are written after side effects so provider retries remain usable if
+ * we crash or fail to persist during handling.
  */
+export async function hasWebhookReceipt(id: string): Promise<boolean> {
+  return (await readHubStore()).webhookReceipts.some((receipt) => receipt.id === id);
+}
+
+/** Record a verified webhook id after webhook side effects complete. */
 export async function recordWebhookOnce(id: string): Promise<boolean> {
   return mutateHubStore((store) => {
     if (store.webhookReceipts.some((receipt) => receipt.id === id)) return false;
