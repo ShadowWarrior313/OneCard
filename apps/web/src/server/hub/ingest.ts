@@ -154,10 +154,10 @@ export async function saveLinkedItem(input: {
  * `withRetry`; a terminal error transitions connection health (login_required /
  * error) WITHOUT discarding last-known data — we never present stale as live.
  */
-export async function syncLinkedItem(itemId: string): Promise<void> {
+export async function syncLinkedItem(itemId: string): Promise<boolean> {
   const store = await readHubStore();
   const item = store.items.find((candidate) => candidate.id === itemId);
-  if (!item) return;
+  if (!item) return true;
   const provider = getDataProvider();
   const accessToken = decryptAccessToken(item.encryptedAccessToken);
 
@@ -175,6 +175,7 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
       mutable.status = "healthy";
       mutable.errorCode = undefined;
     });
+    return true;
   } catch (error) {
     const status = error instanceof ProviderError ? error.status : "error";
     const code = error instanceof ProviderError ? error.code : "sync_failed";
@@ -186,6 +187,7 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
         mutable.errorCode = code;
       }
     });
+    return false;
   }
 }
 

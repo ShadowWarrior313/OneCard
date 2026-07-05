@@ -129,6 +129,10 @@ export async function findItemByProviderItemId(
  * it) or `false` if it is a replay (ignore). This is the idempotency guarantee
  * for webhook-driven sync/health transitions.
  */
+export async function hasWebhookReceipt(id: string): Promise<boolean> {
+  return (await readHubStore()).webhookReceipts.some((receipt) => receipt.id === id);
+}
+
 export async function recordWebhookOnce(id: string): Promise<boolean> {
   return mutateHubStore((store) => {
     if (store.webhookReceipts.some((receipt) => receipt.id === id)) return false;
