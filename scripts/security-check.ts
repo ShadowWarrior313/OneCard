@@ -691,6 +691,138 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub Sandbox email auth stays local-only and opt-in
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuth(): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const configFile = "apps/web/src/config.ts";
+  const sessionRouteFile = "apps/web/src/app/api/hub/session/route.ts";
+  const envExampleFile = "apps/web/.env.example";
+  const config = read(configFile);
+  const sessionRoute = read(sessionRouteFile);
+  const envExample = read(envExampleFile);
+
+  if (!sessionRoute) {
+    notes.push("Hub session route not present.");
+    return { id: "9", title: "Hub Sandbox email auth boundary", findings, notes };
+  }
+
+  if (!/\bsandboxEmailAuthEnabled\b/.test(sessionRoute)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRouteFile,
+      message:
+        "Email-only hub session creation must be gated by sandboxEmailAuthEnabled, not provider environment.",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']|plaidEnv\s*===\s*["']sandbox["']/.test(sessionRoute)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRouteFile,
+      message:
+        "Hub session creation is tied to PLAID_ENV=sandbox; that allows email impersonation on shared Sandbox hosts.",
+    });
+  }
+
+  if (!/\bHUB_SANDBOX_EMAIL_AUTH\b/.test(config) || !/\bsandboxEmailAuthEnabled\b/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Hub config must expose an explicit HUB_SANDBOX_EMAIL_AUTH opt-in for email sessions.",
+    });
+  }
+  if (!/NODE_ENV\s*!==\s*["']production["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "HUB_SANDBOX_EMAIL_AUTH must be ignored when NODE_ENV is production.",
+    });
+  }
+  if (!/\bHUB_SANDBOX_EMAIL_AUTH\s*=/.test(envExample)) {
+    findings.push({
+      severity: "WARN",
+      file: envExampleFile,
+      message: "Document HUB_SANDBOX_EMAIL_AUTH in the web env example for local hub development.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Email-only Sandbox hub sessions are explicit opt-in and disabled in production.");
+  }
+  return { id: "9", title: "Hub Sandbox email auth boundary", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  CHECK 10 — Hub webhook receipts are written after side effects
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubWebhookReceipts(): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routesFile = "apps/web/src/server/hub/routes.ts";
+  const storeFile = "apps/web/src/data/store.ts";
+  const routes = read(routesFile);
+  const store = read(storeFile);
+  const webhookStart = routes.indexOf("export async function handleWebhook");
+  const webhook = webhookStart === -1 ? "" : routes.slice(webhookStart);
+
+  if (!webhook) {
+    notes.push("Hub webhook route not present.");
+    return { id: "10", title: "Hub webhook receipt ordering", findings, notes };
+  }
+
+  const hasReceipt = webhook.indexOf("hasWebhookReceipt(event.id)");
+  const recordReceipt = webhook.indexOf("recordWebhookOnce(event.id)");
+  const syncSideEffect = webhook.indexOf("syncLinkedItem(");
+  const statusSideEffect = webhook.indexOf("setItemStatus(");
+
+  if (!/\bhasWebhookReceipt\b/.test(store)) {
+    findings.push({
+      severity: "FAIL",
+      file: storeFile,
+      message: "Webhook handling needs a read-only receipt check before side effects.",
+    });
+  }
+  if (hasReceipt === -1 || recordReceipt === -1) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook handler must check existing receipts and record a receipt after processing.",
+    });
+  } else if (hasReceipt > recordReceipt) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook handler records a receipt before checking for duplicates.",
+    });
+  }
+
+  const lastSideEffect = Math.max(syncSideEffect, statusSideEffect);
+  if (lastSideEffect !== -1 && recordReceipt !== -1 && recordReceipt < lastSideEffect) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message:
+        "Webhook receipt is recorded before sync/status side effects complete, suppressing provider retries on failure.",
+    });
+  }
+  if (!/Could not process webhook sync/.test(webhook)) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook sync failures must return a non-2xx response before recording a receipt.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Webhook receipts are checked before processing and recorded only after side effects succeed.");
+  }
+  return { id: "10", title: "Hub webhook receipt ordering", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +838,8 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuth(),
+    checkHubWebhookReceipts(),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
