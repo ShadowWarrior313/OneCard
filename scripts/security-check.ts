@@ -691,6 +691,70 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub Sandbox email auth stays local-only and opt-in
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuth(): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const configFile = "apps/web/src/config.ts";
+  const sessionRouteFile = "apps/web/src/app/api/hub/session/route.ts";
+  const envExampleFile = "apps/web/.env.example";
+  const config = read(configFile);
+  const sessionRoute = read(sessionRouteFile);
+  const envExample = read(envExampleFile);
+
+  if (!sessionRoute) {
+    notes.push("Hub session route not present.");
+    return { id: "9", title: "Hub Sandbox email auth boundary", findings, notes };
+  }
+
+  if (!/\bsandboxEmailAuthEnabled\b/.test(sessionRoute)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRouteFile,
+      message:
+        "Email-only hub session creation must be gated by sandboxEmailAuthEnabled, not provider environment.",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']|plaidEnv\s*===\s*["']sandbox["']/.test(sessionRoute)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRouteFile,
+      message:
+        "Hub session creation is tied to PLAID_ENV=sandbox; that allows email impersonation on shared Sandbox hosts.",
+    });
+  }
+
+  if (!/\bHUB_SANDBOX_EMAIL_AUTH\b/.test(config) || !/\bsandboxEmailAuthEnabled\b/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "Hub config must expose an explicit HUB_SANDBOX_EMAIL_AUTH opt-in for email sessions.",
+    });
+  }
+  if (!/NODE_ENV\s*!==\s*["']production["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "HUB_SANDBOX_EMAIL_AUTH must be ignored when NODE_ENV is production.",
+    });
+  }
+  if (!/\bHUB_SANDBOX_EMAIL_AUTH\s*=/.test(envExample)) {
+    findings.push({
+      severity: "WARN",
+      file: envExampleFile,
+      message: "Document HUB_SANDBOX_EMAIL_AUTH in the web env example for local hub development.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Email-only Sandbox hub sessions are explicit opt-in and disabled in production.");
+  }
+  return { id: "9", title: "Hub Sandbox email auth boundary", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +770,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuth(),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
