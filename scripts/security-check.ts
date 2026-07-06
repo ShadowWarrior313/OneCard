@@ -691,6 +691,115 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub sandbox email auth must be explicitly opted in
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubSandboxAuth(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const sessionRoute = "apps/web/src/app/api/hub/session/route.ts";
+  const configFile = "apps/web/src/config.ts";
+
+  if (!files.includes(sessionRoute)) {
+    notes.push("Hub session route is not present.");
+    return { id: "9", title: "Hub sandbox email auth opt-in", findings, notes };
+  }
+
+  const route = read(sessionRoute);
+  const config = read(configFile);
+
+  if (!/sandboxEmailAuthEnabled/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "Hub session POST must gate email-only auth on sandboxEmailAuthEnabled, not PLAID_ENV alone",
+    });
+  }
+  if (/plaidEnv\s*!==\s*["']sandbox["']/.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute,
+      message: "PLAID_ENV=sandbox alone must not enable email-only hub sessions",
+    });
+  }
+  if (!/HUB_SANDBOX_EMAIL_AUTH/.test(config) || !/NODE_ENV\s*!==\s*["']production["']/.test(config)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "sandboxEmailAuthEnabled must require HUB_SANDBOX_EMAIL_AUTH=1 and non-production NODE_ENV",
+    });
+  }
+
+  if (findings.length === 0) notes.push("Sandbox email auth is explicitly opt-in and disabled in production.");
+  return { id: "9", title: "Hub sandbox email auth opt-in", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  CHECK 10 — Hub webhook receipts recorded after side effects
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubWebhookReceipts(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routesFile = "apps/web/src/server/hub/routes.ts";
+  const storeFile = "apps/web/src/data/store.ts";
+
+  if (!files.includes(routesFile)) {
+    notes.push("Hub routes are not present.");
+    return { id: "10", title: "Hub webhook idempotency ordering", findings, notes };
+  }
+
+  const routes = read(routesFile);
+  const store = read(storeFile);
+  const handlerStart = routes.indexOf("export async function handleWebhook");
+  const handler = handlerStart >= 0 ? routes.slice(handlerStart) : routes;
+  const hasReceipt = handler.indexOf("await hasWebhookReceipt(event.id)");
+  const recordReceipt = handler.indexOf("await recordWebhookOnce(event.id)");
+  const syncSideEffect = handler.indexOf("syncLinkedItem(item.id)");
+  const statusSideEffect = handler.indexOf("setItemStatus(event.providerItemId");
+  const firstSideEffect = Math.min(
+    ...[syncSideEffect, statusSideEffect].filter((index) => index >= 0),
+  );
+
+  if (!/export async function hasWebhookReceipt/.test(store)) {
+    findings.push({
+      severity: "FAIL",
+      file: storeFile,
+      message: "Hub store must expose hasWebhookReceipt() so retries are skipped without pre-recording failures",
+    });
+  }
+  if (hasReceipt < 0) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook handler must check hasWebhookReceipt(event.id) before applying side effects",
+    });
+  } else if (firstSideEffect >= 0 && hasReceipt > firstSideEffect) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook duplicate check must run before sync/status side effects",
+    });
+  }
+  if (recordReceipt < 0) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook handler must record receipt after successful processing",
+    });
+  } else if (firstSideEffect >= 0 && recordReceipt < firstSideEffect) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile,
+      message: "Webhook receipts must be recorded after sync/status side effects so provider retries recover failures",
+    });
+  }
+
+  if (findings.length === 0) notes.push("Webhook receipts are checked before and recorded after side effects.");
+  return { id: "10", title: "Hub webhook idempotency ordering", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +815,8 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubSandboxAuth(files),
+    checkHubWebhookReceipts(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
