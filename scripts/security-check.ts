@@ -691,6 +691,74 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub webhook receipts recorded after successful side effects
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubWebhookReliability(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routeFile = files.find((f) => /apps\/web\/src\/server\/hub\/routes\.ts$/.test(f));
+  const storeFile = files.find((f) => /apps\/web\/src\/data\/store\.ts$/.test(f));
+
+  if (!routeFile || !storeFile) {
+    notes.push("Hub webhook route/store not present.");
+    return { id: "9", title: "Hub webhook retry-safe idempotency", findings, notes };
+  }
+
+  const route = read(routeFile);
+  const store = read(storeFile);
+  const handleWebhookStart = route.indexOf("export async function handleWebhook");
+  const handleWebhook = handleWebhookStart >= 0 ? route.slice(handleWebhookStart) : "";
+  const syncIndex = handleWebhook.indexOf("syncLinkedItem(");
+  const recordIndex = handleWebhook.indexOf("recordWebhookOnce(");
+
+  if (!/export async function hasWebhookReceipt/.test(store)) {
+    findings.push({
+      severity: "FAIL",
+      file: storeFile,
+      message: "Hub store needs a read-only webhook receipt check before processing duplicates.",
+    });
+  }
+
+  if (!/hasWebhookReceipt\(\s*event\.id\s*\)/.test(handleWebhook)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler must check existing receipts before processing duplicate events.",
+    });
+  }
+
+  if (recordIndex < 0 || syncIndex < 0 || recordIndex < syncIndex) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "recordWebhookOnce(event.id) must run after webhook side effects, not before sync/status processing.",
+    });
+  }
+
+  if (!/syncLinkedItem\([^)]*,\s*\{\s*throwOnFailure:\s*true\s*\}\s*\)/.test(handleWebhook)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Webhook-triggered sync must propagate failures so the provider retries the event.",
+    });
+  }
+
+  if (!/catch\s*\{[\s\S]*return error\("Could not process webhook",\s*503\)/.test(handleWebhook)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Webhook side-effect failures must return a retryable 5xx response.",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Hub webhook receipts are written only after successful side effects.");
+  }
+  return { id: "9", title: "Hub webhook retry-safe idempotency", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +774,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubWebhookReliability(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
