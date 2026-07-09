@@ -691,6 +691,56 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub webhook receipts recorded only after side effects
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubWebhookIdempotency(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const routeFile = files.find((f) => /apps\/web\/src\/server\/hub\/routes\.ts$/.test(f));
+  const route = routeFile ? read(routeFile) : "";
+
+  if (!routeFile || !route) {
+    notes.push("Hub webhook route not present.");
+    return { id: "9", title: "Hub webhook idempotency ordering", findings, notes };
+  }
+
+  const hasCheckIndex = route.indexOf("hasWebhookReceipt(event.id)");
+  const recordIndex = route.indexOf("recordWebhookOnce(event.id)");
+  if (hasCheckIndex === -1) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler must check completed receipts before processing duplicates.",
+    });
+  }
+  if (recordIndex === -1) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Hub webhook handler must record a completed receipt after side effects succeed.",
+    });
+  } else if (hasCheckIndex !== -1 && recordIndex < hasCheckIndex) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      line: lineOf(route, recordIndex),
+      message: "Hub webhook receipt is recorded before the duplicate check / side effects; provider retries can be lost.",
+    });
+  }
+
+  if (!/syncLinkedItem\(item\.id,\s*\{\s*throwOnFailure:\s*true\s*\}\s*\)/s.test(route)) {
+    findings.push({
+      severity: "FAIL",
+      file: routeFile,
+      message: "Webhook-driven sync must propagate failures so providers retry instead of recording a completed receipt.",
+    });
+  }
+
+  return { id: "9", title: "Hub webhook idempotency ordering", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +756,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubWebhookIdempotency(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
