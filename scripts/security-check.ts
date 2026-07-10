@@ -691,6 +691,65 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub demo auth hardening
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubDemoAuth(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+
+  const configFile = files.find((f) => /apps\/web\/src\/config\.ts$/.test(f));
+  const sessionRoute = files.find((f) =>
+    /apps\/web\/src\/app\/api\/hub\/session\/route\.ts$/.test(f),
+  );
+  const sessionFile = files.find((f) => /apps\/web\/src\/server\/auth\/session\.ts$/.test(f));
+
+  const configSource = configFile ? read(configFile) : "";
+  const routeSource = sessionRoute ? read(sessionRoute) : "";
+  const sessionSource = sessionFile ? read(sessionFile) : "";
+
+  if (!configFile || !/demoAuthEnabled/.test(configSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile ?? "apps/web/src/config.ts",
+      message: "Hub config must expose an explicit demoAuthEnabled flag",
+    });
+  } else if (
+    !/HUB_DEMO_AUTH_ENABLED/.test(configSource) ||
+    !/NODE_ENV\s*!==\s*["']production["']/.test(configSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "demoAuthEnabled must require HUB_DEMO_AUTH_ENABLED=1 and be disabled in production",
+    });
+  } else {
+    notes.push("Hub demo auth requires explicit opt-in and is disabled in production.");
+  }
+
+  if (!sessionRoute || !/demoAuthEnabled/.test(routeSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute ?? "apps/web/src/app/api/hub/session/route.ts",
+      message: "Hub session POST must gate demo cookie minting on demoAuthEnabled",
+    });
+  }
+
+  if (
+    sessionSource.includes("onecard-sandbox-session-secret") &&
+    !/HUB_DEMO_AUTH_ENABLED/.test(sessionSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionFile ?? "apps/web/src/server/auth/session.ts",
+      message: "The published sandbox session secret must only be usable behind explicit demo auth",
+    });
+  }
+
+  return { id: "9", title: "Hub demo auth hardening", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +765,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubDemoAuth(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

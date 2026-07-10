@@ -66,7 +66,8 @@ The logged-in `/hub` dashboard is the **consumer rewards-intelligence layer on t
 
 ```bash
 cp apps/web/.env.example apps/web/.env.local
-# Mock is the default. To see the UI, set NEXT_PUBLIC_HUB_UI=1 and AUTH_SESSION_SECRET + HUB_ENCRYPTION_KEY.
+# Mock is the default. To see the UI, set NEXT_PUBLIC_HUB_UI=1, HUB_DEMO_AUTH_ENABLED=1,
+# AUTH_SESSION_SECRET, and HUB_ENCRYPTION_KEY.
 pnpm --filter @onecard/web dev
 ```
 

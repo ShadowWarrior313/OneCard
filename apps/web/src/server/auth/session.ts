@@ -24,8 +24,10 @@ interface SessionPayload {
 function sessionSecret(): string {
   const secret = process.env.AUTH_SESSION_SECRET?.trim();
   if (secret) return secret;
-  if (process.env.NODE_ENV !== "production") return "onecard-sandbox-session-secret";
-  throw new Error("AUTH_SESSION_SECRET is required");
+  if (process.env.HUB_DEMO_AUTH_ENABLED === "1" && process.env.NODE_ENV !== "production") {
+    return "onecard-sandbox-session-secret";
+  }
+  throw new Error("AUTH_SESSION_SECRET is required unless local demo auth is explicitly enabled");
 }
 
 function encode(value: string): string {
