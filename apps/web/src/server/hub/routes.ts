@@ -7,6 +7,7 @@ import { requireHubUser } from "@/server/auth/session";
 import {
   dashboardForUser,
   findItemByProviderItemId,
+  hasWebhookReceipt,
   recordWebhookOnce,
   setItemStatus,
 } from "@/data/store";
@@ -119,22 +120,30 @@ export async function handleWebhook(request: Request, providerParam: string): Pr
   }
   if (!event) return error("Invalid webhook signature", 400);
 
-  // Idempotency: act on each verified webhook exactly once.
-  if (!(await recordWebhookOnce(event.id))) {
+  // Idempotency: skip verified webhooks only after a prior successful handling.
+  if (await hasWebhookReceipt(event.id)) {
     return Response.json({ received: true, duplicate: true });
   }
 
-  if (event.kind === "sync_available" && event.providerItemId) {
-    const item = await findItemByProviderItemId(event.providerItemId);
-    if (item) await syncLinkedItem(item.id);
-  } else if (event.providerItemId && event.kind === "login_required") {
-    logProviderWarning("Webhook flagged item login_required", event.errorCode);
-    await setItemStatus(event.providerItemId, "login_required", event.errorCode);
-  } else if (event.providerItemId && event.kind === "pending_expiration") {
-    // Surface reconnect proactively before the credential fully expires.
-    await setItemStatus(event.providerItemId, "login_required", event.errorCode);
-  } else if (event.providerItemId && event.kind === "error") {
-    await setItemStatus(event.providerItemId, "error", event.errorCode);
+  try {
+    if (event.kind === "sync_available" && event.providerItemId) {
+      const item = await findItemByProviderItemId(event.providerItemId);
+      if (item) await syncLinkedItem(item.id, { throwOnFailure: true });
+    } else if (event.providerItemId && event.kind === "login_required") {
+      logProviderWarning("Webhook flagged item login_required", event.errorCode);
+      await setItemStatus(event.providerItemId, "login_required", event.errorCode);
+    } else if (event.providerItemId && event.kind === "pending_expiration") {
+      // Surface reconnect proactively before the credential fully expires.
+      await setItemStatus(event.providerItemId, "login_required", event.errorCode);
+    } else if (event.providerItemId && event.kind === "error") {
+      await setItemStatus(event.providerItemId, "error", event.errorCode);
+    }
+  } catch {
+    return error("Webhook processing failed", 502);
+  }
+
+  if (!(await recordWebhookOnce(event.id))) {
+    return Response.json({ received: true, duplicate: true });
   }
 
   return Response.json({ received: true });
