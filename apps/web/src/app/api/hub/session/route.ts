@@ -9,9 +9,10 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (getHubServerConfig().plaidEnv !== "sandbox") {
+  const config = getHubServerConfig();
+  if (!config.demoAuthEnabled || config.plaidEnv !== "sandbox") {
     return Response.json(
-      { error: "Development and production require a verified authentication provider" },
+      { error: "Demo hub auth is disabled. Configure a verified authentication provider." },
       { status: 501 },
     );
   }

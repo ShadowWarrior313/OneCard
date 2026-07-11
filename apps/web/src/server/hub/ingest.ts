@@ -7,7 +7,13 @@ import { decryptAccessToken, encryptAccessToken } from "@/server/data-providers/
 import { logProviderWarning } from "@/server/log";
 import { categorizeTransaction } from "@/server/rewards-intel/categorize";
 import { createHubId, mutateHubStore, readHubStore } from "@/data/store";
-import type { HubStore, HubTransaction, LinkedAccount, LinkedItem } from "@/data/schema";
+import type {
+  EncryptedSecret,
+  HubStore,
+  HubTransaction,
+  LinkedAccount,
+  LinkedItem,
+} from "@/data/schema";
 
 /**
  * Provider-neutral persistence + sync orchestration.
@@ -118,6 +124,22 @@ function applyTransactions(
   );
 }
 
+function sameEncryptedSecret(a: EncryptedSecret, b: EncryptedSecret): boolean {
+  return (
+    a.algorithm === b.algorithm &&
+    a.iv === b.iv &&
+    a.authTag === b.authTag &&
+    a.ciphertext === b.ciphertext
+  );
+}
+
+function itemMatchesSnapshot(current: LinkedItem, snapshot: LinkedItem): boolean {
+  return (
+    current.cursor === snapshot.cursor &&
+    sameEncryptedSecret(current.encryptedAccessToken, snapshot.encryptedAccessToken)
+  );
+}
+
 export async function saveLinkedItem(input: {
   userId: string;
   provider: ProviderId;
@@ -154,7 +176,10 @@ export async function saveLinkedItem(input: {
  * `withRetry`; a terminal error transitions connection health (login_required /
  * error) WITHOUT discarding last-known data — we never present stale as live.
  */
-export async function syncLinkedItem(itemId: string): Promise<void> {
+export async function syncLinkedItem(
+  itemId: string,
+  options: { throwOnFailure?: boolean } = {},
+): Promise<void> {
   const store = await readHubStore();
   const item = store.items.find((candidate) => candidate.id === itemId);
   if (!item) return;
@@ -168,6 +193,7 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
     await mutateHubStore((nextStore) => {
       const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
       if (!mutable) return;
+      if (!itemMatchesSnapshot(mutable, item)) return;
       upsertAccounts(nextStore, item.userId, item.id, result.accounts);
       applyTransactions(nextStore, item.userId, result.added, result.modified, result.removedIds);
       mutable.cursor = result.nextCursor;
@@ -179,13 +205,14 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
     const status = error instanceof ProviderError ? error.status : "error";
     const code = error instanceof ProviderError ? error.code : "sync_failed";
     logProviderWarning("Item sync failed; preserving last-known data", code);
-    await mutateHubStore((nextStore) => {
+    const recordedFailure = await mutateHubStore((nextStore) => {
       const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
-      if (mutable) {
-        mutable.status = status === "login_required" ? "login_required" : "error";
-        mutable.errorCode = code;
-      }
+      if (!mutable || !itemMatchesSnapshot(mutable, item)) return false;
+      mutable.status = status === "login_required" ? "login_required" : "error";
+      mutable.errorCode = code;
+      return true;
     });
+    if (options.throwOnFailure && recordedFailure) throw error;
   }
 }
 

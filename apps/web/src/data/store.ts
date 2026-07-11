@@ -124,6 +124,10 @@ export async function findItemByProviderItemId(
   return (await readHubStore()).items.find((item) => item.providerItemId === providerItemId);
 }
 
+export async function hasWebhookReceipt(id: string): Promise<boolean> {
+  return (await readHubStore()).webhookReceipts.some((receipt) => receipt.id === id);
+}
+
 /**
  * Record a verified webhook id exactly once. Returns `true` if it is new (act on
  * it) or `false` if it is a replay (ignore). This is the idempotency guarantee

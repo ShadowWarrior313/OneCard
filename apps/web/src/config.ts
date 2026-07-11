@@ -9,6 +9,8 @@ export type PlaidEnvironment = "sandbox" | "development" | "production";
 
 export interface HubServerConfig {
   plaidEnv: PlaidEnvironment;
+  /** Local-only demo profile auth; never enabled in production builds. */
+  demoAuthEnabled: boolean;
   /** Public HTTPS endpoint a provider should call back, if configured. */
   webhookUrl?: string;
 }
@@ -21,6 +23,8 @@ export function getHubServerConfig(): HubServerConfig {
   const webhook = (process.env.HUB_WEBHOOK_URL ?? process.env.PLAID_WEBHOOK_URL)?.trim();
   return {
     plaidEnv,
+    demoAuthEnabled:
+      process.env.HUB_DEMO_AUTH_ENABLED === "1" && process.env.NODE_ENV !== "production",
     webhookUrl: webhook?.startsWith("https://") ? webhook : undefined,
   };
 }
