@@ -173,8 +173,9 @@ export class PlaidProvider implements FinancialDataProvider {
       return null;
     }
 
-    // Idempotency key: Plaid retries resend an identical body, so hashing the
-    // raw body gives a stable dedupe key without needing a provider event id.
+    // Retries of the same delivery share a body; distinct later SYNC_UPDATES_AVAILABLE
+    // events can also share a body once update flags stabilize. Durable receipt
+    // dedupe for sync_available therefore lives outside this hash (see hub routes).
     const id = createHash("sha256").update(rawBody).digest("hex");
     return {
       id,
