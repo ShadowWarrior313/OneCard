@@ -691,6 +691,116 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 9 — Hub reliability/auth hardening
+// ════════════════════════════════════════════════════════════════════
+
+function checkHubHardening(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+
+  const configFile = files.find((f) => /apps\/web\/src\/config\.ts$/.test(f));
+  const sessionRoute = files.find((f) =>
+    /apps\/web\/src\/app\/api\/hub\/session\/route\.ts$/.test(f),
+  );
+  const sessionFile = files.find((f) => /apps\/web\/src\/server\/auth\/session\.ts$/.test(f));
+  const routesFile = files.find((f) => /apps\/web\/src\/server\/hub\/routes\.ts$/.test(f));
+  const ingestFile = files.find((f) => /apps\/web\/src\/server\/hub\/ingest\.ts$/.test(f));
+
+  const configSource = configFile ? read(configFile) : "";
+  const routeSource = sessionRoute ? read(sessionRoute) : "";
+  const sessionSource = sessionFile ? read(sessionFile) : "";
+  const hubRoutesSource = routesFile ? read(routesFile) : "";
+  const ingestSource = ingestFile ? read(ingestFile) : "";
+
+  if (!configFile || !/demoAuthEnabled/.test(configSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile ?? "apps/web/src/config.ts",
+      message: "Hub config must expose an explicit demoAuthEnabled flag",
+    });
+  } else if (
+    !/HUB_DEMO_AUTH_ENABLED/.test(configSource) ||
+    !/NODE_ENV\s*!==\s*["']production["']/.test(configSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: configFile,
+      message: "demoAuthEnabled must require HUB_DEMO_AUTH_ENABLED=1 and be disabled in production",
+    });
+  } else {
+    notes.push("Hub demo auth requires explicit opt-in and is disabled in production.");
+  }
+
+  if (!sessionRoute || !/demoAuthEnabled/.test(routeSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionRoute ?? "apps/web/src/app/api/hub/session/route.ts",
+      message: "Hub session POST must gate demo cookie minting on demoAuthEnabled",
+    });
+  }
+
+  if (
+    sessionSource.includes("onecard-sandbox-session-secret") &&
+    !/HUB_DEMO_AUTH_ENABLED/.test(sessionSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionFile ?? "apps/web/src/server/auth/session.ts",
+      message: "The published sandbox session secret must only be usable behind explicit demo auth",
+    });
+  }
+
+  const hasCheck = hubRoutesSource.indexOf("hasWebhookReceipt(event.id)");
+  const recordCheck = hubRoutesSource.indexOf("recordWebhookOnce(event.id)");
+  if (!routesFile || hasCheck === -1 || recordCheck === -1 || hasCheck > recordCheck) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile ?? "apps/web/src/server/hub/routes.ts",
+      message:
+        "Hub webhooks must check existing receipts before processing and record receipts only after side effects succeed",
+    });
+  }
+  if (!/syncLinkedItem\(item\.id,\s*\{\s*throwOnFailure:\s*true\s*\}\)/s.test(hubRoutesSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile ?? "apps/web/src/server/hub/routes.ts",
+      message: "Webhook-triggered sync must propagate failures so providers retry",
+    });
+  }
+  if (!/event\.kind\s*!==\s*["']sync_available["']/.test(hubRoutesSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile ?? "apps/web/src/server/hub/routes.ts",
+      message:
+        "sync_available webhooks must not use durable body-hash receipts (cursor sync is the idempotency key)",
+    });
+  }
+  if (!/return error\("Could not process webhook",\s*503\)/.test(hubRoutesSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: routesFile ?? "apps/web/src/server/hub/routes.ts",
+      message: "Webhook side-effect failures must return a retryable 5xx response",
+    });
+  }
+
+  if (
+    !ingestFile ||
+    !/itemMatchesSnapshot\(mutable,\s*item\)/.test(ingestSource) ||
+    !/throwOnFailure/.test(ingestSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: ingestFile ?? "apps/web/src/server/hub/ingest.ts",
+      message: "Item sync must guard stale snapshots and support failure propagation",
+    });
+  } else {
+    notes.push("Hub webhook retries and item sync stale-write guards are present.");
+  }
+
+  return { id: "9", title: "Hub reliability/auth hardening", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +816,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubHardening(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
