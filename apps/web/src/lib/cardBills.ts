@@ -147,3 +147,23 @@ export function recomputeBillStatuses(bills: CardBill[]): CardBill[] {
     status: statusForDueDate(b.dueDate, b.status === "paid"),
   }));
 }
+
+/**
+ * Merge persisted statement bills with the current wallet.
+ * Preserves paid/autopay state for cards still in the wallet; seeds only truly
+ * new cards. Callers must pass the post-hydration wallet — never the default
+ * placeholder set.
+ */
+export function reconcileBillsWithWallet(
+  stored: CardBill[] | null,
+  cards: { cardId: string; displayName: string; issuer: string }[],
+): CardBill[] {
+  if (!stored || stored.length === 0) {
+    return recomputeBillStatuses(seedBillsForCards(cards));
+  }
+  const storedIds = new Set(stored.map((b) => b.cardId));
+  const walletIds = new Set(cards.map((c) => c.cardId));
+  const kept = stored.filter((b) => walletIds.has(b.cardId));
+  const missing = cards.filter((c) => !storedIds.has(c.cardId));
+  return recomputeBillStatuses([...kept, ...seedBillsForCards(missing)]);
+}

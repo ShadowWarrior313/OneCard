@@ -18,6 +18,8 @@ const DEFAULT_IDS = ["amex_cobalt", "cibc_dividend_infinite", "scotia_momentum",
 interface WalletContextValue {
   cardIds: string[];
   cards: CardProduct[];
+  /** True after the initial localStorage read (or confirmed empty) has applied. */
+  hydrated: boolean;
   toggleCard: (id: string) => void;
   hasCard: (id: string) => boolean;
   defaultCardId: string | undefined;
@@ -108,6 +110,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       value={{
         cardIds,
         cards,
+        hydrated,
         toggleCard,
         hasCard,
         defaultCardId,

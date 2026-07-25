@@ -4,6 +4,8 @@
  * Receives and verifies Stripe webhook events.
  * Signature is verified with the STRIPE_WEBHOOK_SECRET before any
  * payload is processed — unauthenticated payloads are rejected (400).
+ * Missing/empty secrets fail closed (503): Stripe's constructEvent accepts
+ * an empty secret, which would otherwise treat attacker-signed payloads as valid.
  *
  * Sensitive fields are never logged. Only the event type and id are logged.
  *
@@ -14,15 +16,18 @@ import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET ?? "";
-
 export async function POST(request: Request): Promise<NextResponse> {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  if (!webhookSecret) {
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
+  }
+
   const body = await request.text();
   const sig = request.headers.get("stripe-signature") ?? "";
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(body, sig, WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch {
     // Signature mismatch — reject without logging the body (may contain PII).
     return NextResponse.json({ error: "Invalid webhook signature" }, { status: 400 });

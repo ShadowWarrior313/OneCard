@@ -673,10 +673,12 @@ function checkGuard(files: string[]): CheckResult {
     }
   }
 
-  // Webhook should verify the Stripe signature.
+  // Webhook should verify the Stripe signature and fail closed without a secret.
+  // constructEvent accepts an empty secret, so `?? ""` / missing-env paths are an auth bypass.
   const webhook = files.find((f) => PAYMENT_ROUTE_RE.test(f) && /webhook\/route\.(ts|js)$/.test(f));
   if (webhook) {
-    if (!/webhooks\.constructEvent/.test(read(webhook))) {
+    const webhookSource = read(webhook);
+    if (!/webhooks\.constructEvent/.test(webhookSource)) {
       findings.push({
         severity: "FAIL",
         file: webhook,
@@ -684,6 +686,25 @@ function checkGuard(files: string[]): CheckResult {
       });
     } else {
       notes.push("Webhook verifies the Stripe signature.");
+    }
+    const defaultsEmptySecret =
+      /STRIPE_WEBHOOK_SECRET\s*\?\?\s*["']["']/.test(webhookSource) ||
+      /STRIPE_WEBHOOK_SECRET\s*\|\|\s*["']["']/.test(webhookSource);
+    const failsClosedWithoutSecret =
+      /STRIPE_WEBHOOK_SECRET/.test(webhookSource) &&
+      (/!webhookSecret/.test(webhookSource) ||
+        /!.*STRIPE_WEBHOOK_SECRET/.test(webhookSource) ||
+        /Webhook not configured/.test(webhookSource)) &&
+      /503/.test(webhookSource);
+    if (defaultsEmptySecret || !failsClosedWithoutSecret) {
+      findings.push({
+        severity: "FAIL",
+        file: webhook,
+        message:
+          "Webhook must fail closed when STRIPE_WEBHOOK_SECRET is missing/empty (do not default to \"\")",
+      });
+    } else {
+      notes.push("Webhook fails closed when STRIPE_WEBHOOK_SECRET is unset.");
     }
   }
 
