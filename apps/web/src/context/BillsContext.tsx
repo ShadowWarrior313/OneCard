@@ -13,8 +13,8 @@ import {
   appendBillPayment,
   readBillPayments,
   readStoredBills,
+  reconcileBillsWithWallet,
   recomputeBillStatuses,
-  seedBillsForCards,
   writeStoredBills,
   type BillPayment,
   type CardBill,
@@ -41,34 +41,28 @@ type BillsContextValue = {
 const BillsContext = createContext<BillsContextValue | null>(null);
 
 export function BillsProvider({ children }: { children: React.ReactNode }) {
-  const { cards } = useWallet();
+  const { cards, hydrated: walletHydrated } = useWallet();
   const [bills, setBills] = useState<CardBill[]>([]);
   const [payments, setPayments] = useState<BillPayment[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   const syncWithWallet = useCallback(() => {
-    const stored = readStoredBills();
-    const storedIds = new Set((stored ?? []).map((b) => b.cardId));
-    const walletIds = new Set(cards.map((c) => c.cardId));
+    // Never reconcile against the pre-hydrate default wallet — that would drop
+    // bills for non-default cards and rewrite localStorage before the real
+    // wallet ids load.
+    if (!walletHydrated) return;
 
-    let next: CardBill[];
-    if (!stored || stored.length === 0) {
-      next = seedBillsForCards(cards);
-    } else {
-      const kept = stored.filter((b) => walletIds.has(b.cardId));
-      const missing = cards.filter((c) => !storedIds.has(c.cardId));
-      next = [...kept, ...seedBillsForCards(missing)];
-    }
-    next = recomputeBillStatuses(next);
+    const next = reconcileBillsWithWallet(readStoredBills(), cards);
     setBills(next);
     writeStoredBills(next);
-  }, [cards]);
+  }, [cards, walletHydrated]);
 
   useEffect(() => {
+    if (!walletHydrated) return;
     setPayments(readBillPayments());
     syncWithWallet();
     setHydrated(true);
-  }, [syncWithWallet]);
+  }, [walletHydrated, syncWithWallet]);
 
   useEffect(() => {
     if (!hydrated) return;
