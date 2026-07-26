@@ -8,8 +8,10 @@ export function mapMccToCategory(mcc: string): RewardCategory {
   const code = parseInt(mcc, 10);
   if (Number.isNaN(code)) return "other";
 
-  // Grocery / supermarkets (5411, 5422, 5441, 5451, 5462)
-  if (code >= 5411 && code <= 5499) return "groceries";
+  // Grocery / supermarkets (5411, 5422, 5441, 5451, 5462).
+  // Do NOT include 5499 — that is misc food / convenience stores, which card
+  // programs (e.g. Amex Cobalt) typically do not treat as grocery bonus spend.
+  if (code >= 5411 && code <= 5462) return "groceries";
   // Restaurants / dining (5812–5814)
   if (code >= 5812 && code <= 5814) return "dining";
   // Gas stations (5541–5542, 5983)

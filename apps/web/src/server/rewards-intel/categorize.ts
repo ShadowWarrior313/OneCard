@@ -40,7 +40,9 @@ const CATEGORY_MAP: Record<EngineCategory, CardRewardCategoryKey> = {
   gas: "gas",
   lodging: "travel",
   travel: "travel",
-  convenience: "groceries",
+  // Convenience / misc food (MCC 5499) is NOT grocery for card programs.
+  // Collapsing it into groceries overstates grocery multipliers (e.g. Cobalt 5×).
+  convenience: "other",
   wholesale: "other",
   discount: "other",
   department: "other",
