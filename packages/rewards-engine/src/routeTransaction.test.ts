@@ -81,6 +81,13 @@ describe("mapMccToCategory", () => {
   it("maps utilities to recurring_bills", () => {
     expect(mapMccToCategory("4900")).toBe("recurring_bills");
   });
+
+  it("maps supermarket MCCs to groceries but not convenience 5499", () => {
+    expect(mapMccToCategory("5411")).toBe("groceries");
+    expect(mapMccToCategory("5462")).toBe("groceries");
+    // 5499 = misc food / convenience — must not inherit grocery bonuses
+    expect(mapMccToCategory("5499")).toBe("other");
+  });
 });
 
 describe("effectiveMultiplier", () => {
@@ -203,6 +210,26 @@ describe("routeTransaction", () => {
     );
     expect(decision.selectedCardId).toBe("td_aeroplan_infinite");
     expect(decision.multiplier).toBe(1.5);
+  });
+
+  it("does not apply grocery bonuses to convenience MCC 5499", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 40,
+          merchantName: "Corner Convenience",
+          mcc: "5499",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, CIBC_DIVIDEND],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.category).toBe("other");
+    // Cobalt grocery is 5×; convenience must earn base (1×), not grocery.
+    expect(decision.multiplier).toBe(1);
   });
 
   it("respects excludedCardIds", () => {
