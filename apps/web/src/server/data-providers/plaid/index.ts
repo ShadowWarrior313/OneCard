@@ -65,7 +65,8 @@ export class PlaidProvider implements FinancialDataProvider {
     }
   }
 
-  async linkAccount(input: { publicToken: string }): Promise<LinkResult> {
+  async linkAccount(input: { publicToken: string; userId: string }): Promise<LinkResult> {
+    void input.userId;
     try {
       const client = getPlaidClient();
       const exchange = (await client.itemPublicTokenExchange({ public_token: input.publicToken }))

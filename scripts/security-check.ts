@@ -691,6 +691,60 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 10 — Mock hub provider isolation (no shared item id / published secret)
+// ════════════════════════════════════════════════════════════════════
+
+function checkMockProviderIsolation(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+
+  const mockProvider = files.find((f) => /data-providers\/mock\/index\.ts$/.test(f));
+  if (!mockProvider) {
+    notes.push("Mock provider not present — skip.");
+    return { id: "10", title: "Mock hub provider isolation", findings, notes };
+  }
+
+  const raw = read(mockProvider);
+  if (/mock_item_default/.test(raw)) {
+    findings.push({
+      severity: "FAIL",
+      file: mockProvider,
+      message:
+        "Mock provider hardcodes shared providerItemId 'mock_item_default' — multi-user webhooks collide",
+    });
+  }
+  if (/onecard-mock-webhook-secret/.test(raw)) {
+    findings.push({
+      severity: "FAIL",
+      file: mockProvider,
+      message: "Mock webhook uses a published default HMAC secret — forgeable when DATA_PROVIDER=mock",
+    });
+  }
+  if (!/mockProviderItemId|mock_item_\$\{/.test(raw)) {
+    findings.push({
+      severity: "FAIL",
+      file: mockProvider,
+      message: "Mock linkAccount must derive a per-user providerItemId (e.g. mockProviderItemId)",
+    });
+  }
+
+  const mockIds = files.find((f) => /data-providers\/mock\/ids\.ts$/.test(f));
+  if (mockIds && !/export function mockProviderItemId/.test(read(mockIds))) {
+    findings.push({
+      severity: "FAIL",
+      file: mockIds,
+      message: "mockProviderItemId helper missing",
+    });
+  }
+
+  if (findings.length === 0) {
+    notes.push("Mock provider uses per-user item ids and fails closed without MOCK_WEBHOOK_SECRET.");
+  }
+
+  return { id: "10", title: "Mock hub provider isolation", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +760,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkMockProviderIsolation(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

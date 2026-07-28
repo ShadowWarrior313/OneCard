@@ -200,7 +200,10 @@ export async function linkAndSync(input: {
   publicToken: string;
 }): Promise<void> {
   const provider = getDataProvider();
-  const link = await provider.linkAccount({ publicToken: input.publicToken });
+  const link = await provider.linkAccount({
+    publicToken: input.publicToken,
+    userId: input.userId,
+  });
   const item = await saveLinkedItem({
     userId: input.userId,
     provider: provider.id,
