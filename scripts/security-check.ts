@@ -691,7 +691,7 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
-//  CHECK 9 — Mock hub provider isolation (no shared item id / published secret)
+//  CHECK 10 — Mock hub provider isolation (no shared item id / published secret)
 // ════════════════════════════════════════════════════════════════════
 
 function checkMockProviderIsolation(files: string[]): CheckResult {
@@ -701,7 +701,7 @@ function checkMockProviderIsolation(files: string[]): CheckResult {
   const mockProvider = files.find((f) => /data-providers\/mock\/index\.ts$/.test(f));
   if (!mockProvider) {
     notes.push("Mock provider not present — skip.");
-    return { id: "9", title: "Mock hub provider isolation", findings, notes };
+    return { id: "10", title: "Mock hub provider isolation", findings, notes };
   }
 
   const raw = read(mockProvider);
@@ -741,7 +741,7 @@ function checkMockProviderIsolation(files: string[]): CheckResult {
     notes.push("Mock provider uses per-user item ids and fails closed without MOCK_WEBHOOK_SECRET.");
   }
 
-  return { id: "9", title: "Mock hub provider isolation", findings, notes };
+  return { id: "10", title: "Mock hub provider isolation", findings, notes };
 }
 
 // ════════════════════════════════════════════════════════════════════
