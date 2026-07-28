@@ -46,8 +46,11 @@ export interface FinancialDataProvider {
   /**
    * Exchange a client public token for a durable access token + the item's
    * accounts. The returned `accessToken` must be vaulted (encrypted) immediately.
+   *
+   * `userId` scopes the link to the owning hub user. Mock providers MUST derive a
+   * per-user `providerItemId` from it so webhooks cannot collide across users.
    */
-  linkAccount(input: { publicToken: string }): Promise<LinkResult>;
+  linkAccount(input: { publicToken: string; userId: string }): Promise<LinkResult>;
 
   /** Incremental, cursor-based transaction sync. Idempotent on `cursor`. */
   syncTransactions(input: {

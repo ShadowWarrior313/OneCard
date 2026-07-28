@@ -12,6 +12,7 @@ import type {
   SyncResult,
 } from "../types";
 import { MOCK_ACCOUNTS, MOCK_INSTITUTION, mockTransactions } from "./fixtures";
+import { mockProviderItemId } from "./ids";
 
 /**
  * Fully local provider. Default in dev/test so the hub works with NO Plaid keys.
@@ -44,8 +45,10 @@ function scenarioFromAccessToken(accessToken: string): Scenario {
   return "healthy";
 }
 
-function mockWebhookSecret(): string {
-  return process.env.MOCK_WEBHOOK_SECRET?.trim() || "onecard-mock-webhook-secret";
+/** Fail closed: never ship a published default HMAC secret. */
+function mockWebhookSecret(): string | null {
+  const secret = process.env.MOCK_WEBHOOK_SECRET?.trim();
+  return secret ? secret : null;
 }
 
 /** Per-token attempt counter so the rate-limit scenario fails once then recovers. */
@@ -63,12 +66,12 @@ export class MockProvider implements FinancialDataProvider {
     return { provider: this.id, mode: "update" };
   }
 
-  async linkAccount(input: { publicToken: string }): Promise<LinkResult> {
+  async linkAccount(input: { publicToken: string; userId: string }): Promise<LinkResult> {
     const scenario = scenarioFromPublicToken(input.publicToken);
     return {
-      // A stable item id (scenario-independent) so re-linking REPAIRS the same
-      // item — this is what makes the reconnect/update-mode loop demoable in mock.
-      providerItemId: "mock_item_default",
+      // Stable per-user id (scenario-independent) so re-linking REPAIRS the same
+      // item for that user — and webhooks cannot collide across hub users.
+      providerItemId: mockProviderItemId(input.userId),
       accessToken: accessTokenFor(scenario),
       institutionName: MOCK_INSTITUTION,
       accounts: MOCK_ACCOUNTS,
@@ -128,9 +131,11 @@ export class MockProvider implements FinancialDataProvider {
     rawBody: string,
     headers: Record<string, string>,
   ): Promise<ProviderWebhookEvent | null> {
+    const secret = mockWebhookSecret();
+    if (!secret) return null;
     const signature = headers["x-mock-signature"];
     if (!signature) return null;
-    const expected = createHmac("sha256", mockWebhookSecret()).update(rawBody).digest("hex");
+    const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
     const a = Buffer.from(signature);
     const b = Buffer.from(expected);
     if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
