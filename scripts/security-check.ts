@@ -691,6 +691,79 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 11 — Stripe payment routes refuse live-mode secret keys
+// ════════════════════════════════════════════════════════════════════
+
+function checkStripeTestModeOnly(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+
+  const guardFile = files.find((f) => /lib\/assertStripeTestMode\.ts$/.test(f));
+  const guardSource = guardFile ? read(guardFile) : "";
+  if (
+    !guardFile ||
+    !/export function assertStripeTestMode/.test(guardSource) ||
+    !/startsWith\(\s*["']sk_test_["']\s*\)/.test(guardSource)
+  ) {
+    findings.push({
+      severity: "FAIL",
+      file: guardFile ?? "apps/web/src/lib/assertStripeTestMode.ts",
+      message:
+        "assertStripeTestMode must exist and require STRIPE_SECRET_KEY to start with sk_test_",
+    });
+    return { id: "11", title: "Stripe payment routes are test-mode only", findings, notes };
+  }
+  notes.push(`Guard present: ${guardFile}`);
+
+  const routes = files.filter(
+    (f) =>
+      /api\/stripe\/(payment-intent|setup-intent|confirm-card)\/route\.(ts|js)$/.test(f),
+  );
+  if (routes.length < 3) {
+    findings.push({
+      severity: "FAIL",
+      file: "apps/web/src/app/api/stripe",
+      message:
+        "Expected payment-intent, setup-intent, and confirm-card routes for test-mode enforcement",
+    });
+  }
+  for (const f of routes) {
+    if (!/assertStripeTestMode\s*\(/.test(read(f))) {
+      findings.push({
+        severity: "FAIL",
+        file: f,
+        message: "Stripe payment route must call assertStripeTestMode() before creating/retrieving Stripe objects",
+      });
+    }
+  }
+
+  const stripeSingleton = files.find((f) => /lib\/stripe\.ts$/.test(f));
+  if (stripeSingleton) {
+    const source = read(stripeSingleton);
+    // Refuse constructing the SDK client with a live key even if a route forgets the assert.
+    if (
+      !/startsWith\(\s*["']sk_test_["']\s*\)/.test(source) ||
+      !/sk_test_placeholder/.test(source)
+    ) {
+      findings.push({
+        severity: "FAIL",
+        file: stripeSingleton,
+        message:
+          "stripe.ts must only initialize the Stripe client with an sk_test_ key (fallback sk_test_placeholder)",
+      });
+    } else {
+      notes.push("Stripe singleton refuses to initialize with live secret keys.");
+    }
+  }
+
+  if (findings.length === 0) {
+    notes.push("Payment/setup/confirm routes fail closed unless STRIPE_SECRET_KEY is sk_test_.");
+  }
+
+  return { id: "11", title: "Stripe payment routes are test-mode only", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +779,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkStripeTestModeOnly(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

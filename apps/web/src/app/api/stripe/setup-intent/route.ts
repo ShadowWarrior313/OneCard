@@ -10,6 +10,7 @@
  */
 import { stripe } from "@/lib/stripe";
 import { assertNoRawCardData, RawCardDataError } from "@/lib/assertNoRawCardData";
+import { assertStripeTestMode, StripeTestModeError } from "@/lib/assertStripeTestMode";
 import { NextResponse } from "next/server";
 
 // Simple in-memory rate limit: max 5 SetupIntents per IP per minute.
@@ -29,6 +30,19 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    assertStripeTestMode();
+  } catch (err) {
+    if (err instanceof StripeTestModeError) {
+      console.error("[onecard/setup-intent] refused non-test Stripe secret key");
+      return NextResponse.json(
+        { error: "Stripe test mode is required" },
+        { status: 503 },
+      );
+    }
+    throw err;
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 

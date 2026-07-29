@@ -14,11 +14,25 @@
 import { stripe } from "@/lib/stripe";
 import type { StoredCard } from "@/lib/stripe";
 import { assertNoRawCardData, RawCardDataError } from "@/lib/assertNoRawCardData";
+import { assertStripeTestMode, StripeTestModeError } from "@/lib/assertStripeTestMode";
 import { NextResponse } from "next/server";
 
 const PM_ID_RE = /^pm_[a-zA-Z0-9_]{8,}$/;
 
 export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    assertStripeTestMode();
+  } catch (err) {
+    if (err instanceof StripeTestModeError) {
+      console.error("[onecard/confirm-card] refused non-test Stripe secret key");
+      return NextResponse.json(
+        { error: "Stripe test mode is required" },
+        { status: 503 },
+      );
+    }
+    throw err;
+  }
+
   let body: { paymentMethodId?: string };
   try {
     body = (await request.json()) as { paymentMethodId?: string };
