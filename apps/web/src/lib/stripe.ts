@@ -7,19 +7,32 @@
  *   • Stripe onboarding (completed business verification)
  *   • A completed PCI SAQ A (or A-EP if you host any payment page)
  *   • Legal / privacy review for your jurisdiction
+ *
+ * Live `sk_live_` keys are refused by `assertStripeTestMode` on every payment
+ * route — never rely on comments alone to keep checkout in sandbox.
  */
 import Stripe from "stripe";
+import { assertStripeTestMode } from "./assertStripeTestMode";
 
 const key = process.env.STRIPE_SECRET_KEY;
 if (!key) {
   // Warn loudly in development; in production the route will 500 naturally.
   console.warn("[onecard] STRIPE_SECRET_KEY is not set — Stripe routes will fail.");
+} else if (!key.trim().startsWith("sk_test_")) {
+  console.error(
+    "[onecard] STRIPE_SECRET_KEY is not a test-mode key — payment routes will fail closed.",
+  );
 }
 
-export const stripe = new Stripe(key ?? "sk_test_placeholder", {
+// Never construct the client with a live key even if a route forgets the assert.
+const safeKey = key?.trim().startsWith("sk_test_") ? key.trim() : "sk_test_placeholder";
+
+export const stripe = new Stripe(safeKey, {
   apiVersion: "2026-05-27.dahlia",
   typescript: true,
 });
+
+export { assertStripeTestMode, StripeTestModeError } from "./assertStripeTestMode";
 
 /** Safe card metadata — the ONLY card fields stored by OneCard. No PAN or CVV. */
 export interface StoredCard {

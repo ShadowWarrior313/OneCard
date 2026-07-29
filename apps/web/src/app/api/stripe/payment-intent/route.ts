@@ -14,6 +14,7 @@
  */
 import { stripe } from "@/lib/stripe";
 import { assertNoRawCardData, RawCardDataError } from "@/lib/assertNoRawCardData";
+import { assertStripeTestMode, StripeTestModeError } from "@/lib/assertStripeTestMode";
 import { NextResponse } from "next/server";
 
 // Simple in-memory rate limit: max 10 PaymentIntents per IP per minute.
@@ -39,6 +40,19 @@ const MIN_AMOUNT_CENTS = 50; // Stripe minimum chargeable amount
 const MAX_AMOUNT_CENTS = 99_999; // CA$999.99 cap for this test page
 
 export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    assertStripeTestMode();
+  } catch (err) {
+    if (err instanceof StripeTestModeError) {
+      console.error("[onecard/payment-intent] refused non-test Stripe secret key");
+      return NextResponse.json(
+        { error: "Stripe test mode is required" },
+        { status: 503 },
+      );
+    }
+    throw err;
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 
