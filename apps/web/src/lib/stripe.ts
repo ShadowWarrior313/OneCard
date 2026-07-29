@@ -12,7 +12,6 @@
  * route — never rely on comments alone to keep checkout in sandbox.
  */
 import Stripe from "stripe";
-import { assertStripeTestMode } from "./assertStripeTestMode";
 
 const key = process.env.STRIPE_SECRET_KEY;
 if (!key) {
