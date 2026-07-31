@@ -13,10 +13,12 @@ import type {
 } from "../types";
 import { getPlaidClient } from "./client";
 import { mapPlaidError, toProviderAccount, toProviderTransaction } from "./mapping";
+import { DEFAULT_MAX_SYNC_PAGES, finishPlaidSyncPagination } from "./sync-pagination";
 import { verifyPlaidWebhook } from "./webhook";
+import { logProviderWarning } from "@/server/log";
 
 const COUNTRY_CODES = [CountryCode.Ca, CountryCode.Us];
-const MAX_SYNC_PAGES = 100;
+const MAX_SYNC_PAGES = DEFAULT_MAX_SYNC_PAGES;
 
 /**
  * Plaid implementation of the neutral provider interface. Sandbox-first
@@ -110,14 +112,25 @@ export class PlaidProvider implements FinancialDataProvider {
         hasMore = response.has_more;
         page += 1;
       }
-      if (hasMore) throw new Error("Plaid sync exceeded the page limit");
+      // Cap per call to bound memory/time, but never throw when has_more remains:
+      // throwing would skip cursor persistence and permanently stall large histories.
+      const finish = finishPlaidSyncPagination({
+        hasMore,
+        nextCursor: cursor,
+        pageCount: page,
+        maxPages: MAX_SYNC_PAGES,
+      });
+      if (finish.truncated) {
+        logProviderWarning("Plaid sync page budget reached; returning partial progress", "sync_truncated");
+      }
 
       return {
         accounts: accounts.map(toProviderAccount),
         added: added.map(toProviderTransaction),
         modified: modified.map(toProviderTransaction),
         removedIds,
-        nextCursor: cursor,
+        nextCursor: finish.nextCursor,
+        hasMore: finish.hasMore,
       };
     } catch (error) {
       throw mapPlaidError(error);

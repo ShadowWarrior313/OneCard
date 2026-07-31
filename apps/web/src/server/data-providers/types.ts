@@ -107,6 +107,11 @@ export interface SyncResult {
   removedIds: string[];
   /** Opaque cursor to persist and pass back on the next sync. */
   nextCursor?: string;
+  /**
+   * When true, more pages remain beyond this call's page budget. Callers should
+   * persist `nextCursor` and invoke sync again (do not treat as an error).
+   */
+  hasMore?: boolean;
 }
 
 /** Live health probe for an item. */
