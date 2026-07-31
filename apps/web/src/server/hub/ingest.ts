@@ -153,40 +153,54 @@ export async function saveLinkedItem(input: {
  * Incrementally sync one item. Backoff for transient errors is handled by
  * `withRetry`; a terminal error transitions connection health (login_required /
  * error) WITHOUT discarding last-known data — we never present stale as live.
+ *
+ * Providers may return `hasMore: true` when a single call hits an internal page
+ * budget. We persist the advanced cursor after each successful round and keep
+ * syncing so large histories catch up instead of stalling.
  */
-export async function syncLinkedItem(itemId: string): Promise<void> {
-  const store = await readHubStore();
-  const item = store.items.find((candidate) => candidate.id === itemId);
-  if (!item) return;
-  const provider = getDataProvider();
-  const accessToken = decryptAccessToken(item.encryptedAccessToken);
+const MAX_SYNC_CONTINUATION_ROUNDS = 50;
 
-  try {
-    const result = await withRetry(() =>
-      provider.syncTransactions({ accessToken, cursor: item.cursor }),
-    );
-    await mutateHubStore((nextStore) => {
-      const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
-      if (!mutable) return;
-      upsertAccounts(nextStore, item.userId, item.id, result.accounts);
-      applyTransactions(nextStore, item.userId, result.added, result.modified, result.removedIds);
-      mutable.cursor = result.nextCursor;
-      mutable.lastSyncedAt = new Date().toISOString();
-      mutable.status = "healthy";
-      mutable.errorCode = undefined;
-    });
-  } catch (error) {
-    const status = error instanceof ProviderError ? error.status : "error";
-    const code = error instanceof ProviderError ? error.code : "sync_failed";
-    logProviderWarning("Item sync failed; preserving last-known data", code);
-    await mutateHubStore((nextStore) => {
-      const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
-      if (mutable) {
-        mutable.status = status === "login_required" ? "login_required" : "error";
-        mutable.errorCode = code;
-      }
-    });
+export async function syncLinkedItem(itemId: string): Promise<void> {
+  for (let round = 0; round < MAX_SYNC_CONTINUATION_ROUNDS; round += 1) {
+    const store = await readHubStore();
+    const item = store.items.find((candidate) => candidate.id === itemId);
+    if (!item) return;
+    const provider = getDataProvider();
+    const accessToken = decryptAccessToken(item.encryptedAccessToken);
+
+    try {
+      const result = await withRetry(() =>
+        provider.syncTransactions({ accessToken, cursor: item.cursor }),
+      );
+      await mutateHubStore((nextStore) => {
+        const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
+        if (!mutable) return;
+        upsertAccounts(nextStore, item.userId, item.id, result.accounts);
+        applyTransactions(nextStore, item.userId, result.added, result.modified, result.removedIds);
+        mutable.cursor = result.nextCursor;
+        mutable.lastSyncedAt = new Date().toISOString();
+        mutable.status = "healthy";
+        mutable.errorCode = undefined;
+      });
+      if (!result.hasMore) return;
+    } catch (error) {
+      const status = error instanceof ProviderError ? error.status : "error";
+      const code = error instanceof ProviderError ? error.code : "sync_failed";
+      logProviderWarning("Item sync failed; preserving last-known data", code);
+      await mutateHubStore((nextStore) => {
+        const mutable = nextStore.items.find((candidate) => candidate.id === item.id);
+        if (mutable) {
+          mutable.status = status === "login_required" ? "login_required" : "error";
+          mutable.errorCode = code;
+        }
+      });
+      return;
+    }
   }
+  logProviderWarning(
+    "Item sync stopped after continuation budget; cursor advanced — next sync will continue",
+    "sync_continuation_budget",
+  );
 }
 
 export async function syncUserItems(userId: string): Promise<void> {
