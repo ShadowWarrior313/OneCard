@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { CountryCode, Products, type Transaction } from "plaid";
+import { logProviderWarning } from "@/server/log";
 import type { FinancialDataProvider } from "../provider";
 import type {
   LinkResult,
@@ -15,7 +16,6 @@ import { getPlaidClient } from "./client";
 import { mapPlaidError, toProviderAccount, toProviderTransaction } from "./mapping";
 import { DEFAULT_MAX_SYNC_PAGES, finishPlaidSyncPagination } from "./sync-pagination";
 import { verifyPlaidWebhook } from "./webhook";
-import { logProviderWarning } from "@/server/log";
 
 const COUNTRY_CODES = [CountryCode.Ca, CountryCode.Us];
 const MAX_SYNC_PAGES = DEFAULT_MAX_SYNC_PAGES;
