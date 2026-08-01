@@ -16,6 +16,7 @@ import type {
   LinkedItem,
   SubTrackerRecord,
 } from "./schema";
+import { upsertHubUserByEmail } from "./hubUserIdentity";
 
 const STORE_PATH =
   process.env.HUB_DATA_PATH ?? path.join(process.cwd(), ".data", "hub-store.json");
@@ -93,29 +94,30 @@ export function createHubId(prefix: string): string {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
+/**
+ * Upsert a hub user keyed by email (stable identity).
+ *
+ * Important: user ids must NOT be derived from AUTH_SESSION_SECRET. Rotating the
+ * session signing secret is a routine ops action and must not orphan linked
+ * accounts / transactions. Existing rows are found by normalized email and keep
+ * their original id; new users get a random `user_…` id.
+ */
 export async function ensureHubUser(input: {
-  id: string;
   email: string;
   name: string;
 }): Promise<HubUser> {
-  return mutateHubStore((store) => {
-    const existing = store.users.find((user) => user.id === input.id);
-    if (existing) {
-      existing.email = input.email;
-      existing.name = input.name;
-      return existing;
-    }
-    const user: HubUser = {
-      ...input,
-      createdAt: new Date().toISOString(),
-    };
-    store.users.push(user);
-    return user;
-  });
+  return mutateHubStore((store) =>
+    upsertHubUserByEmail(store.users, input, () => createHubId("user")),
+  );
 }
 
 export async function findHubUser(userId: string): Promise<HubUser | undefined> {
   return (await readHubStore()).users.find((user) => user.id === userId);
+}
+
+export async function findHubUserByEmail(email: string): Promise<HubUser | undefined> {
+  const normalized = email.trim().toLowerCase();
+  return (await readHubStore()).users.find((user) => user.email === normalized);
 }
 
 export async function findItemByProviderItemId(

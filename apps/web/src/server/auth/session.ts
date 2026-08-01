@@ -10,8 +10,10 @@ import type { HubUser } from "@/data/schema";
  * gates every internal hub route so a user only ever sees their own data
  * (per-user isolation).
  *
- * The Sandbox build derives a stable user id from the email; production must
- * replace this with a reviewed auth provider (see session route + README).
+ * The Sandbox build mints a cookie for a hub user looked up/created by email
+ * with a random stable id. Production must replace this with a reviewed auth
+ * provider (see session route + README). Session signing uses
+ * AUTH_SESSION_SECRET; that secret must never be used as a user-id pepper.
  */
 const COOKIE_NAME = "onecard_hub_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
@@ -80,12 +82,6 @@ function readSession(request: Request): SessionPayload | undefined {
   }
 }
 
-export function userIdForEmail(email: string): string {
-  return createHmac("sha256", sessionSecret())
-    .update(email.trim().toLowerCase())
-    .digest("hex");
-}
-
 export async function createHubSession(input: {
   email: string;
   name: string;
@@ -95,7 +91,8 @@ export async function createHubSession(input: {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || name.length < 2) {
     throw new Error("A valid name and email are required");
   }
-  const user = await ensureHubUser({ id: userIdForEmail(email), email, name });
+  // Identity is email-stable in the hub store — never HMAC(session secret, email).
+  const user = await ensureHubUser({ email, name });
   const cookie = [
     `${COOKIE_NAME}=${encodeURIComponent(
       sessionToken({ userId: user.id, expiresAt: Date.now() + MAX_AGE_SECONDS * 1000 }),

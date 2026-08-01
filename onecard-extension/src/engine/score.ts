@@ -3,6 +3,7 @@ import {
   CATEGORY_LABELS,
   STORE_OFFER_RULES,
   categoryForMcc,
+  isCardAcceptedAtMerchant,
   normalizedCashbackPercent,
   rewardRuleFor,
 } from "./rewards-rules";
@@ -76,7 +77,7 @@ function scoreCard(
   total: number | undefined,
   merchantId: string,
 ): CardScore {
-  const baseRule = rewardRuleFor(card, category);
+  const baseRule = rewardRuleFor(card, category, merchantId);
   const offer = STORE_OFFER_RULES.find(
     (rule) => rule.merchantId === merchantId && rule.cardId === card.id,
   );
@@ -92,7 +93,10 @@ function scoreCard(
   let effectivePercent = normalizedCashbackPercent(card, rule);
   let estimatedValue = total == null ? undefined : (total * effectivePercent) / 100;
   if (total != null && rule.cap && total > rule.cap.amount) {
-    const fallbackPercent = normalizedCashbackPercent(card, rewardRuleFor(card, "other"));
+    const fallbackPercent = normalizedCashbackPercent(
+      card,
+      rewardRuleFor(card, "other", merchantId),
+    );
     const cappedValue = (rule.cap.amount * effectivePercent) / 100;
     const overageValue = ((total - rule.cap.amount) * fallbackPercent) / 100;
     estimatedValue = cappedValue + overageValue;
@@ -118,10 +122,11 @@ export function scoreRecommendation(
 
   const rewardCategory = categoryForMcc(primaryMcc.mcc);
   const cartCategory = inferCartCategory(detection.cart.items);
-  const scores = wallet
-    .map((card) =>
-      scoreCard(card, rewardCategory, detection.cart.total, detection.merchant.id),
-    )
+  const merchantId = detection.merchant.id;
+  const eligible = wallet.filter((card) => isCardAcceptedAtMerchant(card, merchantId));
+  if (eligible.length === 0) return null;
+  const scores = eligible
+    .map((card) => scoreCard(card, rewardCategory, detection.cart.total, merchantId))
     .sort((a, b) => b.effectivePercent - a.effectivePercent);
   const winner = scores[0];
   if (!winner) return null;

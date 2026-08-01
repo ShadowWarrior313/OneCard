@@ -1,4 +1,4 @@
-import type { LinkedCard } from "../engine/rewards-rules";
+import { AMEX_GROCERY_EXCLUSIONS, type LinkedCard } from "../engine/rewards-rules";
 
 export const SAMPLE_WALLET: LinkedCard[] = [
   {
@@ -13,6 +13,7 @@ export const SAMPLE_WALLET: LinkedCard[] = [
         category: "groceries",
         rate: 5,
         unit: "x",
+        excludedMerchantIds: [...AMEX_GROCERY_EXCLUSIONS],
         cap: {
           amount: 2500,
           period: "monthly",
@@ -32,7 +33,13 @@ export const SAMPLE_WALLET: LinkedCard[] = [
     rewardUnit: "Scene+ points",
     pointValueCents: 1,
     rules: [
-      { category: "groceries", rate: 6, unit: "x" },
+      // Scene+ elevated grocery is Sobeys-family, not Loblaw banners.
+      {
+        category: "groceries",
+        rate: 6,
+        unit: "x",
+        excludedMerchantIds: ["loblaws", "no_frills", "superstore", "food_basics", "walmart"],
+      },
       { category: "dining", rate: 5, unit: "x" },
       { category: "entertainment", rate: 5, unit: "x" },
       { category: "streaming", rate: 3, unit: "x" },

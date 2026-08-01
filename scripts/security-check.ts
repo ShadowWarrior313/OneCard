@@ -690,6 +690,63 @@ function checkGuard(files: string[]): CheckResult {
   return { id: "8", title: "Server-side raw-card guard on payment routes", findings, notes };
 }
 
+/**
+ * Check 12 — Hub user identity must not be derived from AUTH_SESSION_SECRET.
+ *
+ * Rotating the session signing secret is routine ops (and recommended after any
+ * exposure). If hub user ids are HMAC(sessionSecret, email), every rotation
+ * orphans linked accounts and transactions under a new empty identity.
+ *
+ * Numbered 12 so it does not collide with open hardening checks 9–11
+ * (hub auth/webhook, mock isolation, Stripe test-mode).
+ */
+function checkHubUserIdentity(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+  const sessionFile = files.find((f) => /server\/auth\/session\.(ts|js)$/.test(f));
+  const storeFile = files.find((f) => /apps\/web\/src\/data\/store\.(ts|js)$/.test(f));
+  const identityFile = files.find((f) => /apps\/web\/src\/data\/hubUserIdentity\.(ts|js)$/.test(f));
+
+  if (!sessionFile || !storeFile) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionFile ?? storeFile ?? "apps/web/src/server/auth/session.ts",
+      message: "Hub session/store modules missing — cannot verify user-id stability",
+    });
+    return { id: "12", title: "Hub user identity independent of session secret", findings, notes };
+  }
+
+  const sessionSource = read(sessionFile);
+  if (/userIdForEmail/.test(sessionSource) || /createHmac\s*\(\s*[\"']sha256[\"']\s*,\s*sessionSecret\s*\(\s*\)\s*\)\s*\.update\s*\(\s*email/.test(sessionSource)) {
+    findings.push({
+      severity: "FAIL",
+      file: sessionFile,
+      message:
+        "Hub user ids must not be derived from AUTH_SESSION_SECRET / sessionSecret() — rotating the signing secret would orphan hub data",
+    });
+  }
+
+  const storeSource = read(storeFile);
+  const identitySource = identityFile ? read(identityFile) : "";
+  const combined = `${storeSource}\n${identitySource}`;
+  const upsertsByEmail =
+    /upsertHubUserByEmail/.test(storeSource) ||
+    /user\.email\s*===\s*email/.test(combined) ||
+    /find\(\s*\(user\)\s*=>\s*user\.email\s*===\s*/.test(combined);
+
+  if (!upsertsByEmail) {
+    findings.push({
+      severity: "FAIL",
+      file: identityFile ?? storeFile,
+      message: "ensureHubUser must look up existing users by email so identity survives secret rotation",
+    });
+  } else {
+    notes.push("Hub users are upserted by email with stable random ids (not session-secret HMACs).");
+  }
+
+  return { id: "12", title: "Hub user identity independent of session secret", findings, notes };
+}
+
 // ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
@@ -706,6 +763,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubUserIdentity(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);
