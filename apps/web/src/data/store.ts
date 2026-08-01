@@ -16,6 +16,7 @@ import type {
   LinkedItem,
   SubTrackerRecord,
 } from "./schema";
+import { upsertHubUserByEmail } from "./hubUserIdentity";
 
 const STORE_PATH =
   process.env.HUB_DATA_PATH ?? path.join(process.cwd(), ".data", "hub-store.json");
@@ -105,24 +106,9 @@ export async function ensureHubUser(input: {
   email: string;
   name: string;
 }): Promise<HubUser> {
-  const email = input.email.trim().toLowerCase();
-  const name = input.name.trim().replace(/\s+/g, " ");
-  return mutateHubStore((store) => {
-    const existing = store.users.find((user) => user.email === email);
-    if (existing) {
-      existing.email = email;
-      existing.name = name;
-      return existing;
-    }
-    const user: HubUser = {
-      id: createHubId("user"),
-      email,
-      name,
-      createdAt: new Date().toISOString(),
-    };
-    store.users.push(user);
-    return user;
-  });
+  return mutateHubStore((store) =>
+    upsertHubUserByEmail(store.users, input, () => createHubId("user")),
+  );
 }
 
 export async function findHubUser(userId: string): Promise<HubUser | undefined> {

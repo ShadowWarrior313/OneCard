@@ -6,6 +6,7 @@ import {
   rewardRuleFor,
   type LinkedCard,
 } from "./rewards-rules.ts";
+import { scoreRecommendation } from "./score.ts";
 
 const WALLET: LinkedCard[] = [
   {
@@ -51,6 +52,17 @@ const WALLET: LinkedCard[] = [
   },
 ];
 
+function groceryCheckout(merchantId: string, displayName: string) {
+  return {
+    merchant: {
+      id: merchantId,
+      displayName,
+      mccCandidates: [{ mcc: "5411", confidence: 0.95, reason: "test" }],
+    },
+    cart: { items: [{ name: "milk" }], total: 100 },
+  };
+}
+
 describe("extension reward correctness guards", () => {
   it("rejects Amex at Loblaws via network acceptance", () => {
     const amex = WALLET.find((c) => c.id === "amex_cobalt")!;
@@ -58,18 +70,20 @@ describe("extension reward correctness guards", () => {
     assert.equal(isCardAcceptedAtMerchant(WALLET[2]!, "loblaws"), true);
   });
 
+  it("recommends a Visa/MC grocery card at Loblaws, never Amex", () => {
+    const result = scoreRecommendation(groceryCheckout("loblaws", "Loblaws"), WALLET);
+    assert.ok(result);
+    assert.notEqual(result!.winner.card.network, "amex");
+    assert.equal(result!.winner.card.id, "bmo_cashback_world_elite");
+  });
+
   it("falls back Cobalt grocery bonus at Walmart to base rate", () => {
     const amex = WALLET.find((c) => c.id === "amex_cobalt")!;
     const rule = rewardRuleFor(amex, "groceries", "walmart");
     assert.equal(rule.category, "other");
     assert.equal(rule.rate, 1);
-    const eligible = WALLET.filter((c) => isCardAcceptedAtMerchant(c, "walmart"));
-    const scored = eligible.map((card) => {
-      const r = rewardRuleFor(card, "groceries", "walmart");
-      const pct = r.unit === "%" ? r.rate : r.rate * (card.pointValueCents / 100);
-      return { id: card.id, pct };
-    });
-    scored.sort((a, b) => b.pct - a.pct);
-    assert.equal(scored[0]?.id, "bmo_cashback_world_elite");
+    const result = scoreRecommendation(groceryCheckout("walmart", "Walmart"), WALLET);
+    assert.ok(result);
+    assert.equal(result!.winner.card.id, "bmo_cashback_world_elite");
   });
 });
