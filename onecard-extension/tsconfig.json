@@ -10,5 +10,6 @@
     "jsx": "preserve",
     "types": []
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }

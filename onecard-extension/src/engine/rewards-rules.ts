@@ -23,8 +23,31 @@ export type RewardRule = {
     period: "monthly" | "annual";
     note: string;
   };
+  /** Merchants where this category bonus does not apply (issuer exclusions). */
+  excludedMerchantIds?: string[];
   note?: string;
 };
+
+/** Merchant payment-network restrictions (issuer / retailer acceptance). */
+export const MERCHANT_ACCEPTED_NETWORKS: Record<string, CardNetwork[]> = {
+  loblaws: ["visa", "mastercard"],
+  no_frills: ["visa", "mastercard"],
+  superstore: ["visa", "mastercard"],
+  food_basics: ["visa", "mastercard"],
+  costco: ["mastercard"],
+  save_on_foods: ["visa", "mastercard"],
+};
+
+/** Amex Cobalt grocery exclusions (extension merchant ids). */
+export const AMEX_GROCERY_EXCLUSIONS = [
+  "loblaws",
+  "no_frills",
+  "superstore",
+  "food_basics",
+  "costco",
+  "save_on_foods",
+  "walmart",
+] as const;
 
 export type StoreOfferRule = {
   merchantId: string;
@@ -99,15 +122,33 @@ export function categoryForMcc(mcc: string): RewardCategory {
   return MCC_CATEGORY_MAP[mcc] ?? "other";
 }
 
-export function rewardRuleFor(card: LinkedCard, category: RewardCategory): RewardRule {
-  return (
-    card.rules.find((rule) => rule.category === category) ??
+export function isCardAcceptedAtMerchant(
+  card: LinkedCard,
+  merchantId?: string,
+): boolean {
+  if (!merchantId || !card.network) return true;
+  const accepted = MERCHANT_ACCEPTED_NETWORKS[merchantId];
+  if (!accepted) return true;
+  return accepted.includes(card.network);
+}
+
+export function rewardRuleFor(
+  card: LinkedCard,
+  category: RewardCategory,
+  merchantId?: string,
+): RewardRule {
+  const fallback =
     card.rules.find((rule) => rule.category === "other") ?? {
-      category: "other",
+      category: "other" as const,
       rate: 1,
-      unit: "x",
-    }
-  );
+      unit: "x" as const,
+    };
+  const rule = card.rules.find((candidate) => candidate.category === category);
+  if (!rule) return fallback;
+  if (merchantId && rule.excludedMerchantIds?.includes(merchantId)) {
+    return fallback;
+  }
+  return rule;
 }
 
 export function normalizedCashbackPercent(card: LinkedCard, rule: RewardRule): number {

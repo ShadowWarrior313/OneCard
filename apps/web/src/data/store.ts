@@ -93,20 +93,31 @@ export function createHubId(prefix: string): string {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
+/**
+ * Upsert a hub user keyed by email (stable identity).
+ *
+ * Important: user ids must NOT be derived from AUTH_SESSION_SECRET. Rotating the
+ * session signing secret is a routine ops action and must not orphan linked
+ * accounts / transactions. Existing rows are found by normalized email and keep
+ * their original id; new users get a random `user_…` id.
+ */
 export async function ensureHubUser(input: {
-  id: string;
   email: string;
   name: string;
 }): Promise<HubUser> {
+  const email = input.email.trim().toLowerCase();
+  const name = input.name.trim().replace(/\s+/g, " ");
   return mutateHubStore((store) => {
-    const existing = store.users.find((user) => user.id === input.id);
+    const existing = store.users.find((user) => user.email === email);
     if (existing) {
-      existing.email = input.email;
-      existing.name = input.name;
+      existing.email = email;
+      existing.name = name;
       return existing;
     }
     const user: HubUser = {
-      ...input,
+      id: createHubId("user"),
+      email,
+      name,
       createdAt: new Date().toISOString(),
     };
     store.users.push(user);
@@ -116,6 +127,11 @@ export async function ensureHubUser(input: {
 
 export async function findHubUser(userId: string): Promise<HubUser | undefined> {
   return (await readHubStore()).users.find((user) => user.id === userId);
+}
+
+export async function findHubUserByEmail(email: string): Promise<HubUser | undefined> {
+  const normalized = email.trim().toLowerCase();
+  return (await readHubStore()).users.find((user) => user.email === normalized);
 }
 
 export async function findItemByProviderItemId(
