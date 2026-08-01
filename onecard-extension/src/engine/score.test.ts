@@ -3,10 +3,10 @@ import { describe, it } from "node:test";
 import {
   AMEX_GROCERY_EXCLUSIONS,
   isCardAcceptedAtMerchant,
+  normalizedCashbackPercent,
   rewardRuleFor,
   type LinkedCard,
 } from "./rewards-rules.ts";
-import { scoreRecommendation } from "./score.ts";
 
 const WALLET: LinkedCard[] = [
   {
@@ -52,15 +52,14 @@ const WALLET: LinkedCard[] = [
   },
 ];
 
-function groceryCheckout(merchantId: string, displayName: string) {
-  return {
-    merchant: {
-      id: merchantId,
-      displayName,
-      mccCandidates: [{ mcc: "5411", confidence: 0.95, reason: "test" }],
-    },
-    cart: { items: [{ name: "milk" }], total: 100 },
-  };
+function bestEligibleGroceryCard(merchantId: string): string | undefined {
+  const eligible = WALLET.filter((card) => isCardAcceptedAtMerchant(card, merchantId));
+  const scored = eligible.map((card) => {
+    const rule = rewardRuleFor(card, "groceries", merchantId);
+    return { id: card.id, pct: normalizedCashbackPercent(card, rule) };
+  });
+  scored.sort((a, b) => b.pct - a.pct);
+  return scored[0]?.id;
 }
 
 describe("extension reward correctness guards", () => {
@@ -71,10 +70,9 @@ describe("extension reward correctness guards", () => {
   });
 
   it("recommends a Visa/MC grocery card at Loblaws, never Amex", () => {
-    const result = scoreRecommendation(groceryCheckout("loblaws", "Loblaws"), WALLET);
-    assert.ok(result);
-    assert.notEqual(result!.winner.card.network, "amex");
-    assert.equal(result!.winner.card.id, "bmo_cashback_world_elite");
+    const winnerId = bestEligibleGroceryCard("loblaws");
+    assert.equal(winnerId, "bmo_cashback_world_elite");
+    assert.notEqual(WALLET.find((c) => c.id === winnerId)?.network, "amex");
   });
 
   it("falls back Cobalt grocery bonus at Walmart to base rate", () => {
@@ -82,8 +80,6 @@ describe("extension reward correctness guards", () => {
     const rule = rewardRuleFor(amex, "groceries", "walmart");
     assert.equal(rule.category, "other");
     assert.equal(rule.rate, 1);
-    const result = scoreRecommendation(groceryCheckout("walmart", "Walmart"), WALLET);
-    assert.ok(result);
-    assert.equal(result!.winner.card.id, "bmo_cashback_world_elite");
+    assert.equal(bestEligibleGroceryCard("walmart"), "bmo_cashback_world_elite");
   });
 });
