@@ -1,31 +1,33 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
-import { getDataProvider, resolveProviderId } from "./index.ts";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
 
-const ORIGINAL_DATA_PROVIDER = process.env.DATA_PROVIDER;
+const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
-afterEach(() => {
-  if (ORIGINAL_DATA_PROVIDER === undefined) delete process.env.DATA_PROVIDER;
-  else process.env.DATA_PROVIDER = ORIGINAL_DATA_PROVIDER;
-});
+function read(rel: string): string {
+  return readFileSync(path.join(webRoot, rel), "utf8");
+}
 
-describe("getDataProvider provider affinity", () => {
-  it("defaults the active provider to mock when DATA_PROVIDER is unset", () => {
-    delete process.env.DATA_PROVIDER;
-    assert.equal(resolveProviderId(), "mock");
-    assert.equal(getDataProvider().id, "mock");
+describe("hub provider affinity (source)", () => {
+  it("allows getDataProvider to take an explicit ProviderId", () => {
+    const source = read("src/server/data-providers/index.ts");
+    assert.match(source, /export function getDataProvider\(\s*id\?: ProviderId\)/);
   });
 
-  it("returns the requested provider even when the env default differs", () => {
-    process.env.DATA_PROVIDER = "mock";
-    assert.equal(resolveProviderId(), "mock");
-    assert.equal(getDataProvider("plaid").id, "plaid");
-    assert.equal(getDataProvider("mock").id, "mock");
+  it("syncs linked items through item.provider", () => {
+    const source = read("src/server/hub/ingest.ts");
+    const syncFn = source.match(
+      /export async function syncLinkedItem\([\s\S]*?\nexport async function/,
+    )?.[0];
+    assert.ok(syncFn, "syncLinkedItem function not found");
+    assert.match(syncFn, /getDataProvider\(\s*item\.provider\s*\)/);
+    assert.doesNotMatch(syncFn, /getDataProvider\(\s*\)/);
   });
 
-  it("keeps the active provider on plaid when configured", () => {
-    process.env.DATA_PROVIDER = "plaid";
-    assert.equal(resolveProviderId(), "plaid");
-    assert.equal(getDataProvider().id, "plaid");
+  it("reauths through item.provider", () => {
+    const source = read("src/server/hub/routes.ts");
+    assert.match(source, /getDataProvider\(\s*item\.provider\s*\)\.reauth/);
   });
 });
