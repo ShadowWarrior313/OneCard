@@ -147,3 +147,41 @@ export function recomputeBillStatuses(bills: CardBill[]): CardBill[] {
     status: statusForDueDate(b.dueDate, b.status === "paid"),
   }));
 }
+
+/**
+ * Apply a payment to a bill. Only marks the statement fully paid when the
+ * payment covers the remaining balance; partial payments (minimum / custom)
+ * reduce `statementBalance` and leave the bill open.
+ */
+export function applyBillPayment(
+  bill: CardBill,
+  amount: number,
+  paidAt: string,
+): CardBill {
+  if (bill.status === "paid") return bill;
+  if (!Number.isFinite(amount) || amount <= 0) return bill;
+
+  const payment = Math.min(amount, bill.statementBalance);
+  const nextBalance = Math.round((bill.statementBalance - payment) * 100) / 100;
+  const fullyPaid = nextBalance <= 0;
+
+  if (fullyPaid) {
+    return {
+      ...bill,
+      statementBalance: 0,
+      minimumDue: 0,
+      status: "paid",
+      lastPaidAt: paidAt,
+      lastPaymentAmount: payment,
+    };
+  }
+
+  return {
+    ...bill,
+    statementBalance: nextBalance,
+    minimumDue: Math.min(bill.minimumDue, nextBalance),
+    status: statusForDueDate(bill.dueDate, false),
+    lastPaidAt: paidAt,
+    lastPaymentAmount: payment,
+  };
+}

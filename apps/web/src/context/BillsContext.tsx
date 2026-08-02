@@ -11,6 +11,7 @@ import {
 import { useWallet } from "@/context/WalletContext";
 import {
   appendBillPayment,
+  applyBillPayment,
   readBillPayments,
   readStoredBills,
   recomputeBillStatuses,
@@ -93,16 +94,7 @@ export function BillsProvider({ children }: { children: React.ReactNode }) {
     setPayments((prev) => [payment, ...prev]);
     setBills((prev) =>
       recomputeBillStatuses(
-        prev.map((b) =>
-          b.id === bill.id
-            ? {
-                ...b,
-                status: "paid",
-                lastPaidAt: paidAt,
-                lastPaymentAmount: input.amount,
-              }
-            : b,
-        ),
+        prev.map((b) => (b.id === bill.id ? applyBillPayment(b, input.amount, paidAt) : b)),
       ),
     );
   }, [bills]);
