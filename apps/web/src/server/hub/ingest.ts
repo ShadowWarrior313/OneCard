@@ -158,7 +158,10 @@ export async function syncLinkedItem(itemId: string): Promise<void> {
   const store = await readHubStore();
   const item = store.items.find((candidate) => candidate.id === itemId);
   if (!item) return;
-  const provider = getDataProvider();
+  // Always sync through the provider that owns this item — never the process-wide
+  // DATA_PROVIDER default. A mis-set env must fail closed, not rewrite the item
+  // with another provider's accounts/cursors.
+  const provider = getDataProvider(item.provider);
   const accessToken = decryptAccessToken(item.encryptedAccessToken);
 
   try {
@@ -217,8 +220,16 @@ export async function accessTokenForUserItem(
   userId: string,
   itemId: string,
 ): Promise<string | undefined> {
-  const item = (await readHubStore()).items.find(
+  const item = await linkedItemForUser(userId, itemId);
+  return item ? decryptAccessToken(item.encryptedAccessToken) : undefined;
+}
+
+/** Load a linked item the user owns (provider + vault metadata). */
+export async function linkedItemForUser(
+  userId: string,
+  itemId: string,
+): Promise<LinkedItem | undefined> {
+  return (await readHubStore()).items.find(
     (candidate) => candidate.id === itemId && candidate.userId === userId,
   );
-  return item ? decryptAccessToken(item.encryptedAccessToken) : undefined;
 }

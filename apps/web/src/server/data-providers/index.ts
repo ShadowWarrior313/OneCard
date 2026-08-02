@@ -14,17 +14,29 @@ import { PlaidProvider } from "./plaid";
  * This single function is the entire vendor-swap surface. Adding open banking /
  * MX / Finicity later means: implement `FinancialDataProvider`, add a branch here.
  */
-let cached: { id: ProviderId; instance: FinancialDataProvider } | undefined;
+const cached = new Map<ProviderId, FinancialDataProvider>();
 
 export function resolveProviderId(): ProviderId {
   return process.env.DATA_PROVIDER?.trim().toLowerCase() === "plaid" ? "plaid" : "mock";
 }
 
-export function getDataProvider(): FinancialDataProvider {
-  const id = resolveProviderId();
-  if (cached?.id === id) return cached.instance;
-  const instance: FinancialDataProvider = id === "plaid" ? new PlaidProvider() : new MockProvider();
-  cached = { id, instance };
+/**
+ * Resolve a provider instance.
+ *
+ * When `id` is omitted, returns the *active* provider from `DATA_PROVIDER`
+ * (default `mock`). Pass an explicit id when operating on an already-linked
+ * item — sync/reauth must follow `LinkedItem.provider`, never the current env
+ * default. Otherwise flipping `DATA_PROVIDER` (or leaving it unset so it falls
+ * back to mock) would drive a Plaid item through the mock provider and upsert
+ * sandbox accounts / cursors onto real linked data.
+ */
+export function getDataProvider(id?: ProviderId): FinancialDataProvider {
+  const resolved = id ?? resolveProviderId();
+  const existing = cached.get(resolved);
+  if (existing) return existing;
+  const instance: FinancialDataProvider =
+    resolved === "plaid" ? new PlaidProvider() : new MockProvider();
+  cached.set(resolved, instance);
   return instance;
 }
 

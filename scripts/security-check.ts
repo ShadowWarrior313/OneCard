@@ -691,6 +691,86 @@ function checkGuard(files: string[]): CheckResult {
 }
 
 // ════════════════════════════════════════════════════════════════════
+//  CHECK 13 — Hub sync/reauth follow LinkedItem.provider
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * Numbered 13 so it does not collide with open draft checks 9–12 (hub demo auth,
+ * mock isolation, Stripe test-mode, hub user-id independence).
+ *
+ * Syncing through the process-wide DATA_PROVIDER default (instead of the item's
+ * stored provider) lets an env drift to `mock` upsert sandbox accounts/cursors
+ * onto real Plaid-linked items.
+ */
+function checkHubProviderAffinity(files: string[]): CheckResult {
+  const findings: Finding[] = [];
+  const notes: string[] = [];
+
+  const factory = files.find((f) => /server\/data-providers\/index\.ts$/.test(f));
+  if (!factory) {
+    findings.push({
+      severity: "FAIL",
+      file: "apps/web/src/server/data-providers/index.ts",
+      message: "Provider factory missing",
+    });
+    return { id: "13", title: "Hub sync/reauth follow LinkedItem.provider", findings, notes };
+  }
+
+  const factorySource = stripComments(read(factory));
+  if (!/export function getDataProvider\s*\(\s*id\??\s*:\s*ProviderId/.test(factorySource)) {
+    findings.push({
+      severity: "FAIL",
+      file: factory,
+      message: "getDataProvider must accept an optional ProviderId so item-scoped sync can ignore DATA_PROVIDER drift",
+    });
+  } else {
+    notes.push("getDataProvider(id?) accepts an explicit provider id.");
+  }
+
+  const ingest = files.find((f) => /server\/hub\/ingest\.ts$/.test(f));
+  if (!ingest) {
+    findings.push({
+      severity: "FAIL",
+      file: "apps/web/src/server/hub/ingest.ts",
+      message: "Hub ingest module missing",
+    });
+  } else {
+    const ingestSource = stripComments(read(ingest));
+    if (!/getDataProvider\s*\(\s*item\.provider\s*\)/.test(ingestSource)) {
+      findings.push({
+        severity: "FAIL",
+        file: ingest,
+        message: "syncLinkedItem must call getDataProvider(item.provider), not the process-wide default",
+      });
+    } else {
+      notes.push("syncLinkedItem uses item.provider.");
+    }
+  }
+
+  const routes = files.find((f) => /server\/hub\/routes\.ts$/.test(f));
+  if (!routes) {
+    findings.push({
+      severity: "FAIL",
+      file: "apps/web/src/server/hub/routes.ts",
+      message: "Hub routes module missing",
+    });
+  } else {
+    const routesSource = stripComments(read(routes));
+    if (!/getDataProvider\s*\(\s*item\.provider\s*\)\s*\.reauth/.test(routesSource)) {
+      findings.push({
+        severity: "FAIL",
+        file: routes,
+        message: "reauth must call getDataProvider(item.provider).reauth",
+      });
+    } else {
+      notes.push("reauth uses item.provider.");
+    }
+  }
+
+  return { id: "13", title: "Hub sync/reauth follow LinkedItem.provider", findings, notes };
+}
+
+// ════════════════════════════════════════════════════════════════════
 //  Runner
 // ════════════════════════════════════════════════════════════════════
 
@@ -706,6 +786,7 @@ function main(): void {
     checkEnvAndGit(files),
     checkCvvNeverStored(files),
     checkGuard(files),
+    checkHubProviderAffinity(files),
   ];
 
   console.log(`\n${BOLD}OneCard security pre-flight scanner${RESET}`);

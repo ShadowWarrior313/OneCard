@@ -11,7 +11,8 @@ import {
   setItemStatus,
 } from "@/data/store";
 import { logProviderWarning } from "@/server/log";
-import { accessTokenForUserItem, linkAndSync, syncLinkedItem, syncUserItems } from "./ingest";
+import { linkAndSync, linkedItemForUser, syncLinkedItem, syncUserItems } from "./ingest";
+import { decryptAccessToken } from "@/server/data-providers/token-vault";
 
 /**
  * Internal, authenticated hub routes — provider-neutral. None of these import a
@@ -82,13 +83,16 @@ export async function reauth(request: Request): Promise<Response> {
   } catch {
     return error("Invalid request body", 400);
   }
-  const accessToken = await accessTokenForUserItem(user.id, itemId);
-  if (!accessToken) return error("Account not found", 404);
+  const item = await linkedItemForUser(user.id, itemId);
+  if (!item) return error("Account not found", 404);
 
   try {
-    const result = await getDataProvider().reauth({
+    // Re-auth must target the item's own provider. Using the process-wide
+    // DATA_PROVIDER would send a Plaid access token into the mock provider (or
+    // the reverse) whenever the env drifts from the provider used at link time.
+    const result = await getDataProvider(item.provider).reauth({
       userId: user.id,
-      accessToken,
+      accessToken: decryptAccessToken(item.encryptedAccessToken),
       webhookUrl: getHubServerConfig().webhookUrl,
     });
     return Response.json(result);
