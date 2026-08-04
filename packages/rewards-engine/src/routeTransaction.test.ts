@@ -83,6 +83,92 @@ describe("mapMccToCategory", () => {
   });
 });
 
+describe("fine_dining aliases to dining", () => {
+  const FLAT_3: CardProduct = {
+    cardId: "flat_3",
+    issuer: "Sample",
+    displayName: "Flat 3%",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "visa",
+    rewards: [{ category: "other", multiplier: 3 }],
+  };
+
+  it("does not drop dining bonuses when merchant is labeled fine_dining", () => {
+    // Without aliasing, fine_dining falls through to `other` and Flat 3% beats
+    // Cobalt's 1x base — wrong card on a steakhouse check.
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 200,
+          merchantName: "The Keg",
+          mcc: "5812",
+          merchantId: "the_keg",
+          category: "fine_dining",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, FLAT_3],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.category).toBe("dining");
+    expect(decision.selectedCardId).toBe("amex_cobalt");
+    expect(decision.multiplier).toBe(5);
+    // $200 × 5 × 2¢ = 2000¢
+    expect(decision.estimatedRewardValueCents).toBe(2000);
+  });
+});
+
+describe("Walmart discount coding (not groceries)", () => {
+  const GROCERY_4: CardProduct = {
+    cardId: "grocery_4",
+    issuer: "Sample",
+    displayName: "4% Groceries",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "visa",
+    rewards: [
+      { category: "groceries", multiplier: 4 },
+      { category: "other", multiplier: 1 },
+    ],
+  };
+  const FLAT_2: CardProduct = {
+    cardId: "flat_2",
+    issuer: "Sample",
+    displayName: "Flat 2%",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "visa",
+    rewards: [{ category: "other", multiplier: 2 }],
+  };
+
+  it("ranks a flat card over grocery-bonus when Walmart is other/5310", () => {
+    // Supercenters overwhelmingly code 5310. Treating the host as groceries
+    // would pick grocery_4 at 4% even though the network pays base.
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 100,
+          merchantName: "Walmart",
+          mcc: "5310",
+          merchantId: "walmart",
+          category: "other",
+        },
+        portfolio: {
+          cards: [GROCERY_4, FLAT_2],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.category).toBe("other");
+    expect(decision.selectedCardId).toBe("flat_2");
+    expect(decision.multiplier).toBe(2);
+  });
+});
+
 describe("effectiveMultiplier", () => {
   const dining = { category: "dining" as const, multiplier: 5, capMonthly: 500 };
   const other = { category: "other" as const, multiplier: 1 };

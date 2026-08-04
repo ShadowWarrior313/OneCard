@@ -7,6 +7,7 @@ import type {
   TransactionInput,
 } from "@onecard/shared-types";
 import { getRewardRule } from "./getRewardRule.js";
+import { normalizeRewardCategory } from "./resolveCategory.js";
 
 const DEFAULT_POINT_VALUE_CENTS = 1;
 
@@ -108,8 +109,9 @@ export function estimateRewardForCard(
   category: RewardCategory,
   portfolio: PortfolioContext,
 ): RewardEstimate {
+  const rewardCategory = normalizeRewardCategory(category);
   const merchantId = transaction.merchantId;
-  const rule = getRewardRule(card, category, merchantId);
+  const rule = getRewardRule(card, rewardCategory, merchantId);
   const otherRule = getRewardRule(card, "other", merchantId);
   const spend = getCategorySpend(
     portfolio.usage,
@@ -139,13 +141,13 @@ export function estimateRewardForCard(
       : "";
 
   const reason = cappedOut
-    ? `${card.displayName}: ${otherRule.multiplier}x on ${category} (category cap reached)${capNote}`
-    : `${card.displayName}: ${multiplier}x ${card.currency} on ${category}${partnerNote}${capNote}`;
+    ? `${card.displayName}: ${otherRule.multiplier}x on ${rewardCategory} (category cap reached)${capNote}`
+    : `${card.displayName}: ${multiplier}x ${card.currency} on ${rewardCategory}${partnerNote}${capNote}`;
 
   return {
     cardId: card.cardId,
     displayName: card.displayName,
-    category,
+    category: rewardCategory,
     multiplier,
     estimatedRewardValueCents: Math.round(valueCents * 100) / 100,
     cappedOut,

@@ -56,7 +56,10 @@ const DOMAIN_RULES: Array<{
   { match: "loblaws", category: "groceries", mcc: "5411", merchantId: "loblaws", merchantName: "Loblaws" },
   { match: "nofrills", category: "groceries", mcc: "5411", merchantId: "no_frills", merchantName: "No Frills" },
   { match: "realcanadiansuperstore", category: "groceries", mcc: "5411", merchantId: "superstore", merchantName: "Real Canadian Superstore" },
-  { match: "walmart", category: "groceries", mcc: "5411", merchantId: "walmart_grocery", merchantName: "Walmart" },
+  // Supercenters overwhelmingly code as discount/general merchandise (5310),
+  // not grocery (5411). Treating all walmart.* hosts as groceries over-ranks
+  // grocery-bonus cards that do not pay grocery multipliers at Walmart.
+  { match: "walmart", category: "other", mcc: "5310", merchantId: "walmart", merchantName: "Walmart" },
   { match: "instacart", category: "groceries", mcc: "5411", merchantId: "instacart", merchantName: "Instacart" },
   { match: "metro.ca", category: "groceries", mcc: "5411", merchantId: "metro", merchantName: "Metro" },
   { match: "sobeys", category: "groceries", mcc: "5411", merchantId: "sobeys", merchantName: "Sobeys" },
@@ -110,15 +113,15 @@ const DOMAIN_RULES: Array<{
   { match: "applebees", category: "dining", mcc: "5812", merchantId: "applebees", merchantName: "Applebee's" },
   { match: "chilis", category: "dining", mcc: "5812", merchantId: "chilis", merchantName: "Chili's" },
   { match: "outback", category: "dining", mcc: "5812", merchantId: "outback", merchantName: "Outback Steakhouse" },
-  // Fine dining — still rewards as dining so card dining bonuses apply
-  { match: "thekeg", category: "fine_dining", mcc: "5812", merchantId: "the_keg", merchantName: "The Keg" },
-  { match: "cactusclub", category: "fine_dining", mcc: "5812", merchantId: "cactus_club", merchantName: "Cactus Club" },
-  { match: "joeyrestaurants", category: "fine_dining", mcc: "5812", merchantId: "joey", merchantName: "Joey Restaurants" },
-  { match: "ruthschris", category: "fine_dining", mcc: "5812", merchantId: "ruths_chris", merchantName: "Ruth's Chris Steak House" },
-  { match: "mortons", category: "fine_dining", mcc: "5812", merchantId: "mortons", merchantName: "Morton's Steakhouse" },
-  { match: "opentable", category: "fine_dining", mcc: "5812", merchantId: "opentable", merchantName: "OpenTable" },
-  { match: "nobu", category: "fine_dining", mcc: "5812", merchantId: "nobu", merchantName: "Nobu" },
-  { match: "canoe-restaurant", category: "fine_dining", mcc: "5812", merchantId: "canoe", merchantName: "Canoe Restaurant" },
+  // Steakhouses / fine dining still post as dining for issuer earn rates.
+  { match: "thekeg", category: "dining", mcc: "5812", merchantId: "the_keg", merchantName: "The Keg" },
+  { match: "cactusclub", category: "dining", mcc: "5812", merchantId: "cactus_club", merchantName: "Cactus Club" },
+  { match: "joeyrestaurants", category: "dining", mcc: "5812", merchantId: "joey", merchantName: "Joey Restaurants" },
+  { match: "ruthschris", category: "dining", mcc: "5812", merchantId: "ruths_chris", merchantName: "Ruth's Chris Steak House" },
+  { match: "mortons", category: "dining", mcc: "5812", merchantId: "mortons", merchantName: "Morton's Steakhouse" },
+  { match: "opentable", category: "dining", mcc: "5812", merchantId: "opentable", merchantName: "OpenTable" },
+  { match: "nobu", category: "dining", mcc: "5812", merchantId: "nobu", merchantName: "Nobu" },
+  { match: "canoe-restaurant", category: "dining", mcc: "5812", merchantId: "canoe", merchantName: "Canoe Restaurant" },
 
   // ── Gas ──────────────────────────────────────────────────────────────────
   { match: "shell", category: "gas", mcc: "5541", merchantId: "shell", merchantName: "Shell" },
