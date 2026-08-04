@@ -121,6 +121,54 @@ describe("fine_dining aliases to dining", () => {
   });
 });
 
+describe("Walmart discount coding (not groceries)", () => {
+  const GROCERY_4: CardProduct = {
+    cardId: "grocery_4",
+    issuer: "Sample",
+    displayName: "4% Groceries",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "visa",
+    rewards: [
+      { category: "groceries", multiplier: 4 },
+      { category: "other", multiplier: 1 },
+    ],
+  };
+  const FLAT_2: CardProduct = {
+    cardId: "flat_2",
+    issuer: "Sample",
+    displayName: "Flat 2%",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "visa",
+    rewards: [{ category: "other", multiplier: 2 }],
+  };
+
+  it("ranks a flat card over grocery-bonus when Walmart is other/5310", () => {
+    // Supercenters overwhelmingly code 5310. Treating the host as groceries
+    // would pick grocery_4 at 4% even though the network pays base.
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 100,
+          merchantName: "Walmart",
+          mcc: "5310",
+          merchantId: "walmart",
+          category: "other",
+        },
+        portfolio: {
+          cards: [GROCERY_4, FLAT_2],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.category).toBe("other");
+    expect(decision.selectedCardId).toBe("flat_2");
+    expect(decision.multiplier).toBe(2);
+  });
+});
+
 describe("effectiveMultiplier", () => {
   const dining = { category: "dining" as const, multiplier: 5, capMonthly: 500 };
   const other = { category: "other" as const, multiplier: 1 };
