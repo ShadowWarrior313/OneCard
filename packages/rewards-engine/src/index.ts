@@ -1,6 +1,6 @@
 export { routeTransaction } from "./routeTransaction.js";
 export { mapMccToCategory } from "./mapMccToCategory.js";
-export { resolveCategory } from "./resolveCategory.js";
+export { normalizeRewardCategory, resolveCategory } from "./resolveCategory.js";
 export { getModeMetadata } from "./modes/index.js";
 export {
   estimateRewardForCard,
