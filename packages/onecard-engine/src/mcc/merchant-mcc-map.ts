@@ -133,7 +133,10 @@ export const MERCHANTS: MerchantEntry[] = [
     key: "marriott",
     displayName: "Marriott Hotel",
     domains: ["marriott.com"],
-    nameMatches: ["marriott", "hotel", "resort", "inn & suites"],
+    // Only Marriott-branded descriptors — broad "hotel"/"resort" fragments
+    // falsely claim every lodging (and many restaurants named "Hotel …") as
+    // Marriott host-venue bleed.
+    nameMatches: ["marriott", "marriott hotel", "marriott resort"],
     // Sundry-shop candy, minibar, etc. tend to code as the hotel itself.
     priors: { "7011": 0.85, "5999": 0.1, "5812": 0.05 },
     subVenues: {
@@ -144,11 +147,34 @@ export const MERCHANTS: MerchantEntry[] = [
     hostVenue: true,
   },
 
+  // Generic lodging — fail closed to lodging MCC without inventing a brand.
+  {
+    key: "hotel_generic",
+    displayName: "Hotel / lodging",
+    nameMatches: ["hotel", "motel", "resort", "inn & suites"],
+    priors: { "7011": 0.9, "5812": 0.05, "5999": 0.05 },
+    priorStrength: 0.7,
+    hostVenue: true,
+  },
+
+  // Standalone QSR — must NOT share nameMatches with the Mobil composite below.
+  {
+    key: "burger_king",
+    displayName: "Burger King",
+    domains: ["bk.com", "burgerking.com", "burgerking.ca"],
+    nameMatches: ["burger king", "burgerking"],
+    priors: { "5814": 0.95, "5812": 0.05 },
+    priorStrength: 0.95,
+  },
+
   // ---- Composite gas + QSR --------------------------------------------------
   {
     key: "mobil_bk",
     displayName: "Mobil + Burger King (truck stop)",
-    nameMatches: ["mobil", "burger king", "travel center", "truck stop"],
+    // Do not match bare "burger king" here — that is a normal QSR (see
+    // burger_king above). Composite only when the Mobil/truck-stop signal is
+    // present; use merchantKey/subVenue when the host knows both brands.
+    nameMatches: ["mobil", "travel center", "truck stop"],
     // Genuine coin-flip: pay at the pump (gas) vs go inside for food (fast food).
     // Slight default tilt to the pump.
     priors: { "5542": 0.55, "5814": 0.45 },

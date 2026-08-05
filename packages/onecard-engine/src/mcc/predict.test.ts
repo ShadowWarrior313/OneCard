@@ -78,3 +78,32 @@ describe("ambiguity flags", () => {
     expect(predictMcc({ merchantKey: "safeway" }).ambiguous).toBe(false);
   });
 });
+
+describe("name-match false positives must not steal real merchants", () => {
+  it("standalone Burger King is fast food, not the Mobil truck-stop composite", () => {
+    const p = predictMcc({
+      merchantName: "BURGER KING #4521",
+      channel: "in_person",
+    });
+    expect(p.merchantName).toBe("Burger King");
+    expect(p.candidates[0]!.mcc).toBe("5814");
+    expect(p.candidates[0]!.category).toBe("fast_food");
+    expect(p.flags.composite).toBe(false);
+  });
+
+  it("generic lodging is not claimed as Marriott", () => {
+    const p = predictMcc({
+      merchantName: "BEST WESTERN HOTEL DOWNTOWN",
+      channel: "in_person",
+    });
+    expect(p.merchantName).toBe("Hotel / lodging");
+    expect(p.candidates[0]!.mcc).toBe("7011");
+    expect(p.signalsUsed.some((s) => s.includes("merchant:marriott"))).toBe(false);
+  });
+
+  it("Marriott-branded names still resolve to Marriott", () => {
+    const p = predictMcc({ merchantName: "Toronto Marriott City Centre" });
+    expect(p.merchantName).toBe("Marriott Hotel");
+    expect(p.candidates[0]!.mcc).toBe("7011");
+  });
+});
