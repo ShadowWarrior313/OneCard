@@ -135,7 +135,12 @@ export function computeRewardsSummary(input: {
   month?: string;
 }): RewardsSummaryData {
   const month = input.month ?? new Date().toISOString().slice(0, 7);
-  const usage: UsageState = {};
+  // Actual path depletes the cards the user really used. Optimal path depletes
+  // the card that would have been chosen each time — otherwise summing
+  // independent per-txn counterfactuals reuses the same bonus cap N times and
+  // massively overstates "rewards left on the table".
+  const usageActual: UsageState = {};
+  const usageOptimal: UsageState = {};
   const rewarded: RewardedTransaction[] = [];
   const categories = new Map<CardRewardCategoryKey, RewardsCategoryBreakdown>();
 
@@ -145,15 +150,20 @@ export function computeRewardsSummary(input: {
 
   for (const transaction of spendTransactions) {
     const cardId = actualCardId(transaction, input.accounts);
-    const earned = cardId ? expectedReward(transaction, cardId, usage) : 0;
-    const best = bestHeldCard(transaction, input.walletCardIds, usage);
+    const earned = cardId ? expectedReward(transaction, cardId, usageActual) : 0;
+    const best = bestHeldCard(transaction, input.walletCardIds, usageOptimal);
     const optimal = cardId ? Math.max(earned, best.reward) : 0;
     const missed = Math.max(0, optimal - earned);
+    const optimalCardId = !cardId
+      ? undefined
+      : earned >= best.reward
+        ? cardId
+        : best.cardId;
     if (transaction.date.startsWith(month)) {
       rewarded.push({
         transaction,
         actualCardId: cardId,
-        optimalCardId: best.cardId,
+        optimalCardId,
         earned,
         optimal,
         missed,
@@ -165,7 +175,10 @@ export function computeRewardsSummary(input: {
       row.missed += missed;
       categories.set(category, row);
     }
-    if (cardId) applyUsage(transaction, cardId, usage);
+    if (cardId) applyUsage(transaction, cardId, usageActual);
+    // Unmapped txns force optimal=$0 (no card attribution); do not deplete the
+    // counterfactual path for them either.
+    if (cardId && optimalCardId) applyUsage(transaction, optimalCardId, usageOptimal);
   }
 
   return {
