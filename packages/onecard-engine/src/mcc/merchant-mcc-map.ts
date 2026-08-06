@@ -148,7 +148,11 @@ export const MERCHANTS: MerchantEntry[] = [
   {
     key: "mobil_bk",
     displayName: "Mobil + Burger King (truck stop)",
-    nameMatches: ["mobil", "burger king", "travel center", "truck stop"],
+    // "mobil" must be a whole token — bare substring matching falsely claims
+    // BELL/ROGERS/TELUS MOBILITY, MOBILE …, and AUTOMOBILE as gas/QSR.
+    // "exxonmobil" is one token so it is listed explicitly. Bare "burger king"
+    // on this composite is a separate known issue (standalone QSR → gas).
+    nameMatches: ["mobil", "exxonmobil", "burger king", "travel center", "truck stop"],
     // Genuine coin-flip: pay at the pump (gas) vs go inside for food (fast food).
     // Slight default tilt to the pump.
     priors: { "5542": 0.55, "5814": 0.45 },
@@ -201,6 +205,23 @@ export function normalizeDomain(raw: string): string {
   return d;
 }
 
+/**
+ * Match a curated name fragment against a merchant descriptor.
+ *
+ * Multi-word / punctuated fragments keep substring includes (e.g. "burger king",
+ * "wal-mart", "inn & suites"). Single-token fragments require a whole-token
+ * match so short brands like "mobil" / "target" cannot steal "mobility",
+ * "mobile", "automobile", or "targeted …".
+ */
+export function nameFragmentMatches(merchantName: string, fragment: string): boolean {
+  const name = merchantName.toLowerCase();
+  const frag = fragment.toLowerCase();
+  if (!frag) return false;
+  if (/[^a-z0-9]/.test(frag)) return name.includes(frag);
+  const pattern = new RegExp(`(?:^|[^a-z0-9])${frag}(?:[^a-z0-9]|$)`);
+  return pattern.test(name);
+}
+
 export interface MerchantResolution {
   entry: MerchantEntry;
   /** How we matched — recorded in signalsUsed for explainability. */
@@ -227,7 +248,7 @@ export function resolveMerchant(input: {
   if (input.merchantName) {
     const name = input.merchantName.toLowerCase();
     for (const entry of MERCHANTS) {
-      if (entry.nameMatches?.some((frag) => name.includes(frag))) {
+      if (entry.nameMatches?.some((frag) => nameFragmentMatches(name, frag))) {
         return { entry, via: "name" };
       }
     }
