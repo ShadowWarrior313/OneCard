@@ -86,13 +86,8 @@ export const MCC_CATEGORY_MAP: Record<string, RewardCategory> = {
 };
 
 export const STORE_OFFER_RULES: StoreOfferRule[] = [
-  {
-    merchantId: "walmart",
-    cardId: "bmo_cashback_world_elite",
-    bonusRate: 5,
-    unit: "%",
-    note: "Example store offer slot: BMO grocery bonus at Walmart-coded grocery checkout.",
-  },
+  // Curated store offers go here. Do not invent grocery bonuses for merchants
+  // that predominantly code as discount/general merchandise (e.g. Walmart 5310).
 ];
 
 export function categoryForMcc(mcc: string): RewardCategory {
