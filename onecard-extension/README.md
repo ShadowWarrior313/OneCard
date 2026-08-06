@@ -33,7 +33,7 @@ Open:
 
 Expected manual checks:
 
-- Walmart-like page: detects checkout, resolves Walmart to MCC `5411`, recommends the grocery-bonus card, and explains that a razor/household cart still posts on the merchant category.
+- Walmart-like page: detects checkout, resolves Walmart primarily to MCC `5310` (discount/retail), recommends a flat/base-rate card rather than a grocery-bonus card, and explains that a razor/household cart still posts on the merchant category.
 - Amazon-like page: detects checkout, resolves Amazon to its curated MCC candidate, and recommends from that MCC category.
 - Generic Stripe-style page: detects checkout and degrades to generic/localhost merchant mapping.
 - Non-checkout page: no banner is shown.

@@ -18,14 +18,14 @@ export const MERCHANT_MCC_MAP: MerchantMccEntry[] = [
     domains: ["walmart.com", "walmart.ca"],
     candidates: [
       {
-        mcc: "5411",
-        confidence: 0.72,
-        reason: "Walmart grocery checkout commonly rewards as grocery/supermarket.",
+        mcc: "5310",
+        confidence: 0.8,
+        reason: "Walmart supercenters overwhelmingly code as discount/general merchandise (5310), not grocery.",
       },
       {
-        mcc: "5310",
-        confidence: 0.28,
-        reason: "General Walmart merchandise can code as discount/retail.",
+        mcc: "5411",
+        confidence: 0.2,
+        reason: "A minority of Walmart authorizations code as supermarket/grocery.",
       },
     ],
   },

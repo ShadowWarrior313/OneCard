@@ -397,9 +397,51 @@ function normalizeHost(hostname: string): string {
   return hostname.toLowerCase().replace(/^www\./, "");
 }
 
+/**
+ * Match DOMAIN_RULES entries against a hostname without raw substring collisions.
+ *
+ * Historically `host.includes(match)` mis-routed real checkouts — e.g.
+ * `singaporeair.com` contains `"gap"` and was labeled Gap/clothing, so travel
+ * bonus cards fell through to base rate at an airline pay page.
+ *
+ * - Dotted matches (`metro.ca`, `music.apple`, `article.com`): DNS-label
+ *   boundaries only (prefix / suffix / exact), never mid-label embeds like
+ *   `particle.com` ⊃ `article.com`.
+ * - Bare brand tokens (`gap`, `bell`, `shell`): a full DNS label, or a
+ *   hyphen-bounded label token (`united-airlines`), not a substring inside
+ *   another word (`singaporeair`, `doorbell`, `powershellgallery`).
+ * - Path-qualified matches (`youtube.com/premium`) keep includes() for when a
+ *   full URL is passed; hostname-only callers will not hit them.
+ */
+export function hostMatchesDomainRule(hostname: string, match: string): boolean {
+  const host = normalizeHost(hostname);
+  const needle = match.toLowerCase();
+  if (!host || !needle) return false;
+
+  if (needle.includes("/")) {
+    return host.includes(needle);
+  }
+
+  if (needle.includes(".")) {
+    return (
+      host === needle ||
+      host.startsWith(`${needle}.`) ||
+      host.endsWith(`.${needle}`) ||
+      host.includes(`.${needle}.`)
+    );
+  }
+
+  return host.split(".").some(
+    (label) =>
+      label === needle ||
+      label.startsWith(`${needle}-`) ||
+      label.endsWith(`-${needle}`),
+  );
+}
+
 export function categoryForDomain(hostname: string): DomainCategory {
   const host = normalizeHost(hostname);
-  const rule = DOMAIN_RULES.find((entry) => host.includes(entry.match));
+  const rule = DOMAIN_RULES.find((entry) => hostMatchesDomainRule(host, entry.match));
   return rule ?? DEFAULT_MERCHANT;
 }
 

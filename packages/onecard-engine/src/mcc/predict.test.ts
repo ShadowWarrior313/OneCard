@@ -78,3 +78,34 @@ describe("ambiguity flags", () => {
     expect(predictMcc({ merchantKey: "safeway" }).ambiguous).toBe(false);
   });
 });
+
+describe("name-match whole-token guard for short brand fragments", () => {
+  it("does not classify telecom MOBILITY / MOBILE / AUTOMOBILE as Mobil gas", () => {
+    for (const merchantName of [
+      "BELL MOBILITY #123",
+      "ROGERS MOBILITY",
+      "TELUS MOBILITY",
+      "MOBILE DETAILING TORONTO",
+      "CAA AUTOMOBILE CLUB",
+    ]) {
+      const p = predictMcc({ merchantName, channel: "in_person" });
+      expect(p.signalsUsed.some((s) => s.includes("merchant:mobil_bk"))).toBe(false);
+      expect(p.candidates[0]!.mcc).not.toBe("5542");
+    }
+  });
+
+  it("still resolves real Mobil / ExxonMobil pump descriptors", () => {
+    expect(predictMcc({ merchantName: "MOBIL STATION 4421" }).merchantName).toBe(
+      "Mobil + Burger King (truck stop)",
+    );
+    expect(predictMcc({ merchantName: "EXXONMOBIL" }).merchantName).toBe(
+      "Mobil + Burger King (truck stop)",
+    );
+    expect(predictMcc({ merchantName: "MOBIL #889" }).candidates[0]!.mcc).toBe("5542");
+  });
+
+  it("does not classify TARGETED… as Target big-box", () => {
+    const p = predictMcc({ merchantName: "TARGETED MARKETING INC", channel: "in_person" });
+    expect(p.signalsUsed.some((s) => s.includes("merchant:target"))).toBe(false);
+  });
+});
