@@ -205,6 +205,68 @@ describe("routeTransaction", () => {
     expect(decision.multiplier).toBe(1.5);
   });
 
+  it("picks transit-bonus card when merchant is labeled transportation (not other)", () => {
+    // Catalog bug: Presto/Uber were category "other", so Cobalt's 1× base beat
+    // CIBC's 4% transit bonus. resolveCategory prefers merchant.category over MCC.
+    const cibcTransit: CardProduct = {
+      ...CIBC_DIVIDEND,
+      cardId: "cibc_dividend_infinite",
+      displayName: "CIBC Dividend Visa Infinite Card",
+      rewards: [
+        { category: "other", multiplier: 1 },
+        {
+          category: "transportation",
+          multiplier: 4,
+          capMonthly: 80,
+          sharedCapGroup: "cibc_div_inf_gas_transit",
+        },
+        {
+          category: "gas",
+          multiplier: 4,
+          capMonthly: 80,
+          sharedCapGroup: "cibc_div_inf_gas_transit",
+        },
+      ],
+    };
+    const asOther = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 40,
+          merchantName: "Presto",
+          mcc: "4111",
+          merchantId: "presto",
+          category: "other",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, cibcTransit],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(asOther.selectedCardId).toBe("amex_cobalt");
+
+    const asTransit = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 40,
+          merchantName: "Presto",
+          mcc: "4111",
+          merchantId: "presto",
+          category: "transportation",
+        },
+        portfolio: {
+          cards: [AMEX_COBALT, cibcTransit],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(asTransit.selectedCardId).toBe("cibc_dividend_infinite");
+    expect(asTransit.category).toBe("transportation");
+    expect(asTransit.multiplier).toBe(4);
+  });
+
   it("respects excludedCardIds", () => {
     const decision = routeTransaction(
       ctx({
