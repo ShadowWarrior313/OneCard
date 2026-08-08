@@ -1,5 +1,14 @@
-import { estimateRewardForCard, routeTransaction } from "@onecard/rewards-engine";
-import type { CardProduct, PortfolioContext, RewardCategory } from "@onecard/shared-types";
+import {
+  estimateRewardForCard,
+  getRewardRule,
+  routeTransaction,
+} from "@onecard/rewards-engine";
+import type {
+  CardProduct,
+  CategoryUsage,
+  PortfolioContext,
+  RewardCategory,
+} from "@onecard/shared-types";
 import { merchantById } from "@/data/merchants";
 
 export interface SpendCategoryConfig {
@@ -42,14 +51,47 @@ export interface AnnualRewardsComparison {
   defaultCardName: string;
 }
 
-function emptyPortfolio(
+/**
+ * Apply one month's category spend to the usage ledger so sharedCapGroup
+ * (RBC Ion combined bonus, CIBC gas+transit, …) depletes across categories
+ * instead of resetting for every independent estimate.
+ */
+export function applyEstimateUsage(
+  usage: CategoryUsage[],
+  cardId: string,
+  category: RewardCategory,
+  amount: number,
+  card: CardProduct,
+): void {
+  const rule = getRewardRule(card, category);
+  const existing = usage.find(
+    (entry) =>
+      entry.cardId === cardId &&
+      (rule.sharedCapGroup
+        ? entry.sharedCapGroup === rule.sharedCapGroup
+        : !entry.sharedCapGroup && entry.category === category),
+  );
+  if (existing) {
+    existing.spendThisPeriod += amount;
+    return;
+  }
+  usage.push({
+    cardId,
+    category: rule.category,
+    spendThisPeriod: amount,
+    sharedCapGroup: rule.sharedCapGroup,
+  });
+}
+
+function portfolioWithUsage(
   cards: CardProduct[],
   defaultCardId: string | undefined,
+  usage: CategoryUsage[],
 ): PortfolioContext {
   return {
     cards,
     defaultCardId,
-    usage: [],
+    usage,
     preferences: { preferCashback: false },
   };
 }
@@ -61,9 +103,14 @@ export function computeAnnualRewardsComparison(
 ): AnnualRewardsComparison | null {
   if (cards.length === 0) return null;
 
-  const portfolio = emptyPortfolio(cards, defaultCardId);
   const defaultCard =
     cards.find((c) => c.cardId === defaultCardId) ?? cards[0]!;
+
+  // Separate ledgers: routed path depletes whichever card wins each category;
+  // default path depletes only the default card. Shared caps must not reset
+  // between independent category estimates.
+  const usageRouted: CategoryUsage[] = [];
+  const usageDefault: CategoryUsage[] = [];
 
   let defaultMonthly = 0;
   let routedMonthly = 0;
@@ -86,18 +133,29 @@ export function computeAnnualRewardsComparison(
     const decision = routeTransaction({
       mode: "virtual_provisioning",
       transaction,
-      portfolio,
+      portfolio: portfolioWithUsage(cards, defaultCardId, usageRouted),
     });
 
     routedMonthly += decision.estimatedRewardValueCents / 100;
+    const winner = cards.find((c) => c.cardId === decision.selectedCardId);
+    if (winner) {
+      applyEstimateUsage(usageRouted, winner.cardId, row.category, amount, winner);
+    }
 
     const defaultEstimate = estimateRewardForCard(
       defaultCard,
       transaction,
       row.category,
-      portfolio,
+      portfolioWithUsage(cards, defaultCardId, usageDefault),
     );
     defaultMonthly += defaultEstimate.estimatedRewardValueCents / 100;
+    applyEstimateUsage(
+      usageDefault,
+      defaultCard.cardId,
+      row.category,
+      amount,
+      defaultCard,
+    );
   }
 
   const defaultAnnual = Math.round(defaultMonthly * 12 * 100) / 100;
