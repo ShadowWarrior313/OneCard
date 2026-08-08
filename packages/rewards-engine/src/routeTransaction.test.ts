@@ -1,9 +1,46 @@
 import { describe, it, expect } from "vitest";
 import { mapMccToCategory } from "./mapMccToCategory.js";
 import { routeTransaction } from "./routeTransaction.js";
-import { effectiveMultiplier } from "./estimateReward.js";
+import { effectiveMultiplier, getRewardRule } from "./estimateReward.js";
 import { AMEX_COBALT, CIBC_DIVIDEND } from "./fixtures/cards.js";
 import type { CardProduct, RoutingContext } from "@onecard/shared-types";
+
+/** Mirrors CIBC Costco: elevated gas at Costco pumps, lower store-wide earn in-warehouse. */
+const CIBC_COSTCO: CardProduct = {
+  cardId: "cibc_costco",
+  issuer: "CIBC",
+  displayName: "CIBC Costco Mastercard",
+  currency: "cashback %",
+  pointValueCents: 1,
+  network: "mastercard",
+  rewards: [
+    { category: "other", multiplier: 1 },
+    {
+      category: "gas",
+      multiplier: 3,
+      merchantIds: ["costco", "costco_wholesale"],
+      capMonthly: 5000,
+    },
+    { category: "gas", multiplier: 2, capMonthly: 5000 },
+    {
+      category: "other",
+      multiplier: 2,
+      merchantIds: ["costco", "costco_wholesale"],
+      capMonthly: 8000,
+    },
+  ],
+};
+
+const FLAT_2_5: CardProduct = {
+  cardId: "flat_2_5",
+  issuer: "Test",
+  displayName: "Flat 2.5% Card",
+  currency: "cashback %",
+  pointValueCents: 1,
+  // Mastercard: Costco CA acceptance filters Visa/Amex out of the portfolio.
+  network: "mastercard",
+  rewards: [{ category: "other", multiplier: 2.5 }],
+};
 
 const SCOTIA_SCENE: CardProduct = {
   cardId: "scotia_scene",
@@ -109,7 +146,64 @@ describe("effectiveMultiplier", () => {
   });
 });
 
+describe("getRewardRule merchant-specific categories", () => {
+  it("does not apply Costco gas partner rate to Costco warehouse spend", () => {
+    expect(getRewardRule(CIBC_COSTCO, "other", "costco").multiplier).toBe(2);
+    expect(getRewardRule(CIBC_COSTCO, "groceries", "costco").multiplier).toBe(2);
+    expect(getRewardRule(CIBC_COSTCO, "gas", "costco").multiplier).toBe(3);
+  });
+
+  it("keeps store-wide partner earn (Scene+ at Cineplex) for non-other categories", () => {
+    expect(getRewardRule(SCOTIA_SCENE, "entertainment", "cineplex").multiplier).toBe(2);
+    expect(getRewardRule(SCOTIA_SCENE, "other", "cineplex").multiplier).toBe(2);
+  });
+});
+
 describe("routeTransaction", () => {
+  it("does not recommend CIBC Costco gas rate over a flat 2.5% card at Costco warehouse", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 200,
+          merchantName: "Costco",
+          mcc: "5300",
+          merchantId: "costco",
+          category: "other",
+        },
+        portfolio: {
+          cards: [CIBC_COSTCO, FLAT_2_5],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    // Real Costco warehouse earn is 2%; a flat 2.5% card must win. The old
+    // max-merchant-multiplier bug scored warehouse at gas 3% and flipped this.
+    expect(decision.selectedCardId).toBe("flat_2_5");
+    expect(decision.multiplier).toBe(2.5);
+  });
+
+  it("still applies CIBC Costco 3% at Costco fuel", () => {
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 80,
+          merchantName: "Costco Gas",
+          mcc: "5542",
+          merchantId: "costco",
+          category: "gas",
+        },
+        portfolio: {
+          cards: [CIBC_COSTCO, FLAT_2_5],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.selectedCardId).toBe("cibc_costco");
+    expect(decision.multiplier).toBe(3);
+  });
+
   it("picks AMEX Cobalt for dining (5x MR beats 1x cashback)", () => {
     const decision = routeTransaction(ctx());
     expect(decision.selectedCardId).toBe("amex_cobalt");
