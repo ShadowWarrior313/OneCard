@@ -9,7 +9,7 @@ import type {
   PortfolioContext,
   RewardCategory,
 } from "@onecard/shared-types";
-import { merchantById } from "@/data/merchants";
+import { merchantById } from "../data/merchants";
 
 export interface SpendCategoryConfig {
   category: RewardCategory;

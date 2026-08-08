@@ -1,7 +1,7 @@
 import { predictMcc, type Category as EngineCategory } from "@onecard/onecard-engine";
 import type { RewardCategory } from "@onecard/shared-types";
 import type { CardRewardCategoryKey } from "@/data/cardRewards";
-import { resolveHubMerchant } from "./resolveHubMerchant.ts";
+import { resolveHubMerchant } from "./resolveHubMerchant";
 
 /**
  * Reward-category derivation — the decision layer Plaid does not build.

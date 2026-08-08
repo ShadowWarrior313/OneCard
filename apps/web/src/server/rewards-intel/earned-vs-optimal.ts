@@ -2,7 +2,7 @@ import type { SafeHubTransaction, SafeLinkedAccount } from "@/data/schema";
 import type { CardRewardCategoryKey, CategoryReward } from "@/data/cardRewards";
 import { getCardRewardConfig } from "@/data/cardRewards";
 import { normalizedRate, rewardForCategory } from "./rules-data";
-import { resolveHubMerchantId } from "./resolveHubMerchant.ts";
+import { resolveHubMerchantId } from "./resolveHubMerchant";
 
 /**
  * Earned-vs-optimal — "rewards left on the table".
