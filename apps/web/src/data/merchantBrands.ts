@@ -33,7 +33,11 @@ export const MERCHANT_BRAND_DEFS: MerchantBrandDef[] = [
   // Groceries
   { id: "loblaws", name: "Loblaws", mcc: "5411", category: "groceries", group: "Groceries", logoDomain: "loblaws.ca" },
   { id: "metro", name: "Metro", mcc: "5411", category: "groceries", group: "Groceries", logoDomain: "metro.ca" },
-  { id: "costco", name: "Costco", mcc: "5300", category: "groceries", group: "Groceries", logoDomain: "costco.ca" },
+  // Warehouse clubs overwhelmingly authorize as MCC 5300 (wholesale), not
+  // supermarket 5411. Forcing "groceries" made grocery-bonus cards win at
+  // Costco when issuers pay base/warehouse rates (Amex Cobalt explicitly
+  // excludes Costco from 5× groceries).
+  { id: "costco", name: "Costco", mcc: "5300", category: "other", group: "Groceries", logoDomain: "costco.ca" },
   { id: "sobeys", name: "Sobeys", mcc: "5411", category: "groceries", group: "Groceries", logoDomain: "sobeys.com" },
   { id: "walmart_grocery", name: "Walmart Grocery", shortName: "Walmart", mcc: "5411", category: "groceries", group: "Groceries", logoDomain: "walmart.ca" },
   { id: "no_frills", name: "No Frills", mcc: "5411", category: "groceries", group: "Groceries", logoDomain: "nofrills.ca" },

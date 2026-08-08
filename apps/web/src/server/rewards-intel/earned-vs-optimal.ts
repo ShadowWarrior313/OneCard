@@ -2,6 +2,7 @@ import type { SafeHubTransaction, SafeLinkedAccount } from "@/data/schema";
 import type { CardRewardCategoryKey, CategoryReward } from "@/data/cardRewards";
 import { getCardRewardConfig } from "@/data/cardRewards";
 import { normalizedRate, rewardForCategory } from "./rules-data";
+import { resolveHubMerchantId } from "./resolveHubMerchant";
 
 /**
  * Earned-vs-optimal — "rewards left on the table".
@@ -66,20 +67,50 @@ function usageKey(
   return `${cardId}:${bucket}:${period}`;
 }
 
+function merchantIdFor(transaction: SafeHubTransaction): string | undefined {
+  return (
+    transaction.categorized.merchantId ??
+    resolveHubMerchantId(transaction.merchantName, transaction.website)
+  );
+}
+
+/** Category reward after merchant exclusions (e.g. Cobalt groceries at Loblaws). */
+function rewardForTransactionCategory(
+  cardId: string,
+  category: CardRewardCategoryKey,
+  merchantId: string | undefined,
+): CategoryReward | undefined {
+  const reward = rewardForCategory(cardId, category);
+  if (
+    merchantId &&
+    reward?.excludedMerchantIds?.length &&
+    reward.excludedMerchantIds.includes(merchantId)
+  ) {
+    return rewardForCategory(cardId, "other");
+  }
+  return reward;
+}
+
 function effectiveRate(
   cardId: string,
   category: CardRewardCategoryKey,
   amount: number,
   date: string,
   usage: UsageState,
+  merchantId: string | undefined,
 ): number {
-  const reward = rewardForCategory(cardId, category);
+  const reward = rewardForTransactionCategory(cardId, category, merchantId);
   const config = getCardRewardConfig(cardId);
   if (!reward || !config) return 0;
-  const bonusRate = normalizedRate(cardId, category);
+  const excluded =
+    merchantId &&
+    rewardForCategory(cardId, category)?.excludedMerchantIds?.includes(merchantId);
+  const bonusRate = excluded
+    ? normalizedRate(cardId, "other")
+    : normalizedRate(cardId, category);
   const baseRate = normalizedRate(cardId, "other");
   const key = usageKey(cardId, category, reward, date);
-  if (!key || !reward.cap) return bonusRate;
+  if (!key || !reward.cap || excluded) return bonusRate;
   const remaining = Math.max(0, reward.cap.maxSpend - (usage[key] ?? 0));
   if (remaining <= 0) return baseRate;
   if (amount <= remaining) return bonusRate;
@@ -91,20 +122,36 @@ function expectedReward(
   cardId: string,
   usage: UsageState,
 ): number {
+  const merchantId = merchantIdFor(transaction);
   return transaction.categorized.candidates.reduce(
     (sum, candidate) =>
       sum +
       transaction.amount *
         candidate.probability *
-        effectiveRate(cardId, candidate.category, transaction.amount, transaction.date, usage),
+        effectiveRate(
+          cardId,
+          candidate.category,
+          transaction.amount,
+          transaction.date,
+          usage,
+          merchantId,
+        ),
     0,
   );
 }
 
 function applyUsage(transaction: SafeHubTransaction, cardId: string, usage: UsageState): void {
+  const merchantId = merchantIdFor(transaction);
   for (const candidate of transaction.categorized.candidates) {
-    const reward = rewardForCategory(cardId, candidate.category);
-    if (!reward) continue;
+    const reward = rewardForTransactionCategory(cardId, candidate.category, merchantId);
+    if (!reward?.cap?.period) continue;
+    // Excluded merchants earn at base — do not consume the bonus cap.
+    if (
+      merchantId &&
+      rewardForCategory(cardId, candidate.category)?.excludedMerchantIds?.includes(merchantId)
+    ) {
+      continue;
+    }
     const key = usageKey(cardId, candidate.category, reward, transaction.date);
     if (key) usage[key] = (usage[key] ?? 0) + transaction.amount * candidate.probability;
   }
