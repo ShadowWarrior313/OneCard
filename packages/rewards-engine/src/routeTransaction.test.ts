@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mapMccToCategory } from "./mapMccToCategory.js";
 import { routeTransaction } from "./routeTransaction.js";
-import { effectiveMultiplier } from "./estimateReward.js";
+import { effectiveMultiplier, getRewardRule } from "./estimateReward.js";
 import { AMEX_COBALT, CIBC_DIVIDEND } from "./fixtures/cards.js";
 import type { CardProduct, RoutingContext } from "@onecard/shared-types";
 
@@ -50,7 +50,7 @@ const PC_WORLD_ELITE: CardProduct = {
     {
       category: "groceries",
       multiplier: 4.5,
-      merchantIds: ["loblaws", "no_frills"],
+      merchantIds: ["loblaws", "no_frills", "superstore", "food_basics"],
     },
   ],
 };
@@ -161,6 +161,31 @@ describe("routeTransaction", () => {
       }),
     );
     expect(decision.selectedCardId).toBe("scotia_scene");
+    expect(decision.multiplier).toBe(2);
+  });
+
+  it("does not give PC Financial grocery rates at Walmart", () => {
+    expect(getRewardRule(PC_WORLD_ELITE, "groceries", "loblaws").multiplier).toBe(4.5);
+    expect(getRewardRule(PC_WORLD_ELITE, "groceries", "walmart_grocery").multiplier).toBe(1);
+
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 100,
+          merchantName: "Walmart Grocery",
+          mcc: "5411",
+          merchantId: "walmart_grocery",
+          category: "groceries",
+        },
+        portfolio: {
+          cards: [PC_WORLD_ELITE, CIBC_DIVIDEND],
+          usage: [],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    // CIBC 2% category grocery beats PC's 1% base at Walmart.
+    expect(decision.selectedCardId).toBe("cibc_dividend");
     expect(decision.multiplier).toBe(2);
   });
 
