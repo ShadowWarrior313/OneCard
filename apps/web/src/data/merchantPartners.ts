@@ -8,13 +8,14 @@ export const SCENE_GROCERY_MERCHANTS = [
   "safeway",
 ] as const;
 
-/** Loblaw-affiliated banners — PC Optimum elevated earn + no Amex acceptance */
+/** Loblaw-affiliated banners — PC Optimum elevated earn + no Amex acceptance.
+ *  Walmart is not a PC Optimum grocery partner; it stays in AMEX_GROCERY_EXCLUSIONS
+ *  (Cobalt 5× does not apply) but must not receive PC banner grocery rates. */
 export const PC_GROCERY_MERCHANTS = [
   "loblaws",
   "no_frills",
   "superstore",
   "food_basics",
-  "walmart_grocery",
 ] as const;
 
 export const PC_PARTNER_MERCHANTS = [
