@@ -1,4 +1,4 @@
-import { routeTransaction } from "@onecard/rewards-engine";
+import { resolveCardNetwork, routeTransaction } from "@onecard/rewards-engine";
 import type {
   CardAlternative,
   CardProduct,
@@ -410,7 +410,7 @@ export const CARD_CATALOG: CardProduct[] = (cardRewardSnapshot as SnapshotCard[]
   annualFee: card.annualFee,
   currency: card.currency,
   pointValueCents: Math.round(card.pointValueCAD * 10000) / 100,
-  network: card.network,
+  network: resolveCardNetwork(card.name, card.network),
   rewards: card.rewards,
 }));
 

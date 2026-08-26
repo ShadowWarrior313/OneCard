@@ -7,4 +7,8 @@ export {
   effectiveMultiplier,
   getRewardRule,
 } from "./estimateReward.js";
-export { isCardAcceptedAtMerchant } from "./cardAcceptance.js";
+export {
+  isCardAcceptedAtMerchant,
+  networkFromProductName,
+  resolveCardNetwork,
+} from "./cardAcceptance.js";

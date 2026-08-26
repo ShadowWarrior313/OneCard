@@ -3,6 +3,7 @@
  * Reward value is normalized via pointValueCAD so points and cashback compare in dollars.
  */
 import type { CardNetwork, CardProduct, RewardCategory, RewardRule } from "@onecard/shared-types";
+import { resolveCardNetwork } from "@onecard/rewards-engine";
 import { formatPercent } from "@/lib/formatNumber";
 import { AMEX_GROCERY_EXCLUSIONS } from "./merchantPartners";
 import legacySnapshot from "./cardRewards.snapshot.json";
@@ -183,7 +184,7 @@ export function cardRewardConfigToProduct(
     annualFee: config.annualFee,
     currency: config.currency,
     pointValueCents: Math.round(config.pointValueCAD * 10000) / 100,
-    network: config.network,
+    network: resolveCardNetwork(config.name, config.network) ?? config.network,
     rewards: categoriesToRewardRules(config),
   };
 }
@@ -390,7 +391,7 @@ function legacyEntryToConfig(entry: LegacySnapshotEntry): CardRewardConfig {
     issuer: entry.issuer,
     name: entry.name,
     annualFee: entry.annualFee,
-    network: entry.network,
+    network: resolveCardNetwork(entry.name, entry.network) ?? entry.network,
     pointValueCAD: entry.pointValueCAD,
     currency: entry.currency,
     ratesAsOf: entry.ratesAsOf,
@@ -415,7 +416,7 @@ function catalogAdditionToFallbackConfig(entry: CatalogAddition): CardRewardConf
     id: entry.id,
     issuer: entry.issuer,
     name: entry.name,
-    network: entry.network,
+    network: resolveCardNetwork(entry.name, entry.network) ?? entry.network,
     pointValueCAD: 0.01,
     currency: "issuer rewards",
     ratesAsOf: entry.scrapedAt,

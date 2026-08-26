@@ -426,8 +426,8 @@ export const CARD_APPEARANCES: Record<string, CardAppearance> = {
   colorTo: "#1e3a8a",
   accent: "#0051A5",
   textLight: true,
-    network: "visa",
-    tier: "standard",
+    network: "mastercard",
+    tier: "world-elite",
     faceLabel: "Cash Back",
   },
   rbc_low_rate: {
