@@ -794,17 +794,38 @@
     "network": "visa",
     "pointValueCAD": 0.005,
     "currency": "TD Rewards",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "ratesAsOf": "2026-08-27",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/first-class-travel-visa-infinite-card",
     "verify": true,
     "rewards": [
       {
         "category": "travel",
-        "multiplier": 8
+        "multiplier": 8,
+        "merchantIds": ["expedia"]
+      },
+      {
+        "category": "groceries",
+        "multiplier": 6
       },
       {
         "category": "dining",
+        "multiplier": 6
+      },
+      {
+        "category": "transportation",
+        "multiplier": 6
+      },
+      {
+        "category": "recurring_bills",
         "multiplier": 4
+      },
+      {
+        "category": "streaming",
+        "multiplier": 4
+      },
+      {
+        "category": "travel",
+        "multiplier": 2
       },
       {
         "category": "other",
@@ -984,8 +1005,8 @@
     "network": "amex",
     "pointValueCAD": 0.01,
     "currency": "Scene+ points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "ratesAsOf": "2026-08-27",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/american-express/gold-card.html",
     "verify": true,
     "rewards": [
       {
@@ -993,13 +1014,8 @@
         "multiplier": 1
       },
       {
-        "category": "dining",
-        "multiplier": 5,
-        "capMonthly": 200
-      },
-      {
         "category": "groceries",
-        "multiplier": 3,
+        "multiplier": 6,
         "merchantIds": [
           "sobeys",
           "freshco",
@@ -1008,7 +1024,27 @@
         ]
       },
       {
+        "category": "groceries",
+        "multiplier": 5
+      },
+      {
+        "category": "dining",
+        "multiplier": 5
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 5
+      },
+      {
         "category": "gas",
+        "multiplier": 3
+      },
+      {
+        "category": "transportation",
+        "multiplier": 3
+      },
+      {
+        "category": "streaming",
         "multiplier": 3
       }
     ]
@@ -1073,8 +1109,8 @@
     "network": "mastercard",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "ratesAsOf": "2026-08-27",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/bmo-cashback-world-elite-mastercard/",
     "verify": true,
     "rewards": [
       {
@@ -1083,13 +1119,19 @@
         "capMonthly": 500
       },
       {
-        "category": "gas",
+        "category": "transportation",
         "multiplier": 4,
-        "capMonthly": 250
+        "capMonthly": 300
+      },
+      {
+        "category": "gas",
+        "multiplier": 3,
+        "capMonthly": 300
       },
       {
         "category": "recurring_bills",
-        "multiplier": 2
+        "multiplier": 2,
+        "capMonthly": 500
       },
       {
         "category": "other",
