@@ -234,41 +234,37 @@ const WALLET_SEED_CARD_CONFIGS: CardRewardConfig[] = [
     network: "visa",
     pointValueCAD: 0.01,
     currency: "cashback %",
-    ratesAsOf: "2026-01-15",
+    ratesAsOf: "2026-08-28",
     sourceUrl:
       "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/dividend-visa-infinite-card.html",
     categories: {
       gas: {
         earnRate: 4,
-        cap: {
-          maxSpend: 80,
-          period: "monthly",
-          sharedCapGroup: "cibc_div_inf_gas_transit",
-        },
-        note: "4% on gas and EV charging; first $80/mo in gas+transit bucket.",
+        cap: { maxSpend: 80, period: "monthly" },
+        note: "4% on eligible gas and EV charging (issuer: also 4% groceries).",
       },
       groceries: {
-        earnRate: 2,
+        earnRate: 4,
         cap: { maxSpend: 80, period: "monthly" },
-        note: "2% on groceries; bonus applies to first $80 spend per billing period.",
+        note: "4% on eligible groceries, gas, and EV charging.",
       },
       recurring_bills: {
         earnRate: 2,
         cap: { maxSpend: 80, period: "monthly" },
-        note: "2% on recurring bill payments; bonus applies to first $80 spend per billing period.",
+        note: "2% on recurring bill payments, dining, and transit.",
       },
-      dining: { earnRate: 1 },
+      dining: {
+        earnRate: 2,
+        cap: { maxSpend: 80, period: "monthly" },
+        note: "2% on eligible dining.",
+      },
       travel: { earnRate: 1 },
       subscriptions: { earnRate: 1 },
       entertainment: { earnRate: 1 },
       transportation: {
-        earnRate: 4,
-        cap: {
-          maxSpend: 80,
-          period: "monthly",
-          sharedCapGroup: "cibc_div_inf_gas_transit",
-        },
-        note: "TODO: verify — public transit may share the $80/mo gas+transit bonus bucket.",
+        earnRate: 2,
+        cap: { maxSpend: 80, period: "monthly" },
+        note: "2% on eligible transit and rideshare — not the 4% gas/grocery tier.",
       },
       drugstore: { earnRate: 1 },
       other: { earnRate: 1 },
@@ -314,51 +310,44 @@ const WALLET_SEED_CARD_CONFIGS: CardRewardConfig[] = [
     network: "visa",
     pointValueCAD: 0.014, // TODO: verify — Avion pts valuation depends on redemption
     currency: "Avion points",
-    ratesAsOf: "2026-01-15",
-    sourceUrl: "https://www.rbcroyalbank.com/credit-cards/avion/ion-visa.html",
+    ratesAsOf: "2026-08-28",
+    sourceUrl: "https://www.rbcroyalbank.com/credit-cards/rewards/rbc-ion-visa.html",
     categories: {
       groceries: {
-        earnRate: 3,
+        earnRate: 1.5,
         cap: {
           maxSpend: 500,
           period: "monthly",
           sharedCapGroup: "rbc_ion_bonus",
         },
-        note: "3× on groceries; shares combined $500/mo bonus cap with other 3× categories.",
+        note: "1.5× on groceries. 3× dining/grocery is ION+, not no-fee ION.",
       },
       gas: {
-        earnRate: 3,
+        earnRate: 1.5,
         cap: {
           maxSpend: 500,
           period: "monthly",
           sharedCapGroup: "rbc_ion_bonus",
         },
       },
-      dining: {
-        earnRate: 3,
-        cap: {
-          maxSpend: 500,
-          period: "monthly",
-          sharedCapGroup: "rbc_ion_bonus",
-        },
-      },
+      dining: { earnRate: 1 },
       subscriptions: {
-        earnRate: 3,
+        earnRate: 1.5,
         cap: {
           maxSpend: 500,
           period: "monthly",
           sharedCapGroup: "rbc_ion_bonus",
         },
-        note: "Includes eligible streaming and digital subscriptions.",
+        note: "1.5× on eligible streaming, digital gaming, and subscriptions.",
       },
       transportation: {
-        earnRate: 3,
+        earnRate: 1.5,
         cap: {
           maxSpend: 500,
           period: "monthly",
           sharedCapGroup: "rbc_ion_bonus",
         },
-        note: "TODO: verify EV charging eligibility in bonus bucket.",
+        note: "1.5× on rideshare, transit, gas, and EV charging.",
       },
       travel: { earnRate: 1 },
       entertainment: { earnRate: 1 },

@@ -109,23 +109,32 @@
     "network": "amex",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
-    "verify": true,
+    "ratesAsOf": "2026-08-28",
+    "sourceUrl": "https://www.americanexpress.com/en-ca/benefits/simplycashpreferred-card/",
+    "verify": false,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 2,
-        "capMonthly": 300
+        "multiplier": 4,
+        "capAnnual": 30000,
+        "excludedMerchantIds": [
+          "loblaws",
+          "no_frills",
+          "superstore",
+          "food_basics",
+          "costco",
+          "costco_wholesale",
+          "save_on_foods",
+          "walmart_grocery"
+        ]
       },
       {
         "category": "gas",
-        "multiplier": 2,
-        "capMonthly": 300
+        "multiplier": 4
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 2
       }
     ]
   },
@@ -274,8 +283,8 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "ratesAsOf": "2026-08-28",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/dividend-visa-infinite-card.html",
     "verify": false,
     "rewards": [
       {
@@ -285,6 +294,16 @@
       },
       {
         "category": "groceries",
+        "multiplier": 4,
+        "capMonthly": 80
+      },
+      {
+        "category": "dining",
+        "multiplier": 2,
+        "capMonthly": 80
+      },
+      {
+        "category": "transportation",
         "multiplier": 2,
         "capMonthly": 80
       },
@@ -530,23 +549,28 @@
     "network": "visa",
     "pointValueCAD": 0.014,
     "currency": "Avion points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "ratesAsOf": "2026-08-28",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/rewards/rbc-ion-visa.html",
     "verify": false,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 3,
+        "multiplier": 1.5,
         "capMonthly": 500
       },
       {
         "category": "gas",
-        "multiplier": 3,
+        "multiplier": 1.5,
         "capMonthly": 500
       },
       {
         "category": "streaming",
-        "multiplier": 3,
+        "multiplier": 1.5,
+        "capMonthly": 500
+      },
+      {
+        "category": "transportation",
+        "multiplier": 1.5,
         "capMonthly": 500
       },
       {
@@ -563,12 +587,17 @@
     "network": "visa",
     "pointValueCAD": 0.014,
     "currency": "Avion points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
-    "verify": true,
+    "ratesAsOf": "2026-08-28",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/rewards/rbc-ion-plus-visa.html",
+    "verify": false,
     "rewards": [
       {
         "category": "groceries",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "dining",
         "multiplier": 3,
         "capMonthly": 500
       },
@@ -579,6 +608,11 @@
       },
       {
         "category": "streaming",
+        "multiplier": 3,
+        "capMonthly": 500
+      },
+      {
+        "category": "transportation",
         "multiplier": 3,
         "capMonthly": 500
       },
@@ -733,9 +767,9 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
-    "verify": true,
+    "ratesAsOf": "2026-08-28",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-infinite-card",
+    "verify": false,
     "rewards": [
       {
         "category": "gas",
@@ -749,6 +783,16 @@
       },
       {
         "category": "recurring_bills",
+        "multiplier": 3,
+        "capMonthly": 150
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3,
+        "capMonthly": 150
+      },
+      {
+        "category": "transportation",
         "multiplier": 3,
         "capMonthly": 150
       },
