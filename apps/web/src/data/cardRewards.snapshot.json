@@ -231,8 +231,15 @@
         "multiplier": 2
       },
       {
-        "category": "travel",
+        "category": "transportation",
         "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 2,
+        "merchantIds": [
+          "expedia"
+        ]
       },
       {
         "category": "recurring_bills",
@@ -346,20 +353,27 @@
     "verify": true,
     "rewards": [
       {
-        "category": "gas",
-        "multiplier": 2
-      },
-      {
-        "category": "dining",
-        "multiplier": 2
-      },
-      {
         "category": "travel",
-        "multiplier": 2
+        "multiplier": 2,
+        "merchantIds": [
+          "expedia"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "groceries",
+        "multiplier": 1.5
+      },
+      {
+        "category": "drugstore",
+        "multiplier": 1.5
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 1
       }
     ]
   },
@@ -377,10 +391,21 @@
     "rewards": [
       {
         "category": "travel",
-        "multiplier": 1.5
+        "multiplier": 2,
+        "merchantIds": [
+          "expedia"
+        ]
       },
       {
         "category": "gas",
+        "multiplier": 1.5
+      },
+      {
+        "category": "groceries",
+        "multiplier": 1.5
+      },
+      {
+        "category": "drugstore",
         "multiplier": 1.5
       },
       {
@@ -963,11 +988,29 @@
     "verify": true,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 3
+        "category": "groceries",
+        "multiplier": 3,
+        "merchantIds": [
+          "sobeys",
+          "freshco",
+          "iga",
+          "safeway"
+        ]
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2
       },
       {
         "category": "dining",
+        "multiplier": 2
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
         "multiplier": 2
       },
       {
