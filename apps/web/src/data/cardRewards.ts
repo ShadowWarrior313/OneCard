@@ -198,29 +198,43 @@ const WALLET_SEED_CARD_CONFIGS: CardRewardConfig[] = [
     network: "amex",
     pointValueCAD: 0.02, // TODO: verify — MR valuation varies by redemption (~1.7–2.2¢)
     currency: "MR points",
-    ratesAsOf: "2026-01-15",
+    ratesAsOf: "2026-08-30",
     sourceUrl:
-      "https://www.americanexpress.com/ca/en/credit-cards/cobalt-card/",
+      "https://www.americanexpress.com/ca/en/benefits/cobalt-card/",
     categories: {
       groceries: {
         earnRate: 5,
-        cap: { maxSpend: 2500, period: "monthly" },
+        cap: {
+          maxSpend: 2500,
+          period: "monthly",
+          sharedCapGroup: "amex_cobalt_eats",
+        },
         excludedMerchantIds: [...AMEX_GROCERY_EXCLUSIONS],
-        note: "5× at eligible grocers; Loblaw banners, Costco, Walmart grocery excluded.",
+        note: "5× at eligible grocers; shares the $2,500/mo eats & drinks cap with dining. Loblaw banners, Costco, Walmart grocery excluded.",
       },
       dining: {
         earnRate: 5,
-        cap: { maxSpend: 2500, period: "monthly" },
-        note: "5× on eligible food & drink including delivery.",
+        cap: {
+          maxSpend: 2500,
+          period: "monthly",
+          sharedCapGroup: "amex_cobalt_eats",
+        },
+        note: "5× on eligible food & drink including delivery; shares the $2,500/mo cap with groceries.",
       },
       subscriptions: {
         earnRate: 3,
         note: "3× on eligible streaming subscriptions.",
       },
       travel: { earnRate: 1 },
-      gas: { earnRate: 1 },
+      gas: {
+        earnRate: 2,
+        note: "2× at stand-alone automobile gasoline stations in Canada.",
+      },
       entertainment: { earnRate: 1 },
-      transportation: { earnRate: 1 },
+      transportation: {
+        earnRate: 2,
+        note: "2× on local commuter transportation in Canada including rideshare.",
+      },
       drugstore: { earnRate: 1 },
       recurring_bills: { earnRate: 1 },
       other: { earnRate: 1 },

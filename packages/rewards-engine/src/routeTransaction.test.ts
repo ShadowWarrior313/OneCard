@@ -235,6 +235,65 @@ describe("routeTransaction", () => {
     ).toThrow(/no eligible cards/);
   });
 
+  it("depletes a shared grocery+dining cap so dining falls to base after grocery spend", () => {
+    const cobalt: CardProduct = {
+      ...AMEX_COBALT,
+      rewards: [
+        {
+          category: "groceries",
+          multiplier: 5,
+          capMonthly: 2500,
+          sharedCapGroup: "amex_cobalt_eats",
+        },
+        {
+          category: "dining",
+          multiplier: 5,
+          capMonthly: 2500,
+          sharedCapGroup: "amex_cobalt_eats",
+        },
+        { category: "other", multiplier: 1 },
+      ],
+    };
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 80,
+          merchantName: "Tim Hortons",
+          mcc: "5814",
+          merchantId: "tim_hortons",
+          category: "dining",
+        },
+        portfolio: {
+          cards: [
+            cobalt,
+            {
+              ...CIBC_DIVIDEND,
+              cardId: "dining_cash",
+              displayName: "3% Dining Cash",
+              rewards: [
+                { category: "dining", multiplier: 3 },
+                { category: "other", multiplier: 1 },
+              ],
+            },
+          ],
+          usage: [
+            {
+              cardId: "amex_cobalt",
+              category: "groceries",
+              spendThisPeriod: 2500,
+              sharedCapGroup: "amex_cobalt_eats",
+            },
+          ],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.selectedCardId).toBe("dining_cash");
+    expect(decision.alternatives.find((row) => row.cardId === "amex_cobalt")?.cappedOut).toBe(
+      true,
+    );
+  });
+
   it("attaches mode metadata without changing winner", () => {
     const a = routeTransaction(ctx({ mode: "network_dependent" }));
     const b = routeTransaction(ctx({ mode: "virtual_provisioning" }));
