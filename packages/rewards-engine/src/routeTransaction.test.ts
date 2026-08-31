@@ -34,7 +34,7 @@ const TD_AEROPLAN: CardProduct = {
     { category: "other", multiplier: 1 },
     { category: "gas", multiplier: 1.5 },
     { category: "groceries", multiplier: 1.5 },
-    { category: "travel", multiplier: 1.5 },
+    { category: "travel", multiplier: 1.5, merchantIds: ["air_canada"] },
   ],
 };
 
