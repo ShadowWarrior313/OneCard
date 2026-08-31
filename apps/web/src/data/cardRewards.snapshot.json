@@ -174,14 +174,10 @@
     "network": "amex",
     "pointValueCAD": 0.02,
     "currency": "MR points",
-    "ratesAsOf": "2026-01-15",
+    "ratesAsOf": "2026-08-31",
     "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
     "verify": true,
     "rewards": [
-      {
-        "category": "travel",
-        "multiplier": 2
-      },
       {
         "category": "other",
         "multiplier": 1
@@ -307,8 +303,8 @@
     "network": "visa",
     "pointValueCAD": 0.02,
     "currency": "Aeroplan points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "ratesAsOf": "2026-08-31",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/aeroplan-visa-infinite-card.html",
     "verify": true,
     "rewards": [
       {
@@ -320,16 +316,13 @@
         "multiplier": 1.5
       },
       {
-        "category": "dining",
-        "multiplier": 1.5
-      },
-      {
-        "category": "recurring_bills",
+        "category": "groceries",
         "multiplier": 1.5
       },
       {
         "category": "travel",
-        "multiplier": 1.5
+        "multiplier": 1.5,
+        "merchantIds": ["air_canada"]
       }
     ]
   },
@@ -606,7 +599,7 @@
       },
       {
         "category": "travel",
-        "multiplier": 3,
+        "multiplier": 2,
         "merchantIds": [
           "westjet"
         ]
@@ -621,6 +614,10 @@
       },
       {
         "category": "gas",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
         "multiplier": 2
       }
     ]
@@ -677,8 +674,8 @@
     "network": "visa",
     "pointValueCAD": 0.02,
     "currency": "Aeroplan points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "ratesAsOf": "2026-08-31",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/aeroplan/aeroplan-visa-infinite-card",
     "verify": true,
     "rewards": [
       {
@@ -695,7 +692,8 @@
       },
       {
         "category": "travel",
-        "multiplier": 1.5
+        "multiplier": 1.5,
+        "merchantIds": ["air_canada"]
       }
     ]
   },
@@ -707,21 +705,26 @@
     "network": "visa",
     "pointValueCAD": 0.02,
     "currency": "Aeroplan points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "ratesAsOf": "2026-08-31",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/aeroplan/aeroplan-visa-platinum-card",
     "verify": true,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 1.5
+        "category": "other",
+        "multiplier": 1
       },
       {
         "category": "gas",
-        "multiplier": 1.5
+        "multiplier": 1
       },
       {
-        "category": "other",
+        "category": "groceries",
         "multiplier": 1
+      },
+      {
+        "category": "travel",
+        "multiplier": 1,
+        "merchantIds": ["air_canada"]
       }
     ]
   },
