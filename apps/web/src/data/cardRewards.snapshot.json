@@ -63,11 +63,17 @@
       },
       {
         "category": "groceries",
-        "multiplier": 2
+        "multiplier": 2,
+        "excludedMerchantIds": [
+          "walmart_grocery",
+          "costco",
+          "costco_wholesale",
+          "superstore"
+        ]
       },
       {
         "category": "dining",
-        "multiplier": 2
+        "multiplier": 1
       },
       {
         "category": "other",
@@ -158,7 +164,7 @@
       },
       {
         "category": "dining",
-        "multiplier": 3
+        "multiplier": 2
       },
       {
         "category": "gas",
