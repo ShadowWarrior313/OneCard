@@ -1021,21 +1021,34 @@
     "network": "visa",
     "pointValueCAD": 0.0067,
     "currency": "BMO Rewards",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "ratesAsOf": "2026-09-02",
+    "sourceUrl": "https://www.bmo.com/en-ca/main/personal/credit-cards/bmo-eclipse-visa-infinite-privilege/",
     "verify": true,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 5
+        "category": "groceries",
+        "multiplier": 5,
+        "capAnnual": 20000
       },
       {
         "category": "dining",
-        "multiplier": 3
+        "multiplier": 5,
+        "capAnnual": 25000
+      },
+      {
+        "category": "drugstore",
+        "multiplier": 5,
+        "capAnnual": 15000
       },
       {
         "category": "gas",
-        "multiplier": 2
+        "multiplier": 5,
+        "capAnnual": 15000
+      },
+      {
+        "category": "travel",
+        "multiplier": 5,
+        "capAnnual": 25000
       },
       {
         "category": "other",
