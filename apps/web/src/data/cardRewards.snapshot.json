@@ -1229,28 +1229,41 @@
     "issuer": "National Bank",
     "name": "National Bank World Elite Mastercard",
     "annualFee": 150,
-    "network": "visa",
+    "network": "mastercard",
     "pointValueCAD": 0.01,
     "currency": "À la carte points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
-    "verify": true,
+    "ratesAsOf": "2026-09-03",
+    "sourceUrl": "https://www.nbc.ca/personal/mastercard-credit-cards/world-elite.html",
+    "verify": false,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 2
+        "category": "groceries",
+        "multiplier": 5,
+        "capMonthly": 2500,
+        "sharedCapGroup": "nbc_we_eats",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart_grocery"
+        ]
       },
       {
         "category": "dining",
+        "multiplier": 5,
+        "capMonthly": 2500,
+        "sharedCapGroup": "nbc_we_eats"
+      },
+      {
+        "category": "gas",
         "multiplier": 2
       },
       {
-        "category": "groceries",
+        "category": "recurring_bills",
         "multiplier": 2
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 1
       }
     ]
   },
