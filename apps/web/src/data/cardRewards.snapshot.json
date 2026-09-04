@@ -1199,28 +1199,41 @@
     "issuer": "National Bank",
     "name": "National Bank Platinum Mastercard",
     "annualFee": 89,
-    "network": "visa",
+    "network": "mastercard",
     "pointValueCAD": 0.01,
     "currency": "À la carte points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
-    "verify": true,
+    "ratesAsOf": "2026-09-04",
+    "sourceUrl": "https://www.nbc.ca/personal/mastercard-credit-cards/platinum.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 2,
+        "capMonthly": 1000,
+        "sharedCapGroup": "nbc_plat_eats",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart_grocery"
+        ]
+      },
+      {
         "category": "dining",
-        "multiplier": 2
+        "multiplier": 2,
+        "capMonthly": 1000,
+        "sharedCapGroup": "nbc_plat_eats"
       },
       {
         "category": "gas",
-        "multiplier": 2
+        "multiplier": 1.5
       },
       {
-        "category": "travel",
-        "multiplier": 2
+        "category": "recurring_bills",
+        "multiplier": 1.5
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 0.67
       }
     ]
   },
