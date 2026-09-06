@@ -1158,17 +1158,29 @@
     "network": "mastercard",
     "pointValueCAD": 0.0067,
     "currency": "BMO Rewards",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "ratesAsOf": "2026-09-06",
+    "sourceUrl": "https://www.bmo.com/en-ca/main/personal/credit-cards/bmo-ascend-world-elite-mastercard/",
     "verify": true,
     "rewards": [
       {
         "category": "travel",
-        "multiplier": 5
+        "multiplier": 5,
+        "capAnnual": 15000
       },
       {
         "category": "dining",
-        "multiplier": 3
+        "multiplier": 3,
+        "capAnnual": 10000
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 3,
+        "capAnnual": 10000
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 3,
+        "capAnnual": 10000
       },
       {
         "category": "other",
