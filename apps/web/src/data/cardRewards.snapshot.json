@@ -2320,13 +2320,33 @@
     "id": "desjardins_cash_back_we",
     "issuer": "Desjardins",
     "name": "Desjardins Cash Back World Elite Mastercard",
+    "annualFee": 100,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
+    "currency": "cashback %",
+    "ratesAsOf": "2026-09-07",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/cash-back-world-elite-mastercard.html",
     "verify": true,
     "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 4,
+        "capAnnual": 10000,
+        "excludedMerchantIds": ["costco", "costco_wholesale"]
+      },
+      {
+        "category": "dining",
+        "multiplier": 3,
+        "capAnnual": 6000
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 3
+      },
+      {
+        "category": "transportation",
+        "multiplier": 3
+      },
       {
         "category": "other",
         "multiplier": 1
