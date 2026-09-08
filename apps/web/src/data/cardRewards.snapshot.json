@@ -2354,13 +2354,41 @@
     "id": "desjardins_odyssey_we",
     "issuer": "Desjardins",
     "name": "Desjardins Odyssey World Elite Mastercard",
+    "annualFee": 130,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
+    "currency": "BONUSDOLLARS",
+    "ratesAsOf": "2026-09-08",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/odyssey-world-elite-mastercard.html",
     "verify": true,
     "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capAnnual": 10000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 3,
+        "capAnnual": 6000
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 2,
+        "capAnnual": 20000
+      },
       {
         "category": "other",
         "multiplier": 1
