@@ -2524,13 +2524,32 @@
     "id": "triangle_world_elite",
     "issuer": "Canadian Tire Bank",
     "name": "Triangle World Elite Mastercard",
+    "annualFee": 0,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://triangle.canadiantire.ca/en/credit-cards.html",
+    "currency": "CT Money",
+    "ratesAsOf": "2026-09-10",
+    "sourceUrl": "https://triangle.canadiantire.ca/en/credit-cards/triangle-world-elite-mastercard.html",
     "verify": true,
     "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capAnnual": 12000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 4,
+        "merchantIds": [
+          "canadian_tire"
+        ]
+      },
       {
         "category": "other",
         "multiplier": 1
