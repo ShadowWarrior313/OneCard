@@ -1127,22 +1127,24 @@
   {
     "id": "bmo_airmiles",
     "issuer": "BMO",
-    "name": "BMO AIR MILES World Elite Mastercard",
-    "annualFee": 120,
+    "name": "BMO Blue Rewards World Elite Mastercard",
+    "annualFee": 150,
     "network": "mastercard",
-    "pointValueCAD": 0.012,
-    "currency": "AIR MILES",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "pointValueCAD": 0.0067,
+    "currency": "Blue Rewards",
+    "ratesAsOf": "2026-09-11",
+    "sourceUrl": "https://www.bmo.com/en-ca/main/personal/credit-cards/bmo-blue-rewards-world-elite-mastercard/",
     "verify": true,
     "rewards": [
       {
         "category": "gas",
-        "multiplier": 3
+        "multiplier": 2,
+        "capMonthly": 500
       },
       {
         "category": "groceries",
-        "multiplier": 3
+        "multiplier": 2,
+        "capMonthly": 500
       },
       {
         "category": "other",

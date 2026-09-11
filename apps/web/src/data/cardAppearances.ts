@@ -591,12 +591,12 @@ export const CARD_APPEARANCES: Record<string, CardAppearance> = {
   },
   bmo_airmiles: {
     colorFrom: "#2563eb",
-  colorTo: "#312e81",
-  accent: "#2563eb",
-  textLight: true,
+    colorTo: "#312e81",
+    accent: "#2563eb",
+    textLight: true,
     network: "mastercard",
     tier: "world-elite",
-    faceLabel: "AIR MILES",
+    faceLabel: "Blue Rewards",
   },
   bmo_ascend: {
     colorFrom: "#0075BE",

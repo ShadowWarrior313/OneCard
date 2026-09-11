@@ -30,7 +30,7 @@ export const CARD_IMAGE_SEARCH_OVERRIDES: Partial<Record<string, string>> = {
   scotia_gold_amex: "Gold American Express",
   bmo_eclipse: "Eclipse",
   bmo_ascend: "Ascend",
-  bmo_airmiles: "Air Miles",
+  bmo_airmiles: "Blue Rewards",
   nbc_platinum: "Platinum Mastercard",
   pc_world_elite_mc: "World Elite Mastercard",
 };
