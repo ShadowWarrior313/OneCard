@@ -76,7 +76,7 @@ export const BANK_CARDS: CardMeta[] = [
   { cardId: "bmo_eclipse_rise", issuer: "BMO", displayName: "BMO eclipse rise Visa Card" },
   { cardId: "bmo_cashback_we", issuer: "BMO", displayName: "BMO CashBack World Elite Mastercard" },
   { cardId: "bmo_cashback", issuer: "BMO", displayName: "BMO CashBack Mastercard" },
-  { cardId: "bmo_airmiles", issuer: "BMO", displayName: "BMO AIR MILES World Elite Mastercard" },
+  { cardId: "bmo_airmiles", issuer: "BMO", displayName: "BMO Blue Rewards World Elite Mastercard" },
   { cardId: "bmo_ascend", issuer: "BMO", displayName: "BMO Ascend World Elite Mastercard" },
   { cardId: "bmo_rewards_mc", issuer: "BMO", displayName: "BMO Rewards Mastercard" },
   { cardId: "nbc_platinum", issuer: "National Bank", displayName: "National Bank Platinum Mastercard" },
