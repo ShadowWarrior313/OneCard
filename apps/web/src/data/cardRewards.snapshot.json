@@ -2116,13 +2116,38 @@
     "id": "bmo_eclipse_infinite",
     "issuer": "BMO",
     "name": "BMO eclipse Visa Infinite Card",
+    "annualFee": 120,
     "network": "visa",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/",
+    "pointValueCAD": 0.0067,
+    "currency": "BMO Rewards",
+    "ratesAsOf": "2026-09-12",
+    "sourceUrl": "https://www.bmo.com/main/personal/credit-cards/bmo-eclipse-visa-infinite/",
     "verify": true,
     "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "capAnnual": 6000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 5,
+        "capAnnual": 6000
+      },
+      {
+        "category": "gas",
+        "multiplier": 5,
+        "capAnnual": 20000
+      },
+      {
+        "category": "transportation",
+        "multiplier": 5,
+        "capAnnual": 20000
+      },
       {
         "category": "other",
         "multiplier": 1
