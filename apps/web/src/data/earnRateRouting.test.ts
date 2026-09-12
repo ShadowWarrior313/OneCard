@@ -95,16 +95,22 @@ describe("BMO eclipse Visa Infinite is 5x grocery/dining/gas/transit, not a 1x s
     );
   });
 
-  it("does not treat Costco warehouse as grocery 5x", () => {
-    const decision = route("costco", 80, [
+  it("beats Costco MC 1% on Loblaws groceries", () => {
+    const decision = route("loblaws", 80, [
       "bmo_eclipse_infinite",
       "cibc_costco",
     ]);
-    assert.equal(decision.selectedCardId, "cibc_costco");
+    assert.equal(decision.selectedCardId, "bmo_eclipse_infinite");
     const eclipse = decision.alternatives.find(
       (alt) => alt.cardId === "bmo_eclipse_infinite",
     );
-    assert.equal(eclipse?.multiplier, 1);
+    const costco = decision.alternatives.find((alt) => alt.cardId === "cibc_costco");
+    assert.equal(eclipse?.multiplier, 5);
+    assert.equal(costco?.multiplier, 1);
+    assert.ok(
+      (eclipse?.estimatedRewardValueCents ?? 0) >
+        (costco?.estimatedRewardValueCents ?? 0),
+    );
   });
 
   it("awards 5x grocery/dining/gas/transit with annual caps at BMO Rewards cash value", () => {
