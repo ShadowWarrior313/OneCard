@@ -2558,16 +2558,28 @@
     "id": "amex_ca_aeroplan_reserve",
     "issuer": "American Express",
     "name": "American Express Aeroplan Reserve Card",
+    "annualFee": 599,
     "network": "amex",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.americanexpress.com/en-ca/credit-cards/",
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-09-13",
+    "sourceUrl": "https://www.americanexpress.com/en-ca/membership-benefits/aeroplan-reserve-card/",
     "verify": true,
     "rewards": [
       {
+        "category": "travel",
+        "multiplier": 3,
+        "merchantIds": [
+          "air_canada"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.25
       }
     ]
   },
