@@ -2575,13 +2575,25 @@
     "id": "amex_ca_aeroplan",
     "issuer": "American Express",
     "name": "American Express Aeroplan Card",
+    "annualFee": 120,
     "network": "amex",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.americanexpress.com/en-ca/credit-cards/",
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-09-14",
+    "sourceUrl": "https://www.americanexpress.com/en-ca/membership-benefits/aeroplan-card/",
     "verify": true,
     "rewards": [
+      {
+        "category": "travel",
+        "multiplier": 2,
+        "merchantIds": [
+          "air_canada"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 1.5
+      },
       {
         "category": "other",
         "multiplier": 1
