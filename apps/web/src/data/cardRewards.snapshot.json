@@ -2592,16 +2592,32 @@
     "id": "amex_ca_simplycash",
     "issuer": "American Express",
     "name": "SimplyCash Card from American Express",
+    "annualFee": 0,
     "network": "amex",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.americanexpress.com/en-ca/credit-cards/",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-09-25",
+    "sourceUrl": "https://www.americanexpress.com/en-ca/benefits/simplycash-card/",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 2,
+        "capAnnual": 15000,
+        "excludedMerchantIds": [
+          "walmart_grocery",
+          "costco",
+          "costco_wholesale",
+          "superstore"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 2
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.25
       }
     ]
   },
