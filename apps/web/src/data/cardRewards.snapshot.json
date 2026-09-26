@@ -2422,13 +2422,57 @@
     "id": "mbna_rewards_world_elite",
     "issuer": "MBNA",
     "name": "MBNA Rewards World Elite Mastercard",
+    "annualFee": 120,
     "network": "mastercard",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.mbna.ca/en/credit-cards",
-    "verify": true,
+    "pointValueCAD": 0.0083,
+    "currency": "MBNA Rewards points",
+    "ratesAsOf": "2026-09-26",
+    "sourceUrl": "https://www.mbna.ca/en/credit-cards/rewards/mbna-rewards-world-elite-mastercard",
+    "verify": false,
     "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 5,
+        "capAnnual": 50000
+      },
+      {
+        "category": "groceries",
+        "multiplier": 5,
+        "capAnnual": 50000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "streaming",
+        "multiplier": 5,
+        "capAnnual": 50000
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 5,
+        "capAnnual": 50000
+      },
+      {
+        "category": "streaming",
+        "multiplier": 5,
+        "capAnnual": 50000,
+        "merchantIds": [
+          "steam",
+          "xbox",
+          "playstation"
+        ]
+      },
+      {
+        "category": "fitness",
+        "multiplier": 5,
+        "capAnnual": 50000,
+        "merchantIds": [
+          "goodlife",
+          "peloton"
+        ]
+      },
       {
         "category": "other",
         "multiplier": 1
