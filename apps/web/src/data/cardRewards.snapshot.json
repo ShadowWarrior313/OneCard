@@ -2609,16 +2609,42 @@
     "id": "amex_ca_marriott_business",
     "issuer": "American Express",
     "name": "Marriott Bonvoy Business American Express Card",
+    "annualFee": 150,
     "network": "amex",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.americanexpress.com/en-ca/credit-cards/",
-    "verify": true,
+    "pointValueCAD": 0.009,
+    "currency": "Bonvoy points",
+    "ratesAsOf": "2026-09-27",
+    "sourceUrl": "https://www.americanexpress.com/ca/en/business/small-business/benefits/marriott-bonvoy-business-card/",
+    "verify": false,
     "rewards": [
       {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 2
+      },
+      {
+        "category": "travel",
+        "multiplier": 5,
+        "merchantIds": [
+          "marriott"
+        ]
+      },
+      {
+        "category": "travel",
+        "multiplier": 3,
+        "excludedMerchantIds": [
+          "airbnb",
+          "fairmont",
+          "hilton",
+          "marriott"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
+      },
+      {
+        "category": "gas",
+        "multiplier": 3
       }
     ]
   },
