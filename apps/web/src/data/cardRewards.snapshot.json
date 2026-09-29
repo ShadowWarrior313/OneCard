@@ -1946,16 +1946,69 @@
     "id": "cibc_aeroplan_privilege",
     "issuer": "CIBC",
     "name": "CIBC Aeroplan Visa Infinite Privilege Card",
+    "annualFee": 599,
     "network": "visa",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
-    "verify": true,
+    "pointValueCAD": 0.02,
+    "currency": "Aeroplan points",
+    "ratesAsOf": "2026-09-29",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/aeroplan-visa-infinite-privilege-card.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "travel",
+        "multiplier": 2,
+        "merchantIds": [
+          "air_canada"
+        ],
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
+        "category": "transportation",
+        "multiplier": 1.5,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ],
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
+        "category": "gas",
+        "multiplier": 1.5,
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
+        "category": "groceries",
+        "multiplier": 1.5,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ],
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
+        "category": "travel",
+        "multiplier": 1.5,
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
+        "category": "dining",
+        "multiplier": 1.5,
+        "capAnnual": 100000,
+        "sharedCapGroup": "cibc_aeroplan_privilege_bonus"
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.25
       }
     ]
   },
