@@ -205,6 +205,52 @@ describe("routeTransaction", () => {
     expect(decision.multiplier).toBe(1.5);
   });
 
+  it("falls back to the base rate when a merchant bonus cap is exhausted", () => {
+    const cappedPartner: CardProduct = {
+      cardId: "capped_partner",
+      issuer: "Test",
+      displayName: "Capped Partner Card",
+      currency: "points",
+      pointValueCents: 1,
+      network: "visa",
+      rewards: [
+        { category: "other", multiplier: 1.25 },
+        {
+          category: "travel",
+          multiplier: 2,
+          merchantIds: ["air_canada"],
+          capAnnual: 100_000,
+          sharedCapGroup: "bonus",
+        },
+      ],
+    };
+    const decision = routeTransaction(
+      ctx({
+        transaction: {
+          amount: 80,
+          merchantName: "Air Canada",
+          mcc: "3000",
+          merchantId: "air_canada",
+          category: "travel",
+        },
+        portfolio: {
+          cards: [cappedPartner],
+          usage: [
+            {
+              cardId: "capped_partner",
+              category: "groceries",
+              spendThisPeriod: 100_000,
+              sharedCapGroup: "bonus",
+            },
+          ],
+          preferences: { preferCashback: false },
+        },
+      }),
+    );
+    expect(decision.multiplier).toBe(1.25);
+    expect(decision.alternatives[0]?.cappedOut).toBe(true);
+  });
+
   it("respects excludedCardIds", () => {
     const decision = routeTransaction(
       ctx({
