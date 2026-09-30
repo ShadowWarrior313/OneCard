@@ -1980,16 +1980,71 @@
     "id": "cibc_aventura_privilege",
     "issuer": "CIBC",
     "name": "CIBC Aventura Visa Infinite Privilege Card",
+    "annualFee": 499,
     "network": "visa",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
-    "verify": true,
+    "pointValueCAD": 0.012,
+    "currency": "Aventura points",
+    "ratesAsOf": "2026-09-30",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/aventura-visa-infinite-privilege-card.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 2,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ],
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster"
+        ],
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit"
+        ],
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
+        "category": "travel",
+        "multiplier": 1.25,
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.25,
+        "capAnnual": 200000,
+        "sharedCapGroup": "cibc_aventura_privilege_bonus"
       }
     ]
   },
