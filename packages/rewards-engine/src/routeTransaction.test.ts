@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mapMccToCategory } from "./mapMccToCategory.js";
 import { routeTransaction } from "./routeTransaction.js";
-import { effectiveMultiplier } from "./estimateReward.js";
+import { effectiveMultiplier, estimateRewardForCard } from "./estimateReward.js";
 import { AMEX_COBALT, CIBC_DIVIDEND } from "./fixtures/cards.js";
 import type { CardProduct, RoutingContext } from "@onecard/shared-types";
 
@@ -240,5 +240,101 @@ describe("routeTransaction", () => {
     const b = routeTransaction(ctx({ mode: "virtual_provisioning" }));
     expect(a.selectedCardId).toBe(b.selectedCardId);
     expect(b.modeMetadata.merchantAcceptance).toBe("digital_only");
+  });
+});
+
+describe("merchant bonus cap fallback", () => {
+  const aeroplan: CardProduct = {
+    cardId: "cibc_aeroplan",
+    issuer: "CIBC",
+    displayName: "CIBC Aeroplan Visa Card",
+    currency: "Aeroplan points",
+    pointValueCents: 2,
+    network: "visa",
+    rewards: [
+      {
+        category: "travel",
+        multiplier: 1,
+        merchantIds: ["air_canada"],
+        capAnnual: 40_000,
+        sharedCapGroup: "cibc_aeroplan_bonus",
+      },
+      { category: "other", multiplier: 0.67 },
+    ],
+  };
+
+  const costcoCard: CardProduct = {
+    cardId: "cibc_costco",
+    issuer: "CIBC",
+    displayName: "CIBC Costco Mastercard",
+    currency: "cashback %",
+    pointValueCents: 1,
+    network: "mastercard",
+    rewards: [
+      { category: "other", multiplier: 1 },
+      {
+        category: "gas",
+        multiplier: 3,
+        merchantIds: ["costco"],
+        capMonthly: 5000,
+      },
+      {
+        category: "other",
+        multiplier: 2,
+        merchantIds: ["costco"],
+        capMonthly: 8000,
+      },
+    ],
+  };
+
+  function estimate(
+    card: CardProduct,
+    merchantId: string,
+    category: "travel" | "gas",
+    usage: RoutingContext["portfolio"]["usage"],
+  ) {
+    return estimateRewardForCard(
+      card,
+      {
+        amount: 80,
+        merchantName: merchantId,
+        mcc: "3000",
+        merchantId,
+      },
+      category,
+      {
+        cards: [card],
+        usage,
+        preferences: { preferCashback: false },
+      },
+    );
+  }
+
+  it("drops a capped merchant bonus to the generic base rate", () => {
+    const open = estimate(aeroplan, "air_canada", "travel", []);
+    expect(open.multiplier).toBe(1);
+    expect(open.cappedOut).toBe(false);
+
+    const capped = estimate(aeroplan, "air_canada", "travel", [
+      {
+        cardId: "cibc_aeroplan",
+        category: "other",
+        spendThisPeriod: 40_000,
+        sharedCapGroup: "cibc_aeroplan_bonus",
+      },
+    ]);
+    expect(capped.multiplier).toBe(0.67);
+    expect(capped.cappedOut).toBe(true);
+  });
+
+  it("drops a capped merchant bonus to the next merchant rate, not 1x", () => {
+    const open = estimate(costcoCard, "costco", "gas", []);
+    expect(open.multiplier).toBe(3);
+
+    const capped = estimate(costcoCard, "costco", "gas", [
+      { cardId: "cibc_costco", category: "gas", spendThisPeriod: 5000 },
+    ]);
+    expect(capped.multiplier).toBe(2);
+    expect(capped.cappedOut).toBe(true);
   });
 });

@@ -110,7 +110,19 @@ export function estimateRewardForCard(
 ): RewardEstimate {
   const merchantId = transaction.merchantId;
   const rule = getRewardRule(card, category, merchantId);
-  const otherRule = getRewardRule(card, "other", merchantId);
+  // Merchant rules match before category, so a second lookup for "other" at the
+  // same merchant returns the bonus itself. After a cap, drop that rule and
+  // take the next match (another merchant rate, otherwise the generic base).
+  const otherRule = rule.merchantIds?.length
+    ? getRewardRule(
+        {
+          ...card,
+          rewards: card.rewards.filter((candidate) => candidate !== rule),
+        },
+        "other",
+        merchantId,
+      )
+    : getRewardRule(card, "other", merchantId);
   const spend = getCategorySpend(
     portfolio.usage,
     card.cardId,
