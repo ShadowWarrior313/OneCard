@@ -629,21 +629,57 @@
     "id": "rbc_cashback_preferred",
     "issuer": "RBC",
     "name": "RBC Cash Back Preferred World Elite Mastercard",
-    "annualFee": 99,
-    "network": "visa",
+    "annualFee": 120,
+    "network": "mastercard",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
-    "verify": true,
+    "ratesAsOf": "2026-10-01",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/cardholders/cash-back-updates.html",
+    "verify": false,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 2
+        "multiplier": 3,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 3
       },
       {
         "category": "gas",
-        "multiplier": 1.5
+        "multiplier": 3
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3
+      },
+      {
+        "category": "transportation",
+        "multiplier": 3,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 3,
+        "merchantIds": [
+          "steam",
+          "xbox",
+          "playstation"
+        ]
       },
       {
         "category": "other",
@@ -1810,16 +1846,44 @@
     "id": "rbc_cashback_mastercard",
     "issuer": "RBC",
     "name": "RBC Cash Back Mastercard",
+    "annualFee": 0,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/index.html",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-10-01",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/cash-back/rbc-cashback-mastercard.html",
+    "verify": false,
     "rewards": [
       {
-        "category": "other",
+        "category": "groceries",
+        "multiplier": 2,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart",
+          "walmart_grocery"
+        ]
+      },
+      {
+        "category": "gas",
         "multiplier": 1
+      },
+      {
+        "category": "transportation",
+        "multiplier": 1,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
       }
     ]
   },
