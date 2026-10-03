@@ -2014,16 +2014,17 @@
     "id": "scotia_platinum_amex",
     "issuer": "Scotiabank",
     "name": "Scotiabank Platinum American Express Card",
+    "annualFee": 399,
     "network": "amex",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
-    "verify": true,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-10-03",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/american-express/platinum-card.html",
+    "verify": false,
     "rewards": [
       {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 2
       }
     ]
   },
