@@ -2031,13 +2031,65 @@
     "id": "scotia_momentum_visa",
     "issuer": "Scotiabank",
     "name": "Scotiabank Momentum Visa Card",
+    "annualFee": 49,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-02-01",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/visa/momentum-cash-back-card.html",
+    "verify": false,
     "rewards": [
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capAnnual": 25000,
+        "sharedCapGroup": "scotia_momentum_visa_bonus",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capAnnual": 25000,
+        "sharedCapGroup": "scotia_momentum_visa_bonus"
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capAnnual": 25000,
+        "sharedCapGroup": "scotia_momentum_visa_bonus"
+      },
+      {
+        "category": "drugstore",
+        "multiplier": 2,
+        "capAnnual": 25000,
+        "sharedCapGroup": "scotia_momentum_visa_bonus",
+        "merchantIds": [
+          "shoppers",
+          "rexall",
+          "london_drugs",
+          "cvs",
+          "walgreens"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "capAnnual": 25000,
+        "sharedCapGroup": "scotia_momentum_visa_bonus",
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "via_rail",
+          "mta",
+          "clipper"
+        ]
+      },
       {
         "category": "other",
         "multiplier": 1
