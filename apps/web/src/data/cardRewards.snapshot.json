@@ -1759,16 +1759,67 @@
     "id": "td_platinum_travel",
     "issuer": "TD",
     "name": "TD Platinum Travel Visa Card",
+    "annualFee": 89,
     "network": "visa",
-    "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
-    "verify": true,
+    "pointValueCAD": 0.005,
+    "currency": "TD Rewards",
+    "ratesAsOf": "2026-10-05",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/platinum-travel-visa-card",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 4.5,
+        "capAnnual": 15000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 4.5,
+        "capAnnual": 15000
+      },
+      {
+        "category": "streaming",
+        "multiplier": 3,
+        "capAnnual": 15000,
+        "sharedCapGroup": "td_platinum_travel_media"
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 3,
+        "capAnnual": 15000,
+        "sharedCapGroup": "td_platinum_travel_media"
+      },
+      {
+        "category": "transportation",
+        "multiplier": 4.5,
+        "capAnnual": 15000,
+        "merchantIds": [
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 3,
+        "capAnnual": 15000,
+        "sharedCapGroup": "td_platinum_travel_media",
+        "merchantIds": [
+          "steam",
+          "xbox",
+          "playstation",
+          "ea"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.5
       }
     ]
   },
