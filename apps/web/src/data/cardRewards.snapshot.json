@@ -794,17 +794,68 @@
     "network": "visa",
     "pointValueCAD": 0.005,
     "currency": "TD Rewards",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
-    "verify": true,
+    "ratesAsOf": "2026-10-06",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/travel-rewards/first-class-travel-visa-infinite-card",
+    "verify": false,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 8
+        "category": "groceries",
+        "multiplier": 6,
+        "capAnnual": 25000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
       },
       {
         "category": "dining",
-        "multiplier": 4
+        "multiplier": 6,
+        "capAnnual": 25000
+      },
+      {
+        "category": "streaming",
+        "multiplier": 4,
+        "capAnnual": 25000,
+        "sharedCapGroup": "td_first_class_media"
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 4,
+        "capAnnual": 25000,
+        "sharedCapGroup": "td_first_class_media"
+      },
+      {
+        "category": "other",
+        "multiplier": 6,
+        "capAnnual": 25000,
+        "merchantIds": [
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 4,
+        "capAnnual": 25000,
+        "sharedCapGroup": "td_first_class_media",
+        "merchantIds": [
+          "steam",
+          "xbox",
+          "playstation",
+          "ea",
+          "nintendo",
+          "epic_games"
+        ]
+      },
+      {
+        "category": "travel",
+        "multiplier": 8,
+        "merchantIds": [
+          "expedia"
+        ]
       },
       {
         "category": "other",
