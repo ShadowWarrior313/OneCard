@@ -2507,16 +2507,35 @@
     "id": "triangle_mastercard",
     "issuer": "Canadian Tire Bank",
     "name": "Triangle Mastercard",
+    "annualFee": 0,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://triangle.canadiantire.ca/en/credit-cards.html",
-    "verify": true,
+    "currency": "CT Money",
+    "ratesAsOf": "2026-10-08",
+    "sourceUrl": "https://triangle.canadiantire.ca/en/credit-cards/triangle-mastercard.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 1.5,
+        "capAnnual": 12000,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "walmart",
+          "walmart_grocery"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 4,
+        "merchantIds": [
+          "canadian_tire"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 0.5
       }
     ]
   },
