@@ -1276,21 +1276,17 @@
     "id": "nbc_allure",
     "issuer": "National Bank",
     "name": "National Bank Allure Mastercard",
-    "annualFee": 60,
-    "network": "visa",
+    "annualFee": 0,
+    "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "À la carte points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.nbc.ca/personal/accounts/credit-cards.html",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-10-09",
+    "sourceUrl": "https://www.nbc.ca/personal/mastercard-credit-cards/allure.html",
+    "verify": false,
     "rewards": [
       {
-        "category": "dining",
-        "multiplier": 2
-      },
-      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.5
       }
     ]
   },
