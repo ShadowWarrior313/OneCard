@@ -958,17 +958,66 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "Scene+ points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
-    "verify": true,
+    "ratesAsOf": "2026-10-10",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/visa/passport-infinite-card.html",
+    "verify": false,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 3
+        "category": "groceries",
+        "multiplier": 3,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_passport_bonus",
+        "merchantIds": [
+          "sobeys",
+          "safeway",
+          "iga",
+          "freshco"
+        ]
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_passport_bonus",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
       },
       {
         "category": "dining",
-        "multiplier": 2
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_passport_bonus"
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_passport_bonus",
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_passport_bonus",
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "via_rail",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
       },
       {
         "category": "other",
