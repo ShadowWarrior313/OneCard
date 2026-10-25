@@ -2269,16 +2269,59 @@
     "id": "desjardins_cash_back_visa",
     "issuer": "Desjardins",
     "name": "Desjardins Cash Back Visa",
+    "annualFee": 0,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-10-25",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/cash-back-visa.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.5
       }
     ]
   },
@@ -2286,16 +2329,59 @@
     "id": "desjardins_cash_back_mastercard",
     "issuer": "Desjardins",
     "name": "Desjardins Cash Back Mastercard",
+    "annualFee": 0,
     "network": "mastercard",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
-    "verify": true,
+    "currency": "cashback %",
+    "ratesAsOf": "2026-10-25",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/cash-back-mastercard.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.5
       }
     ]
   },
