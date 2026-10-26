@@ -2303,16 +2303,59 @@
     "id": "desjardins_bonus_visa",
     "issuer": "Desjardins",
     "name": "Desjardins Bonus Visa",
+    "annualFee": 0,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
-    "verify": true,
+    "currency": "BONUSDOLLARS",
+    "ratesAsOf": "2026-10-26",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/bonus-visa.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capAnnual": 3600
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.5
       }
     ]
   },
