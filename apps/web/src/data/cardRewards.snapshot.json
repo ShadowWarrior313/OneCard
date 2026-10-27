@@ -2337,16 +2337,64 @@
     "id": "desjardins_odyssey_gold",
     "issuer": "Desjardins",
     "name": "Desjardins Odyssey Gold Visa",
+    "annualFee": 110,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
-    "verify": true,
+    "currency": "BONUSDOLLARS",
+    "ratesAsOf": "2026-10-27",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/odyssey-gold-visa.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 6000
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 2,
+        "capAnnual": 6000
+      },
+      {
+        "category": "travel",
+        "multiplier": 2,
+        "capAnnual": 15000
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.65
       }
     ]
   },
