@@ -2371,16 +2371,70 @@
     "id": "desjardins_odyssey_privilege",
     "issuer": "Desjardins",
     "name": "Desjardins Odyssey Visa Infinite Privilege",
+    "annualFee": 295,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.desjardins.com/ca/personal/loans-credit/credit-cards/index.jsp",
-    "verify": true,
+    "currency": "BONUSDOLLARS",
+    "ratesAsOf": "2026-10-29",
+    "sourceUrl": "https://www.desjardins.com/en/credit-cards/odyssey-visa-infinite-privilege.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 3,
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 4
+      },
+      {
+        "category": "travel",
+        "multiplier": 3,
+        "capAnnual": 25000
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 4
+      },
+      {
+        "category": "transportation",
+        "multiplier": 4
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 1.5
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 4,
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 4,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
+      },
+      {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.5
       }
     ]
   },
