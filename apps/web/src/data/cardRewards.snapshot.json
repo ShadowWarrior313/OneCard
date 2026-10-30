@@ -1997,16 +1997,79 @@
     "id": "scotia_amex",
     "issuer": "Scotiabank",
     "name": "Scotiabank American Express Card",
+    "annualFee": 0,
     "network": "amex",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
-    "verify": true,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-10-30",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/american-express/no-fee-amex-card.html",
+    "verify": false,
     "rewards": [
       {
         "category": "other",
         "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
+        "category": "dining",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated"
+      },
+      {
+        "category": "gas",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated"
+      },
+      {
+        "category": "groceries",
+        "multiplier": 3,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated",
+        "merchantIds": [
+          "sobeys",
+          "iga",
+          "safeway",
+          "freshco"
+        ]
+      },
+      {
+        "category": "entertainment",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated",
+        "merchantIds": [
+          "cineplex",
+          "amc",
+          "ticketmaster",
+          "sector_entertainment"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "capAnnual": 50000,
+        "sharedCapGroup": "scotia_amex_accelerated",
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper",
+          "sector_transport"
+        ]
       }
     ]
   },
