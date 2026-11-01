@@ -2048,16 +2048,34 @@
     "id": "scotia_scene_student",
     "issuer": "Scotiabank",
     "name": "Scotiabank Scene+ Visa Card for Students",
+    "annualFee": 0,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
-    "verify": true,
+    "currency": "Scene+ points",
+    "ratesAsOf": "2026-11-01",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/visa/scene-student-card.html",
+    "verify": false,
     "rewards": [
       {
         "category": "other",
         "multiplier": 1
+      },
+      {
+        "category": "groceries",
+        "multiplier": 2,
+        "merchantIds": [
+          "sobeys",
+          "freshco",
+          "iga",
+          "safeway"
+        ]
+      },
+      {
+        "category": "other",
+        "multiplier": 2,
+        "merchantIds": [
+          "cineplex"
+        ]
       }
     ]
   },
