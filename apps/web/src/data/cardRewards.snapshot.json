@@ -1793,13 +1793,18 @@
     "id": "rbc_british_airways_infinite",
     "issuer": "RBC",
     "name": "RBC British Airways Visa Infinite Card",
+    "annualFee": 165,
     "network": "visa",
     "pointValueCAD": 0.01,
-    "currency": "issuer rewards",
-    "ratesAsOf": "2026-05-30",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/index.html",
-    "verify": true,
+    "currency": "Avios",
+    "ratesAsOf": "2026-11-02",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/travel/rbc-british-airways-visa-infinite.html",
+    "verify": false,
     "rewards": [
+      {
+        "category": "dining",
+        "multiplier": 2
+      },
       {
         "category": "other",
         "multiplier": 1
