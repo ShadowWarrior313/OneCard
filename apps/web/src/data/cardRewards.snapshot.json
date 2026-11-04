@@ -766,19 +766,29 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards",
+    "ratesAsOf": "2026-11-04",
+    "sourceUrl": "https://www.td.com/ca/en/personal-banking/products/credit-cards/cash-back/cash-back-visa-card",
     "verify": true,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 2,
-        "capMonthly": 100
+        "multiplier": 1,
+        "capAnnual": 5000
       },
       {
         "category": "gas",
-        "multiplier": 2,
-        "capMonthly": 100
+        "multiplier": 1,
+        "capAnnual": 5000
+      },
+      {
+        "category": "recurring_bills",
+        "multiplier": 1,
+        "capAnnual": 5000
+      },
+      {
+        "category": "streaming",
+        "multiplier": 1,
+        "capAnnual": 5000
       },
       {
         "category": "other",
