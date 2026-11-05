@@ -622,6 +622,19 @@
       {
         "category": "gas",
         "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
       }
     ]
   },

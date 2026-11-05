@@ -96,4 +96,17 @@ describe("RBC Avion Visa Infinite Privilege earn rates", () => {
     assert.equal(shell.selectedCardId, westjet.cardId);
     assert.equal(shell.estimatedRewardValueCents, 160);
   });
+
+  it("keeps an $80 Uber trip on WestJet, which earns 2 points on rideshare", () => {
+    const decision = routeTransaction({
+      mode: "virtual_provisioning",
+      transaction: purchase(80, "uber", "other", "4121"),
+      portfolio: portfolio(),
+    });
+    // Uber is catalogued as other, so the 1.5% base would be $1.20 and lose to
+    // Privilege at $1.40. WestJet pays 2 points on MCC 4121, which is $1.60.
+    assert.equal(decision.selectedCardId, westjet.cardId);
+    assert.equal(decision.multiplier, 2);
+    assert.equal(decision.estimatedRewardValueCents, 160);
+  });
 });
