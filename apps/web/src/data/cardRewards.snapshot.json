@@ -504,8 +504,8 @@
     "network": "visa",
     "pointValueCAD": 0.014,
     "currency": "Avion points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/",
+    "ratesAsOf": "2026-11-05",
+    "sourceUrl": "https://www.rbcroyalbank.com/credit-cards/travel/rbc-avion-visa-infinite-privilege.html",
     "verify": true,
     "rewards": [
       {
@@ -518,7 +518,7 @@
       },
       {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 1.25
       }
     ]
   },
@@ -622,6 +622,19 @@
       {
         "category": "gas",
         "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "mta",
+          "clipper"
+        ]
       }
     ]
   },
