@@ -341,25 +341,48 @@
     "network": "visa",
     "pointValueCAD": 0.012,
     "currency": "Aventura points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
-    "verify": true,
+    "ratesAsOf": "2026-11-07",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/aventura-visa-infinite-card.html",
+    "verify": false,
     "rewards": [
       {
+        "category": "groceries",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_infinite_bonus",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
+      },
+      {
         "category": "gas",
-        "multiplier": 2
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_infinite_bonus"
       },
       {
-        "category": "dining",
-        "multiplier": 2
+        "category": "drugstore",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_infinite_bonus"
       },
       {
-        "category": "travel",
-        "multiplier": 2
+        "category": "drugstore",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_infinite_bonus",
+        "merchantIds": [
+          "shoppers",
+          "rexall",
+          "london_drugs",
+          "cvs",
+          "walgreens"
+        ]
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 1
       }
     ]
   },
@@ -371,17 +394,44 @@
     "network": "visa",
     "pointValueCAD": 0.012,
     "currency": "Aventura points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
-    "verify": true,
+    "ratesAsOf": "2026-11-07",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/aventura-gold-visa-card.html",
+    "verify": false,
     "rewards": [
       {
-        "category": "travel",
-        "multiplier": 1.5
+        "category": "groceries",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_gold_bonus",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale"
+        ]
       },
       {
         "category": "gas",
-        "multiplier": 1.5
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_gold_bonus"
+      },
+      {
+        "category": "drugstore",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_gold_bonus"
+      },
+      {
+        "category": "drugstore",
+        "multiplier": 1.5,
+        "capAnnual": 80000,
+        "sharedCapGroup": "cibc_aventura_gold_bonus",
+        "merchantIds": [
+          "shoppers",
+          "rexall",
+          "london_drugs",
+          "cvs",
+          "walgreens"
+        ]
       },
       {
         "category": "other",
