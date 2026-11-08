@@ -916,8 +916,8 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "Scene+ points",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards.html",
+    "ratesAsOf": "2026-11-08",
+    "sourceUrl": "https://www.scotiabank.com/ca/en/personal/credit-cards/visa/scene-card/welcome-kit/earning-sceneplus-points.html",
     "verify": true,
     "rewards": [
       {
@@ -931,21 +931,17 @@
           "sobeys",
           "freshco",
           "iga",
-          "safeway"
+          "safeway",
+          "foodland",
+          "thrifty_foods"
         ]
       },
       {
         "category": "other",
         "multiplier": 2,
         "merchantIds": [
-          "cineplex"
-        ]
-      },
-      {
-        "category": "gas",
-        "multiplier": 2,
-        "merchantIds": [
-          "shell"
+          "cineplex",
+          "home_hardware"
         ]
       }
     ]
