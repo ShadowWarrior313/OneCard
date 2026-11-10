@@ -1561,25 +1561,28 @@
     "network": "mastercard",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.neofinancial.com/credit",
+    "ratesAsOf": "2026-11-10",
+    "sourceUrl": "https://www.neofinancial.com/lp/neo-world/gas-and-grocery",
     "verify": true,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 3
+        "multiplier": 2,
+        "capMonthly": 1000
       },
       {
         "category": "recurring_bills",
-        "multiplier": 2
+        "multiplier": 2,
+        "capMonthly": 500
       },
       {
         "category": "gas",
-        "multiplier": 2
+        "multiplier": 2,
+        "capMonthly": 1000
       },
       {
         "category": "other",
-        "multiplier": 1
+        "multiplier": 0.5
       }
     ]
   },
