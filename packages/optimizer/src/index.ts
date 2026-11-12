@@ -145,6 +145,8 @@ const DOMAIN_RULES: Array<{
   { match: "flyporter", category: "travel", mcc: "3000", merchantId: "porter", merchantName: "Porter Airlines" },
   { match: "americanairlines", category: "travel", mcc: "3000", merchantId: "american_airlines", merchantName: "American Airlines" },
   { match: "booking", category: "travel", mcc: "4722", merchantId: "booking", merchantName: "Booking.com" },
+  // Expedia For TD only. expedia.ca / expedia.com is Expedia Inc. and earns the base rate.
+  { match: "expediafortd", category: "travel", mcc: "4722", merchantId: "expedia_for_td", merchantName: "Expedia For TD" },
   { match: "expedia", category: "travel", mcc: "4722", merchantId: "expedia", merchantName: "Expedia" },
   { match: "airbnb", category: "travel", mcc: "7011", merchantId: "airbnb", merchantName: "Airbnb" },
   { match: "kayak", category: "travel", mcc: "4722", merchantId: "kayak", merchantName: "Kayak" },
@@ -233,6 +235,11 @@ const DOMAIN_RULES: Array<{
   // ── Transportation ───────────────────────────────────────────────────────
   { match: "uber", category: "transportation", mcc: "4121", merchantId: "uber", merchantName: "Uber" },
   { match: "lyft", category: "transportation", mcc: "4121", merchantId: "lyft", merchantName: "Lyft" },
+  { match: "ttc.ca", category: "transportation", mcc: "4111", merchantId: "ttc", merchantName: "TTC" },
+  { match: "prestocard", category: "transportation", mcc: "4111", merchantId: "presto", merchantName: "Presto" },
+  { match: "gotransit", category: "transportation", mcc: "4111", merchantId: "go_transit", merchantName: "GO Transit" },
+  { match: "mta.info", category: "transportation", mcc: "4111", merchantId: "mta", merchantName: "MTA" },
+  { match: "clippercard", category: "transportation", mcc: "4111", merchantId: "clipper", merchantName: "Clipper" },
   { match: "parkwhiz", category: "transportation", mcc: "4121", merchantId: "parkwhiz", merchantName: "ParkWhiz" },
   { match: "spothero", category: "transportation", mcc: "4121", merchantId: "spothero", merchantName: "SpotHero" },
   { match: "greyhound", category: "transportation", mcc: "4131", merchantId: "greyhound", merchantName: "Greyhound" },
