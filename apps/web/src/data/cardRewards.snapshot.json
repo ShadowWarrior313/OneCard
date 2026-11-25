@@ -109,23 +109,33 @@
     "network": "amex",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
-    "verify": true,
+    "ratesAsOf": "2026-11-25",
+    "sourceUrl": "https://www.americanexpress.com/en-ca/benefits/simplycashpreferred-card/",
+    "verify": false,
     "rewards": [
       {
         "category": "groceries",
-        "multiplier": 2,
-        "capMonthly": 300
+        "multiplier": 4,
+        "capAnnual": 30000,
+        "sharedCapGroup": "amex_simplycash_preferred_gas_grocery",
+        "excludedMerchantIds": [
+          "costco",
+          "costco_wholesale",
+          "instacart",
+          "superstore",
+          "walmart",
+          "walmart_grocery"
+        ]
       },
       {
         "category": "gas",
-        "multiplier": 2,
-        "capMonthly": 300
+        "multiplier": 4,
+        "capAnnual": 30000,
+        "sharedCapGroup": "amex_simplycash_preferred_gas_grocery"
       },
       {
         "category": "other",
-        "multiplier": 1.5
+        "multiplier": 2
       }
     ]
   },
