@@ -49,7 +49,7 @@
     "network": "amex",
     "pointValueCAD": 0.02,
     "currency": "MR points",
-    "ratesAsOf": "2026-01-15",
+    "ratesAsOf": "2026-11-26",
     "sourceUrl": "https://www.americanexpress.com/ca/en/credit-cards/",
     "verify": true,
     "rewards": [
@@ -63,10 +63,6 @@
       },
       {
         "category": "groceries",
-        "multiplier": 2
-      },
-      {
-        "category": "dining",
         "multiplier": 2
       },
       {
