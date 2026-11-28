@@ -214,8 +214,8 @@
     "network": "visa",
     "pointValueCAD": 0.01,
     "currency": "cashback %",
-    "ratesAsOf": "2026-01-15",
-    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards.html",
+    "ratesAsOf": "2026-11-28",
+    "sourceUrl": "https://www.cibc.com/en/personal-banking/credit-cards/all-credit-cards/dividend-visa-platinum-card.html",
     "verify": true,
     "rewards": [
       {
@@ -229,6 +229,28 @@
       {
         "category": "dining",
         "multiplier": 2
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "excludedMerchantIds": [
+          "greyhound",
+          "megabus",
+          "parkwhiz",
+          "spothero"
+        ]
+      },
+      {
+        "category": "transportation",
+        "multiplier": 2,
+        "merchantIds": [
+          "uber",
+          "lyft",
+          "ttc",
+          "presto",
+          "go_transit",
+          "sector_transport"
+        ]
       },
       {
         "category": "travel",
